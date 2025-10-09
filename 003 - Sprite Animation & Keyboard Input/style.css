@@ -1,0 +1,14 @@
+body {
+    background: #111;
+}
+
+#canvas1 {
+    width: 800px;
+    height: 500px;
+    border: 2px solid royalblue;
+    background: #d79c50;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}

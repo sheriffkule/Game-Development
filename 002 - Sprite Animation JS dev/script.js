@@ -101,6 +101,27 @@ function animate() {
 
 window.onload = setInterval(animate, 1000 / 30);
 
+const keys = [];
+const player = {
+  x: 100,
+  y: 100,
+  speed: 5
+};
+
+window.addEventListener('keydown', (e) => {
+  keys[e.keyCode] = true;
+});
+
+window.addEventListener('keyup', (e) => {
+  keys[e.keyCode] = false;
+});
+
+function movePlayer() {
+  if (keys[38] && player.y > 100) {
+    player.y -= player.speed;
+  }
+}
+
 window.addEventListener('resize', function () {
   canvas.height = window.innerHeight;
   canvas.width = window.innerWidth;
