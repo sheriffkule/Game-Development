@@ -17,7 +17,7 @@ class Particle {
   draw() {
     ctx.fillStyle = this.color;
     ctx.beginPath();
-    ctx.arc(this.x, this.y + bird.height, this.size, 0, Math.PI * 2);
+    ctx.arc(this.x + bird.width / 3, this.y + bird.height / 2, this.size, 0, Math.PI * 2);
     ctx.fill();
   }
 }
