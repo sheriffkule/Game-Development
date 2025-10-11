@@ -36,6 +36,7 @@ class Frogger {
         this.moving = true;
       }
     }
+    if (this.y < 0) scored();
   }
   draw() {
     ctx3.fillStyle = 'seagreen';

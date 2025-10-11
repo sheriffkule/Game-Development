@@ -37,3 +37,9 @@ const maxParticles = 300;
 const rippleArray = [];
 const carsArray = [];
 const logsArray = [];
+
+const background_lvl2 = new Image();
+background_lvl2.src = 'background_lvl2.png';
+
+const grass = new Image();
+grass.src = 'grass.png';
