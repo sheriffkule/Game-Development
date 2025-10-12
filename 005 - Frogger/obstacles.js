@@ -8,8 +8,12 @@ class Obstacles {
     this.type = type;
   }
   draw() {
-    ctx1.fillStyle = 'skyblue';
-    ctx1.fillRect(this.x, this.y, this.width, this.height);
+    if (this.type === 'turtle') {
+      ctx1.fillRect(this.x, this.y, this.width, this.height)
+      ctx1.drawImage(turtle, dx, dy)
+    }
+    ctx3.fillStyle = 'skyblue';
+    ctx3.fillRect(this.x, this.y, this.width, this.height);
   }
   update() {
     this.x += this.speed * gameSpeed;
@@ -48,7 +52,7 @@ function initObstacles() {
 
   for (let i = 0; i < 3; i++) {
     let x = i * 200;
-    logsArray.push(new Obstacles(x, canvas.height - grid * 6 - 20, grid, grid, 1, 'turtle'))
+    logsArray.push(new Obstacles(x, canvas.height - grid * 6 - 20, grid, grid, 1, 'turtle'));
   }
 }
 initObstacles();
@@ -62,5 +66,12 @@ function handleObstacles() {
   for (let i = 0; i < logsArray.length; i++) {
     logsArray[i].update();
     logsArray[i].draw();
+  }
+
+  for (let i = 0; i < carsArray; i++) {
+    if (collision(frogger, carsArray[i])) {
+      ctx4.drawImage(collisions, 0, 100, 100, 100, frogger.x, frogger.y, 50, 50);
+      resetGame();
+    }
   }
 }
