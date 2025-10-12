@@ -12,10 +12,11 @@ function animate() {
   handleParticles();
   frogger.draw();
   frogger.update();
-
+  
   handleScoreBoard();
   handleObstacles();
   ctx4.drawImage(grass, 0, 0, canvas.width, canvas.height);
+  frame++;
   requestAnimationFrame(animate);
 }
 
@@ -33,6 +34,7 @@ window.addEventListener('keydown', function (e) {
 window.addEventListener('keyup', function (e) {
   delete keys[e.key];
   frogger.moving = false;
+  frogger.frameX = 0;
 });
 
 function scored() {
@@ -59,7 +61,7 @@ function collision(first, second) {
   return !(
     first.x > second.x + second.width ||
     first.x + first.width < second.x ||
-    first.y > second > y + second.height ||
+    first.y > second.y + second.height ||
     first.y + first.height < second.y
   );
 }
