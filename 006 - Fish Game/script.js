@@ -7,8 +7,9 @@ canvas.height = 800;
 
 let score = 0;
 let gameFrame = 0;
-ctx.font = '50px Georgia';
+ctx.font = '40px Georgia';
 let gameSpeed = 1;
+let gameOver = false;
 
 let canvasPosition = canvas.getBoundingClientRect();
 const mouse = {
@@ -55,21 +56,35 @@ class Player {
     if (mouse.y != this.y) {
       this.y -= dy / 20;
     }
+
+    if (gameFrame % 5 == 0) {
+      this.frame++;
+      if (this.frame >= 12) this.frame = 0;
+      if (this.frame == 3 || this.frame == 7 || this.frame == 11) {
+        this.frameX = 0;
+      } else {
+        this.frameX++;
+      }
+      if (this.frame < 3) this.frameY = 0;
+      else if (this.frame < 7) this.frameY = 1;
+      else if (this.frame < 11) this.frameY = 2;
+      else this.frameY = 0;
+    }
   }
   draw() {
     if (mouse.click) {
-      ctx.lineWidth = 1;
+      ctx.lineWidth = 0.1;
       ctx.beginPath();
       ctx.moveTo(this.x, this.y);
       ctx.lineTo(mouse.x, mouse.y);
       ctx.stroke();
     }
-    ctx.fillStyle = 'purple';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.closePath();
-    ctx.fillRect(this.x, this.y, this.radius, 10);
+    // ctx.fillStyle = 'purple';
+    // ctx.beginPath();
+    // ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    // ctx.fill();
+    // ctx.closePath();
+    // ctx.fillRect(this.x, this.y, this.radius, 10);
 
     ctx.save();
     ctx.translate(this.x, this.y);
@@ -154,9 +169,9 @@ function handleBubbles() {
     } else if (bubblesArray[i].distance < bubblesArray[i].radius + player.radius) {
       if (!bubblesArray[i].counted) {
         if (bubblesArray[i].sound == 'sound1') {
-          // bubblePop1.play();
+          bubblePop1.play();
         } else {
-          // bubblePop2.play();
+          bubblePop2.play();
         }
         score++;
         bubblesArray[i].counted = true;
@@ -186,12 +201,12 @@ function handleBackground() {
   ctx.drawImage(background, BG.x2, BG.y, BG.width, BG.height);
 }
 
-const enemyImage = new Image()
+const enemyImage = new Image();
 enemyImage.src = 'enemy1.png';
 
 class Enemy {
-  constructor(){
-    this.x = canvas.width + 200;
+  constructor() {
+    this.x = canvas.width - 200;
     this.y = Math.random() * (canvas.height - 150) + 90;
     this.radius = 60;
     this.speed = Math.random() * 2 + 2;
@@ -202,19 +217,120 @@ class Enemy {
     this.spriteHeight = 397;
   }
   draw() {
-    ctx.fillStyle = 'orangered'
-    ctx.beginPath()
-    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2)
-    ctx.fill()
+    // ctx.fillStyle = 'orangered';
+    // ctx.beginPath();
+    // ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    // ctx.fill();
+    ctx.drawImage(
+      enemyImage,
+      this.frameX * this.spriteWidth,
+      this.frameY * this.spriteHeight,
+      this.spriteWidth,
+      this.spriteHeight,
+      this.x - 60,
+      this.y - 70,
+      this.spriteWidth / 3,
+      this.spriteHeight / 3
+    );
   }
   update() {
     this.x -= this.speed;
+
     if (this.x < 0 - this.radius * 2) {
       this.x = canvas.width + 200;
       this.y = Math.random() * (canvas.height - 150) + 90;
       this.speed = Math.random() * 2 + 2;
     }
+
+    if (gameFrame % 5 == 0) {
+      this.frame++;
+      if (this.frame >= 12) this.frame = 0;
+      if (this.frame == 3 || this.frame == 7 || this.frame == 11) {
+        this.frameX = 0;
+      } else {
+        this.frameX++;
+      }
+      if (this.frame < 3) this.frameY = 0;
+      else if (this.frame < 7) this.frameY = 1;
+      else if (this.frame < 11) this.frameY = 2;
+      else this.frameY = 0;
+    }
+
+    const dx = this.x - player.x;
+    const dy = this.y - player.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    if (distance < this.radius + player.radius) {
+      handleGameOver();
+    }
   }
+}
+
+function handleGameOver() {
+  const gradient = ctx.createLinearGradient(150, 0, 650, 0);
+  gradient.addColorStop(0, 'silver');
+  gradient.addColorStop(0.5, 'white');
+  gradient.addColorStop(1, 'silver');
+  ctx.fillStyle = gradient;
+  ctx.fillText('GAME OVER, your score: ' + score, 150, 250);
+  showRestartButton();
+  gameOver = true;
+}
+
+let enemies = [];
+
+for (let i = 0; i < 4; i++) {
+  enemies.push(new Enemy());
+}
+
+function handleEnemies() {
+  enemies.forEach((enemy) => {
+    enemy.draw();
+    enemy.update();
+  });
+}
+
+function showRestartButton() {
+  let restartBtn = document.querySelector('.restartBtn');
+  if (!restartBtn) {
+    restartBtn = document.createElement('button');
+    restartBtn.classList.add('restartBtn');
+    restartBtn.textContent = 'Start Over';
+    restartBtn.style.position = 'absolute';
+    restartBtn.style.left = '50%';
+    restartBtn.style.top = '50%';
+    restartBtn.style.transform = 'translate(-50%, 50%)';
+    restartBtn.style.fontSize = '2rem';
+    restartBtn.style.padding = '0.5em 2em';
+    restartBtn.style.background = 'radial-gradient( #f5f5f5, #bdbdbd)';
+    restartBtn.style.border = '2px solid #888';
+    restartBtn.style.borderRadius = '12px';
+    restartBtn.style.cursor = 'pointer';
+    restartBtn.style.zIndex = '100';
+    document.body.appendChild(restartBtn);
+    restartBtn.addEventListener('click', restartGame);
+  } else {
+    restartBtn.style.display = 'block';
+  }
+}
+
+function restartGame() {
+  score = 0;
+  gameFrame = 0;
+  gameOver = false;
+  player.x = canvas.width / 2;
+  player.y = canvas.height / 2;
+  player.angle = 0;
+  player.frame = 0;
+  player.frameX = 0;
+  player.frameY = 0;
+  bubblesArray.length = 0;
+  enemies = [];
+  for (let i = 0; i < 4; i++) {
+    enemies.push(new Enemy());
+  }
+  const restartBtn = document.querySelector('.restartBtn');
+  if (restartBtn) restartBtn.style.display = 'none';
+  animate();
 }
 
 function animate() {
@@ -223,10 +339,11 @@ function animate() {
   handleBubbles();
   player.update();
   player.draw();
+  handleEnemies();
   ctx.fillStyle = 'black';
   ctx.fillText('Score: ' + score, 10, 50);
   gameFrame++;
-  requestAnimationFrame(animate);
+  if (!gameOver) requestAnimationFrame(animate);
 }
 
 animate();
