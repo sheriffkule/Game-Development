@@ -247,6 +247,11 @@ function handleEnemies() {
 
     if (enemies[i].health <= 0) {
       let gainedResources = enemies[i].maxHealth / 10;
+      floatingMessages.push(
+        new FloatingMessage('+' + gainedResources, enemies[i].x, enemies[i].y, 30, 'black')
+      );
+      floatingMessages.push(new FloatingMessage('+' + gainedResources, 250, 50, 20, 'gold'));
+      resources.splice(i, 1);
       numberOfResources += gainedResources;
       score += gainedResources;
       const findThisIndex = enemyPositions.indexOf(enemies[i].y);
@@ -296,7 +301,7 @@ function handleResources() {
       floatingMessages.push(
         new FloatingMessage('+' + resources[i].amount, resources[i].x, resources[i].y, 30, 'black')
       );
-      floatingMessages.push(new FloatingMessage('+' + resources[i].amount, 250, 50, 30, 'gold'));
+      floatingMessages.push(new FloatingMessage('+' + resources[i].amount, 250, 50, 20, 'gold'));
       resources.splice(i, 1);
       i--;
     }
