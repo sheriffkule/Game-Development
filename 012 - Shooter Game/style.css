@@ -1,5 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap');
+
+* {
+    margin: 0;
+}
+
 body {
-    background: linear-gradient(navy, darkslategray);
+    background: linear-gradient(navy, rgb(40, 111, 139));
     width: 100vw;
     height: 100vh;
     overflow: hidden;
@@ -11,4 +17,8 @@ body {
     left: 0;
     height: 100%;
     width: 100%;
+}
+
+#collisionCanvas {
+    opacity: 0;
 }
