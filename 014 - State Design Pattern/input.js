@@ -15,6 +15,9 @@ export default class InputHandler {
         case 'ArrowUp':
           this.lastKey = 'PRESS up';
           break;
+        case 'Space':
+          this.lastKey = 'PRESS space';
+          break;
       }
     });
 
@@ -31,6 +34,9 @@ export default class InputHandler {
           break;
         case 'ArrowUp':
           this.lastKey = 'RELEASE up';
+          break;
+        case 'Space':
+          this.lastKey = 'RELEASE space';
           break;
       }
     });

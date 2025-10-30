@@ -8,7 +8,10 @@ export const states = {
   JUMPING_LEFT: 6,
   JUMPING_RIGHT: 7,
   FALLING_LEFT: 8,
-  FALLING_RIGHT: 9
+  FALLING_RIGHT: 9,
+  ROLLING_LEFT: 10,
+  ROLLING_RIGHT: 11,
+  
 };
 
 class State {
@@ -184,5 +187,37 @@ export class FallingRight extends State {
   handleInput(input) {
     if (input === 'PRESS left') this.player.setState(states.FALLING_LEFT);
     else if (this.player.onGround()) this.player.setState(states.STANDING_RIGHT);
+  }
+}
+
+export class RollingLeft extends State {
+  constructor(player) {
+    super('ROLLING LEFT');
+    this.player = player;
+  }
+  enter() {
+    this.player.frameY = 11;
+    this.player.speed = -this.player.maxSpeed * 2;
+    this.player.maxFrame = 6;
+  }
+  handleInput(input) {
+    if (input === 'PRESS right') this.player.setState(states.ROLLING_RIGHT);
+    else if (input === 'RELEASE down') this.player.setState(states.STANDING_LEFT);
+  }
+}
+
+export class RollingRight extends State {
+  constructor(player) {
+    super('ROLLING RIGHT');
+    this.player = player;
+  }
+  enter() {
+    this.player.frameY = 10;
+    this.player.speed = this.player.maxSpeed * 2;
+    this.player.maxFrame = 6;
+  }
+  handleInput(input) {
+    if (input === 'PRESS left') this.player.setState(states.ROLLING_LEFT);
+    else if (input === 'RELEASE down') this.player.setState(states.STANDING_RIGHT);
   }
 }
