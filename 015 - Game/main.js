@@ -1,5 +1,5 @@
 import { Background } from './background.js';
-import { FlyingEnemy } from './enemies.js';
+import { ClimbingEnemy, FlyingEnemy, GroundEnemy } from './enemies.js';
 import { InputHandler } from './input.js';
 import { Player } from './player.js';
 
@@ -35,6 +35,7 @@ window.addEventListener('load', function () {
       }
       this.enemies.forEach((enemy) => {
         enemy.update(deltaTime);
+        if (enemy.markedForDeletion) this.enemies.splice(this.enemies.indexOf(enemy), 1);
       });
     }
 
@@ -46,7 +47,10 @@ window.addEventListener('load', function () {
       });
     }
     addEnemy() {
+      if (this.speed > 0 && Math.random() < 0.5) this.enemies.push(new GroundEnemy(this));
+      else if (this.speed > 0) this.enemies.push(new ClimbingEnemy(this))
       this.enemies.push(new FlyingEnemy(this));
+      // console.log(this.enemies);
     }
   }
 
