@@ -5,11 +5,11 @@
 }
 
 body {
-    background-color: olive;
+    background-color: #353535;
 }
 
 #canvas1 {
-    border: 5px solid #3B3C36;
+    border: 5px solid #70774f;
     position: absolute;
     top: 50%;
     left: 50%;
