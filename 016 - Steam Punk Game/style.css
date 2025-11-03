@@ -14,7 +14,7 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: #4d79bc;
+    background: linear-gradient(to bottom, #3e6297, #5280c7);
     max-width: 100%;
     max-height: 100%;
 }
