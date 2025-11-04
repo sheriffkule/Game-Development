@@ -58,6 +58,7 @@ window.addEventListener('load', function () {
       this.speedY = 0;
       this.maxSpeed = 5;
       this.projectiles = [];
+      this.image = document.getElementById('player');
     }
     update() {
       if (this.game.keys.includes('ArrowUp')) this.speedY = -this.maxSpeed;
@@ -91,6 +92,8 @@ window.addEventListener('load', function () {
       this.x = this.game.width;
       this.speedX = Math.random() * -1.5 - 0.5;
       this.markedForDeletion = false;
+      this.lives = 5;
+      this.score = this.lives;
     }
     update() {
       this.x += this.speedX;
@@ -99,6 +102,9 @@ window.addEventListener('load', function () {
     draw(context) {
       context.fillStyle = 'red';
       context.strokeRect(this.x, this.y, this.width, this.height);
+      context.fillStyle = 'black';
+      context.font = '20px Helvetica';
+      context.fillText(this.lives, this.x, this.y);
     }
   }
 
@@ -112,11 +118,44 @@ window.addEventListener('load', function () {
   }
 
   class Layer {
-    constructor() {}
+    constructor(game, image, speedModifier) {
+      this.game = game;
+      this.image = image;
+      this.speedModifier = speedModifier;
+      this.width = 1768;
+      this.height = 500;
+      this.x = 0;
+      this.y = 0;
+    }
+    update() {
+      if (this.x <= -this.width) this.x = 0;
+      this.x -= this.game.speed * this.speedModifier;
+    }
+    draw(context) {
+      context.drawImage(this.image, this.x, this.y);
+      context.drawImage(this.image, this.x + this.width, this.y);
+    }
   }
 
   class Background {
-    constructor() {}
+    constructor(game) {
+      this.game = game;
+      this.image1 = document.getElementById('layer1');
+      this.layer1 = new Layer(this.game, this.image1, 0.2);
+      this.image2 = document.getElementById('layer2');
+      this.layer2 = new Layer(this.game, this.image2, 0.4);
+      this.image3 = document.getElementById('layer3');
+      this.layer3 = new Layer(this.game, this.image3, 1);
+      this.image4 = document.getElementById('layer4');
+      this.layer4 = new Layer(this.game, this.image4, 1.5);
+      this.layers = [this.layer1, this.layer2, this.layer3];
+    }
+    update() {
+      this.layers.forEach((layer) => layer.update());
+    }
+    draw(context) {
+      this.layers.forEach((layer) => layer.draw(context));
+    }
   }
 
   class UI {
@@ -124,13 +163,42 @@ window.addEventListener('load', function () {
       this.game = game;
       this.fontSize = 25;
       this.fontFamily = 'Helvetica';
-      this.color = 'yellow';
+      this.color = 'white';
     }
     draw(context) {
+      context.save();
       context.fillStyle = this.color;
+      context.shadowOffsetX = 2;
+      context.shadowOffsetY = 2;
+      context.shadowColor = 'black';
+      context.font = this.fontSize + 'px ' + this.fontFamily;
+      // score
+      context.fillText('Score: ' + this.game.score, 20, 40);
+      // ammo
       for (let i = 0; i < this.game.ammo; i++) {
         context.fillRect(20 + 5 * i, 50, 3, 20);
       }
+      // timer
+      const formattedTime = (this.game.gameTime * 0.001).toFixed(1);
+      context.fillText('Timer: ' + formattedTime, 20, 100);
+      // game over message
+      if (this.game.gameOver) {
+        context.textAlign = 'center';
+        let message1;
+        let message2;
+        if (this.game.score > this.game.winningScore) {
+          message1 = 'You Win!';
+          message2 = 'Well done!';
+        } else {
+          message1 = 'You Lose!';
+          message2 = 'Try again!';
+        }
+        context.font = '50px ' + this.fontFamily;
+        context.fillText(message1, this.game.width * 0.5, this.game.height * 0.5 - 40);
+        context.font = '25px ' + this.fontFamily;
+        context.fillText(message2, this.game.width * 0.5, this.game.height * 0.5 + 40);
+      }
+      context.restore();
     }
   }
 
@@ -138,6 +206,7 @@ window.addEventListener('load', function () {
     constructor(width, height) {
       this.width = width;
       this.height = height;
+      this.background = new Background(this);
       this.player = new Player(this);
       this.input = new InputHandler(this);
       this.ui = new UI(this);
@@ -150,8 +219,17 @@ window.addEventListener('load', function () {
       this.ammoTimer = 0;
       this.ammoInterval = 500;
       this.gameOver = false;
+      this.score = 0;
+      this.winningScore = 10;
+      this.gameTime = 0;
+      this.timeLimit = 5000;
+      this.speed = 1;
     }
     update(deltaTime) {
+      if (!this.gameOver) this.gameTime += deltaTime;
+      if (this.gameTime > this.timeLimit) this.gameOver = true;
+      this.background.update();
+      this.background.layer4.update();
       this.player.update();
       if (this.ammoTimer > this.ammoInterval) {
         if (this.ammo < this.maxAmmo) this.ammo++;
@@ -170,7 +248,8 @@ window.addEventListener('load', function () {
             projectile.markedForDeletion = true;
             if (enemy.lives <= 0) {
               enemy.markedForDeletion = true;
-              this.score += enemy.score;
+              if (!this.gameOver) this.score += enemy.score;
+              if (this.score > this.winningScore) this.gameOver = true;
             }
           }
         });
@@ -184,15 +263,16 @@ window.addEventListener('load', function () {
       }
     }
     draw(context) {
+      this.background.draw(context);
       this.player.draw(context);
       this.ui.draw(context);
       this.enemies.forEach((enemy) => {
         enemy.draw(context);
       });
+      this.background.layer4.draw(context);
     }
     addEnemy() {
       this.enemies.push(new Angler1(this));
-      console.log(this.enemies);
     }
     checkCollision(rect1, rect2) {
       return (
