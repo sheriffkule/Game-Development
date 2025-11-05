@@ -35,7 +35,7 @@ canvas {
     top: 50px;
     left: -100px;
     transition: 0.3s;
-    /* animation: wobble 1.5s ease-in-out infinite; */
+    animation: wobble 1.5s ease-in-out infinite;
     pointer-events: none;
 }
 
@@ -44,7 +44,7 @@ canvas {
     top: 50px;
     right: -100px;
     transition: 0.2s;
-    /* animation: wobble 1.6s ease-in-out infinite; */
+    animation: wobble 1.6s ease-in-out infinite;
     pointer-events: none;
 }
 
