@@ -23,3 +23,7 @@ body {
     transform: translate(-50%, -50%);
     pointer-events: none;
 }
+
+#obstacles {
+    display: none;
+}
