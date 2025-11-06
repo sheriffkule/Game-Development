@@ -24,6 +24,6 @@ body {
     pointer-events: none;
 }
 
-#obstacles, #bull, #egg, #toad {
+#obstacles, #bull, #egg, #toad, #larva {
     display: none;
 }
