@@ -24,6 +24,6 @@ body {
     pointer-events: none;
 }
 
-#obstacles {
+#obstacles, #bull {
     display: none;
 }
