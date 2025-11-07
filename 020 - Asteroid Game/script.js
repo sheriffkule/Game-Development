@@ -6,6 +6,8 @@ window.addEventListener('load', function () {
   canvas.height = 800;
   ctx.strokeStyle = 'white';
   ctx.lineWidth = 5;
+  ctx.font = '30px Helvetica';
+  ctx.fillStyle = 'white';
 
   class Asteroid {
     constructor(game) {
@@ -16,16 +18,18 @@ window.addEventListener('load', function () {
       this.image = document.getElementById('asteroid');
       this.spriteWidth = 150;
       this.spriteHeight = 155;
-      this.speed = Math.random() * 1.5 + 0.1;
+      this.speed = Math.random() * 1.5 + 2;
       this.free = true;
       this.angle = 0;
       this.va = Math.random() * 0.02 - 0.01;
     }
     draw(context) {
       if (!this.free) {
-        // context.beginPath();
-        // context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        // context.stroke();
+        if (this.game.debug) {
+          context.beginPath();
+          context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+          context.stroke();
+        }
         context.save();
         context.translate(this.x, this.y);
         context.rotate(this.angle);
@@ -44,8 +48,10 @@ window.addEventListener('load', function () {
         this.angle += this.va;
         this.y += Math.cos(this.angle) * 0.5;
         this.x += this.speed;
-        if (this.x > this.game.width + this.radius) {
+        if (this.x > this.game.width - this.radius) {
           this.reset();
+          const explosion = this.game.getExplosion();
+          if (explosion) explosion.start(this.x, this.y, 0);
         }
       }
     }
@@ -73,7 +79,8 @@ window.addEventListener('load', function () {
       this.frameY = Math.floor(Math.random() * 3);
       this.maxFrame = 22;
       this.animationTimer = 0;
-      this.animationInterval = 1000 / 22;
+      this.animationInterval = 1000 / 35;
+      this.sound = this.game.explosionSounds[Math.floor(Math.random() * this.game.explosionSounds.length)];
     }
     draw(context) {
       if (!this.free) {
@@ -92,6 +99,7 @@ window.addEventListener('load', function () {
     }
     update(deltaTime) {
       if (!this.free) {
+        this.x += this.speed;
         if (this.animationTimer > this.animationInterval) {
           this.frameX++;
           if (this.frameX > this.maxFrame) this.reset();
@@ -101,15 +109,23 @@ window.addEventListener('load', function () {
         }
       }
     }
+    play() {
+      this.sound.volume = 0.2;
+      this.sound.currentTime = 0;
+      this.sound.play();
+    }
     reset() {
       this.free = true;
       this.frameY = Math.floor(Math.random() * 3);
     }
-    start(x, y) {
+    start(x, y, speed) {
       this.free = false;
       this.x = x;
       this.y = y;
       this.frameX = 0;
+      this.speed = speed;
+      this.play();
+      this.sound = this.game.explosionSounds[Math.floor(Math.random() * this.game.explosionSounds.length)];
     }
   }
 
@@ -117,27 +133,54 @@ window.addEventListener('load', function () {
     constructor(width, height) {
       this.width = width;
       this.height = height;
+      this.debug = false;
       this.asteroidPool = [];
       this.maxAsteroids = 30;
       this.asteroidTimer = 0;
-      this.asteroidInterval = 1000;
+      this.asteroidInterval = 500;
       this.createAsteroidPool();
+
+      this.score = 0;
+      this.maxScore = 30;
 
       this.mouse = {
         x: 0,
         y: 0,
+        radius: 2,
       };
 
+      this.explosion1 = document.getElementById('explosion1');
+      this.explosion2 = document.getElementById('explosion2');
+      this.explosion3 = document.getElementById('explosion3');
+      this.explosion4 = document.getElementById('explosion4');
+      this.explosion5 = document.getElementById('explosion5');
+      this.explosion6 = document.getElementById('explosion6');
+      this.explosionSounds = [
+        this.explosion1,
+        this.explosion2,
+        this.explosion3,
+        this.explosion4,
+        this.explosion5,
+        this.explosion6,
+      ];
       this.explosionPool = [];
-      this.maxExplosions = 20
+      this.maxExplosions = 20;
       this.createExplosionPool();
 
       window.addEventListener('click', (e) => {
         this.mouse.x = e.offsetX;
         this.mouse.y = e.offsetY;
-        const explosion = this.getExplosion();
-        if (explosion) explosion.start(this.mouse.x, this.mouse.y);
-        console.log(explosion);
+        this.asteroidPool.forEach((asteroid) => {
+          if (!asteroid.free && this.checkCollision(asteroid, this.mouse)) {
+            const explosion = this.getExplosion();
+            if (explosion) explosion.start(asteroid.x, asteroid.y, asteroid.speed * 0.4);
+            asteroid.reset();
+            if (this.score < this.maxScore) this.score++;
+          }
+        });
+      });
+      window.addEventListener('keydown', (e) => {
+        if (e.key == 'd') this.debug = !this.debug;
       });
     }
     createAsteroidPool() {
@@ -164,6 +207,13 @@ window.addEventListener('load', function () {
         }
       }
     }
+    checkCollision(a, b) {
+      const sumOfRadii = a.radius + b.radius;
+      const dx = a.x - b.x;
+      const dy = a.y - b.y;
+      const distance = Math.hypot(dx, dy);
+      return distance < sumOfRadii;
+    }
     render(context, deltaTime) {
       // create asteroids periodically
       if (this.asteroidTimer > this.asteroidInterval) {
@@ -181,6 +231,13 @@ window.addEventListener('load', function () {
         explosion.draw(context);
         explosion.update(deltaTime);
       });
+      context.fillText('Score: ' + this.score, 20, 35);
+      if (this.score >= this.maxScore) {
+        context.save();
+        context.textAlign = 'center';
+        context.fillText('You Win! Final Score: ' + this.score, this.width * 0.5, this.height * 0.5);
+        context.restore();
+      }
     }
   }
 
