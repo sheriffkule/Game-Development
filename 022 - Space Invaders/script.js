@@ -8,7 +8,6 @@ class Player {
     this.speed = 10;
   }
   draw(context) {
-    context.lineWidth = 3;
     context.strokeRect(this.x, this.y, this.width, this.height);
     context.strokeRect(this.x + this.width / 4, this.y + this.height / 4, this.width / 2, this.height / 2);
   }
@@ -17,18 +16,18 @@ class Player {
     if (this.game.keys.indexOf('ArrowLeft') > -1) this.x -= this.speed;
     if (this.game.keys.indexOf('ArrowRight') > -1) this.x += this.speed;
     // horizontal boundaries
-    if (this.x < 0) this.x = 0;
-    else if (this.x > this.game.width - this.width) this.x = this.game.width - this.width;
+    if (this.x < -this.width * 0.5) this.x = -this.width * 0.5;
+    else if (this.x > this.game.width - this.width * 0.5) this.x = this.game.width - this.width * 0.5;
   }
   shoot() {
     const projectile = this.game.getProjectile();
-    if (projectile) projectile.start(this.x, this.y);
+    if (projectile) projectile.start(this.x + this.width * 0.5, this.y);
   }
 }
 
 class Projectile {
   constructor() {
-    this.width = 4;
+    this.width = 8;
     this.height = 20;
     this.x = 0;
     this.y = 0;
@@ -43,10 +42,11 @@ class Projectile {
   update() {
     if (!this.free) {
       this.y -= this.speed;
+      if (this.y < -this.height) this.reset();
     }
   }
   start(x, y) {
-    this.x = x;
+    this.x = x - this.width * 0.5;
     this.y = y;
     this.free = false;
   }
@@ -55,7 +55,76 @@ class Projectile {
   }
 }
 
-class Enemy {}
+class Enemy {
+  constructor(game, positionX, positionY) {
+    this.game = game;
+    this.width = this.game.enemySize;
+    this.height = this.game.enemySize;
+    this.x = 0;
+    this.y = 0;
+    this.positionX = positionX;
+    this.positionY = positionY;
+    this.markedForDeletion = false;
+  }
+  draw(context) {
+    context.strokeRect(this.x, this.y, this.width, this.height);
+  }
+  update(x, y) {
+    this.x = x + this.positionX;
+    this.y = y + this.positionY;
+    // check collision with projectiles
+    this.game.projectilesPool.forEach((projectile) => {
+      if (!projectile.free && this.game.checkCollision(this, projectile)) {
+        this.markedForDeletion = true;
+        projectile.reset();
+        this.game.score++;
+      }
+    });
+    // lose condition
+    if (this.y + this.height > this.game.height) {
+      this.game.gameOver = true;
+      this.markedForDeletion = true;
+    }
+  }
+}
+
+class Wave {
+  constructor(game) {
+    this.game = game;
+    this.width = this.game.columns * this.game.enemySize;
+    this.height = this.game.rows * this.game.enemySize;
+    this.x = 0;
+    this.y = -this.height;
+    this.speedX = 3;
+    this.speedY = 0;
+    this.enemies = [];
+    this.create();
+  }
+  render(context) {
+    if (this.y < 0) this.y += 5;
+    this.speedY = 0;
+    if (this.x < 0 || this.x > this.game.width - this.width) {
+      this.speedX *= -1;
+      this.speedY = this.game.enemySize;
+    }
+    this.x += this.speedX;
+    this.y += this.speedY;
+    this.enemies.forEach((enemy) => {
+      enemy.update(this.x, this.y);
+      enemy.draw(context);
+    });
+    this.enemies = this.enemies.filter((enemy) => !enemy.markedForDeletion);
+  }
+  create() {
+    for (let y = 0; y < this.game.rows; y++) {
+      for (let x = 0; x < this.game.columns; y++) {
+        let enemyX = x * this.game.enemySize;
+        let enemyY = y * this.game.enemies;
+        this.enemies.push(new Enemy(this.game, enemyX, enemyY));
+      }
+    }
+  }
+}
 
 class Game {
   constructor(canvas) {
@@ -68,11 +137,20 @@ class Game {
     this.projectilesPool = [];
     this.numberOfProjectiles = 10;
     this.createProjectiles();
-    console.log(this.projectilesPool);
+
+    this.columns = 3;
+    this.rows = 3;
+    this.enemySize = 60;
+
+    this.waves = [];
+    this.waves.push(new Wave(this));
+
+    this.score = 0;
 
     //event listeners
     window.addEventListener('keydown', (e) => {
       if (this.keys.indexOf(e.key) === -1) this.keys.push(e.key);
+      if (e.key === '1') this.player.shoot();
     });
     window.addEventListener('keyup', (e) => {
       const index = this.keys.indexOf(e.key);
@@ -80,8 +158,16 @@ class Game {
     });
   }
   render(context) {
+    this.drawStatusText(context);
     this.player.draw(context);
     this.player.update();
+    this.projectilesPool.forEach((projectile) => {
+      projectile.update();
+      projectile.draw(context);
+    });
+    this.waves.forEach((wave) => {
+      wave.render(context);
+    });
   }
   // create projectiles object pool
   createProjectiles() {
@@ -91,9 +177,21 @@ class Game {
   }
   // get free projectile object from the pool
   getProjectile() {
-    for (let i = 0; i < this.projectilesPool; i++) {
+    for (let i = 0; i < this.projectilesPool.length; i++) {
       if (this.projectilesPool[i].free) return this.projectilesPool[i];
     }
+  }
+  // collision detection between 2 rectangles
+  checkCollision(rect1, rect2) {
+    return (
+      rect1.x < rect2.x + rect2.width &&
+      rect1.x + rect1.width > rect2.x &&
+      rect1.y < rect2.y + rect2.height &&
+      rect1.y + rect1.height > rect2.y
+    );
+  }
+  drawStatusText(context) {
+    context.fillText('Score: ' + this.score, 20, 40);
   }
 }
 
@@ -102,6 +200,9 @@ window.addEventListener('load', function () {
   const ctx = canvas.getContext('2d');
   canvas.width = 600;
   canvas.height = 800;
+  ctx.strokeStyle = 'white';
+  ctx.lineWidth = 3;
+  ctx.font = '30px Impact';
 
   const game = new Game(canvas);
 
