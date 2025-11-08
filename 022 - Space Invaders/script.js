@@ -6,6 +6,7 @@ class Player {
     this.x = this.game.width * 0.5 - this.width * 0.5;
     this.y = this.game.height - this.height;
     this.speed = 10;
+    this.lives = 3;
   }
   draw(context) {
     context.strokeRect(this.x, this.y, this.width, this.height);
@@ -22,6 +23,11 @@ class Player {
   shoot() {
     const projectile = this.game.getProjectile();
     if (projectile) projectile.start(this.x + this.width * 0.5, this.y);
+  }
+  restart() {
+    this.x = this.game.width * 0.5 - this.width * 0.5;
+    this.y = this.game.height - this.height;
+    this.lives = 3;
   }
 }
 
@@ -68,6 +74,17 @@ class Enemy {
   }
   draw(context) {
     context.strokeRect(this.x, this.y, this.width, this.height);
+    context.drawImage(
+      this.image,
+      this.frameX * this.width,
+      this.frameY * this.height,
+      this.width,
+      this.height,
+      this.x,
+      this.y,
+      this.width,
+      this.height
+    );
   }
   update(x, y) {
     this.x = x + this.positionX;
@@ -77,14 +94,34 @@ class Enemy {
       if (!projectile.free && this.game.checkCollision(this, projectile)) {
         this.markedForDeletion = true;
         projectile.reset();
-        this.game.score++;
+        if (!this.game.gameOver) this.game.score++;
       }
     });
+    // check collision between enemies & player
+    if (this.game.checkCollision(this, this.game.player)) {
+      this.markedForDeletion = true;
+      if (!this.game.gameOver && this.game.score > 0) this.game.score--;
+      this.game.player.lives--;
+      if (this.game.player.lives < 1) this.game.gameOver = true;
+    }
     // lose condition
     if (this.y + this.height > this.game.height) {
       this.game.gameOver = true;
       this.markedForDeletion = true;
     }
+  }
+  hit(damage) {
+    this.lives -= damage;
+  }
+}
+
+class Beetlemorph extends Enemy {
+  constructor(game, positionX, positionY) {
+    super(game, positionX, positionY);
+    this.image = document.getElementById('beetlemorph');
+    this.frameX = 0;
+    this.frameY = Math.floor(Math.random() * 4);
+    this.lives = 1;
   }
 }
 
@@ -98,6 +135,7 @@ class Wave {
     this.speedX = 3;
     this.speedY = 0;
     this.enemies = [];
+    this.nextWaveTrigger = false;
     this.create();
   }
   render(context) {
@@ -117,10 +155,10 @@ class Wave {
   }
   create() {
     for (let y = 0; y < this.game.rows; y++) {
-      for (let x = 0; x < this.game.columns; y++) {
+      for (let x = 0; x < this.game.columns; x++) {
         let enemyX = x * this.game.enemySize;
-        let enemyY = y * this.game.enemies;
-        this.enemies.push(new Enemy(this.game, enemyX, enemyY));
+        let enemyY = y * this.game.enemySize;
+        this.enemies.push(new Beetlemorph(this.game, enemyX, enemyY));
       }
     }
   }
@@ -137,22 +175,28 @@ class Game {
     this.projectilesPool = [];
     this.numberOfProjectiles = 10;
     this.createProjectiles();
+    this.fired = false;
 
-    this.columns = 3;
-    this.rows = 3;
-    this.enemySize = 60;
+    this.columns = 2;
+    this.rows = 2;
+    this.enemySize = 80;
 
     this.waves = [];
     this.waves.push(new Wave(this));
+    this.waveCount = 1;
 
     this.score = 0;
+    this.gameOver = false;
 
     //event listeners
     window.addEventListener('keydown', (e) => {
+      if (e.key === '1' && !this.fired) this.player.shoot();
+      this.fired = true;
       if (this.keys.indexOf(e.key) === -1) this.keys.push(e.key);
-      if (e.key === '1') this.player.shoot();
+      if (e.key === 'r' && this.gameOver) this.restart();
     });
     window.addEventListener('keyup', (e) => {
+      this.fired = false;
       const index = this.keys.indexOf(e.key);
       if (index > -1) this.keys.splice(index, 1);
     });
@@ -167,6 +211,12 @@ class Game {
     });
     this.waves.forEach((wave) => {
       wave.render(context);
+      if (wave.enemies.length < 1 && !wave.nextWaveTrigger && !this.gameOver) {
+        this.newWave();
+        this.waveCount++;
+        wave.nextWaveTrigger = true;
+        this.player.lives++;
+      }
     });
   }
   // create projectiles object pool
@@ -191,7 +241,42 @@ class Game {
     );
   }
   drawStatusText(context) {
+    context.save();
+    context.shadowOffsetX = 3;
+    context.shadowOffsetY = 3;
+    context.shadowColor = 'black';
     context.fillText('Score: ' + this.score, 20, 40);
+    context.fillText('Wave: ' + this.waveCount, 20, 80);
+    for (let i = 0; i < this.player.lives; i++) {
+      context.fillText('Lives: ', 20, 120);
+      context.fillRect(110 + 20 * i, 100, 10, 20);
+    }
+    if (this.gameOver) {
+      context.textAlign = 'center';
+      context.font = '100px Racing Sans One';
+      context.fillText('GAME 0VER!', this.width * 0.5, this.height * 0.5);
+      context.font = '20px Racing Sans One';
+      context.fillText('Press R to restart!', this.width * 0.5, this.height * 0.5 + 30);
+    }
+    context.restore();
+  }
+  newWave() {
+    if (Math.random() < 0.5 && this.columns * this.enemySize < this.width * 0.8) {
+      this.columns++;
+    } else if (this.rows * this.enemySize < this.height * 0.6) {
+      this.rows += 0.5;
+    }
+    this.waves.push(new Wave(this));
+  }
+  restart() {
+    this.player.restart();
+    this.columns = 2;
+    this.rows = 2;
+    this.waves = [];
+    this.waves.push(new Wave(this));
+    this.waveCount = 1;
+    this.score = 0;
+    this.gameOver = false;
   }
 }
 
@@ -200,9 +285,10 @@ window.addEventListener('load', function () {
   const ctx = canvas.getContext('2d');
   canvas.width = 600;
   canvas.height = 800;
+  ctx.fillStyle = 'white';
   ctx.strokeStyle = 'white';
   ctx.lineWidth = 3;
-  ctx.font = '30px Impact';
+  ctx.font = '30px Racing Sans One';
 
   const game = new Game(canvas);
 
