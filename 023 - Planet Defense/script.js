@@ -109,10 +109,16 @@ class Enemy {
     this.height = this.radius * 2;
     this.speedX = 0;
     this.speedY = 0;
+    this.speedModifier = Math.random() * 0.5 + 0.1;
+    this.angle = 0;
+    this.collided = false;
     this.free = true;
   }
   start() {
     this.free = false;
+    this.collided = false;
+    this.frameX = 0;
+    this.lives = this.maxLives;
     this.frameY = Math.floor(Math.random() * 4);
     if (Math.random() < 0.5) {
       this.x = Math.random() * this.game.width;
@@ -122,33 +128,40 @@ class Enemy {
       this.y = Math.random() * this.game.height;
     }
     const aim = this.game.calcAim(this, this.game.planet);
-    this.speedX = aim[0];
-    this.speedY = aim[1];
+    this.speedX = aim[0] * this.speedModifier;
+    this.speedY = aim[1] * this.speedModifier;
+    this.angle = Math.atan2(aim[3], aim[2]) + Math.PI * 0.5;
   }
   reset() {
     this.free = true;
   }
   hit(damage) {
     this.lives -= damage;
+    if (this.lives >= 1) this.frameX++;
   }
   draw(context) {
     if (!this.free) {
+      context.save();
+      context.translate(this.x, this.y);
+      context.rotate(this.angle);
       context.drawImage(
         this.image,
         this.frameX * this.width,
         this.frameY * this.height,
         this.width,
         this.height,
-        this.x - this.radius,
-        this.y - this.radius,
+        -this.radius,
+        -this.radius,
         this.width,
         this.height
       );
       if (this.game.debug) {
         context.beginPath();
-        context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        context.arc(0, 0, this.radius, 0, Math.PI * 2);
         context.stroke();
+        context.fillText(this.lives, 0, 0);
       }
+      context.restore();
     }
   }
   update() {
@@ -156,22 +169,34 @@ class Enemy {
       this.x += this.speedX;
       this.y += this.speedY;
       // check collision enemy / planet
-      if (this.game.checkCollision(this, this.game.planet)) {
-        this.reset();
+      if (this.game.checkCollision(this, this.game.planet) && this.lives >= 1) {
+        this.lives = 0;
+        this.speedX = 0;
+        this.speedY = 0;
+        this.collided = true;
+        this.game.lives--;
       }
-      // check collision enemy / planet
-      if (this.game.checkCollision(this, this.game.player)) {
-        this.reset();
+      // check collision enemy / player
+      if (this.game.checkCollision(this, this.game.player) && this.lives >= 1) {
+        this.lives = 0;
+        this.collided = true;
+        this.game.lives--;
       }
       // check collision enemy / projectiles
       this.game.projectilePool.forEach((projectile) => {
-        if (!projectile.free && this.game.checkCollision(this, projectile)) {
+        if (!projectile.free && this.game.checkCollision(this, projectile) && this.lives >= 1) {
           projectile.reset();
           this.hit(1);
         }
       });
-      if (this.lives < 1) this.frameX++;
-      if (this.frameX > this.maxFrame) this.reset()
+      // sprite animation
+      if (this.lives < 1 && this.game.spriteUpdate) {
+        this.frameX++;
+      }
+      if (this.frameX > this.maxFrame) {
+        this.reset();
+        if (!this.collided && !this.game.gameOver) this.game.score += this.maxLives;
+      }
     }
   }
 }
@@ -183,7 +208,43 @@ class Asteroid extends Enemy {
     this.frameX = 0;
     this.frameY = Math.floor(Math.random() * 4);
     this.maxFrame = 7;
-    this.lives = 5;
+    this.lives = 2;
+    this.maxLives = this.lives;
+  }
+}
+
+class Lobstermorph extends Enemy {
+  constructor(game) {
+    super(game);
+    this.image = document.getElementById('lobstermorph');
+    this.frameX = 0;
+    this.frameY = Math.floor(Math.random() * 4);
+    this.maxFrame = 14;
+    this.lives = 8;
+    this.maxLives = this.lives;
+  }
+}
+
+class Beetlemorph extends Enemy {
+  constructor(game) {
+    super(game);
+    this.image = document.getElementById('beetlemorph');
+    this.frameX = 0;
+    this.frameY = Math.floor(Math.random() * 4);
+    this.maxFrame = 3;
+    this.lives = 1;
+    this.maxLives = this.lives;
+  }
+}
+
+class Rhinomorph extends Enemy {
+  constructor(game) {
+    super(game);
+    this.image = document.getElementById('rhinomorph');
+    this.frameX = 0;
+    this.frameY = Math.floor(Math.random() * 4);
+    this.maxFrame = 6;
+    this.lives = 4;
     this.maxLives = this.lives;
   }
 }
@@ -195,7 +256,7 @@ class Game {
     this.height = this.canvas.height;
     this.planet = new Planet(this);
     this.player = new Player(this);
-    this.debug = true;
+    this.debug = false;
 
     this.projectilePool = [];
     this.numberOfProjectiles = 20;
@@ -206,7 +267,14 @@ class Game {
     this.createEnemyPool();
     this.enemyPool[0].start();
     this.enemyTimer = 0;
-    this.enemyInterval = 1700;
+    this.enemyInterval = 1200;
+
+    this.spriteUpdate = false;
+    this.spriteTimer = 0;
+    this.spriteInterval = 150;
+    this.score = 0;
+    this.winningScore = 100;
+    this.lives = 20;
 
     this.mouse = {
       x: 0,
@@ -232,6 +300,7 @@ class Game {
   }
   render(context, deltaTime) {
     this.planet.draw(context);
+    this.drawStatusText(context);
     this.player.draw(context);
     this.player.update();
     this.projectilePool.forEach((projectile) => {
@@ -243,13 +312,53 @@ class Game {
       enemy.update();
     });
     // periodically activate an enemy
-    if (this.enemyTimer < this.enemyInterval) {
-      this.enemyTimer += deltaTime;
-    } else {
-      this.enemyTimer = 0;
-      const enemy = this.getEnemy();
-      if (enemy) enemy.start();
+    if (!this.gameOver) {
+      if (this.enemyTimer < this.enemyInterval) {
+        this.enemyTimer += deltaTime;
+      } else {
+        this.enemyTimer = 0;
+        const enemy = this.getEnemy();
+        if (enemy) enemy.start();
+      }
     }
+    // periodically update sprites
+    if (this.spriteTimer < this.spriteInterval) {
+      this.spriteTimer += deltaTime;
+      this.spriteUpdate = false;
+    } else {
+      this.spriteTimer = 0;
+      this.spriteUpdate = true;
+    }
+    // win / lose condition
+    if (this.score >= this.winningScore || this.lives < 1) {
+      this.gameOver = true;
+    }
+  }
+  drawStatusText(context) {
+    context.save();
+    context.textAlign = 'left';
+    context.font = '30px Racing Sans One';
+    context.fillText('Score: ' + this.score, +20, 30);
+    for (let i = 0; i < this.lives; i++) {
+      context.fillRect(20 + 15 * i, 60, 10, 30);
+    }
+    if (this.gameOver) {
+      context.textAlign = 'center';
+      let message1;
+      let message2;
+      if (this.score >= this.winningScore) {
+        message1 = 'You Win!';
+        message2 = 'Your Score is: ' + this.score + '!';
+      } else {
+        message1 = 'You Lose!';
+        message2 = 'Try Again!';
+      }
+      context.font = '100px Racing Sans One';
+      context.fillText(message1, this.width * 0.5, 300);
+      context.font = '50px Racing Sans One';
+      context.fillText(message2, this.width * 0.5, 450);
+    }
+    context.restore();
   }
   calcAim(a, b) {
     const dx = a.x - b.x;
@@ -278,7 +387,16 @@ class Game {
   }
   createEnemyPool() {
     for (let i = 0; i < this.numberOfEnemies; i++) {
-      this.enemyPool.push(new Asteroid(this));
+      let randomNumber = Math.random();
+      if (randomNumber < 0.25) {
+        this.enemyPool.push(new Asteroid(this));
+      } else if (randomNumber < 0.5) {
+        this.enemyPool.push(new Beetlemorph(this));
+      } else if (randomNumber < 0.75) {
+        this.enemyPool.push(new Rhinomorph(this));
+      } else {
+        this.enemyPool.push(new Lobstermorph(this));
+      }
     }
   }
   getEnemy() {
@@ -294,7 +412,11 @@ window.addEventListener('load', function () {
   canvas.width = 800;
   canvas.height = 800;
   ctx.strokeStyle = 'white';
+  ctx.fillStyle = 'white';
   ctx.lineWidth = 2;
+  ctx.font = '40px Helvetica';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
 
   const game = new Game(canvas);
   let lastTime = 0;
