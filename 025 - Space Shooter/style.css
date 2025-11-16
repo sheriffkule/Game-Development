@@ -50,6 +50,10 @@ body {
     transform: scale(1.04) skew(3deg);
 }
 
+.assets {
+    display: none;
+}
+
 @media screen and (max-width: 900px) {
     #canvas1 {
         background: url('background1080x1920.png');

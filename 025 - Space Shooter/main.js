@@ -11,13 +11,18 @@ class Game {
     this.enemyTimer = 0;
     this.enemyInterval = 1000;
 
-    this.score;
+    this.score = 0;
     this.lives;
     this.winningScore = 3;
     this.message1 = 'Run!';
     this.message2 = 'Or get eaten!';
     this.message3 = 'Press ENTER or "R" to start!';
-    this.gameOver;
+    this.crewImage = document.getElementById('crewImage');
+    this.gameOver = true;
+
+    this.spriteTimer = 0;
+    this.spriteInterval = 200;
+    this.spriteUpdate = false;
 
     this.mouse = {
       x: undefined,
@@ -28,7 +33,16 @@ class Game {
       fired: false,
     };
 
-    this.start();
+    this.resize(window.innerWidth, window.innerHeight);
+    this.resetButton = document.getElementById('resetButton');
+    this.resetButton.addEventListener('click', (e) => {
+      this.start();
+    });
+    this.fullScreenButton = document.getElementById('fullScreenButton');
+    this.fullScreenButton.addEventListener('click', (e) => {
+      this.toggleFullScreen();
+    });
+
     // event listeners
     window.addEventListener('resize', (e) => {
       this.resize(e.target.innerWidth, e.target.innerHeight);
@@ -60,12 +74,27 @@ class Game {
       this.mouse.y = e.changedTouches[0].pageY;
       this.mouse.pressed = false;
     });
+
+    window.addEventListener('keyup', (e) => {
+      if (e.key === 'Enter' || e.key.toLowerCase() === 'r') {
+        this.start();
+      } else if (e.key === ' ' || e.key.toLowerCase() === 'f') {
+        this.toggleFullScreen();
+      }
+    });
   }
   start() {
     this.resize(window.innerWidth, window.innerHeight);
     this.score = 0;
-    this.lives = 10;
+    this.lives = 15;
     this.gameOver = false;
+    this.enemyPool.forEach((enemy) => {
+      enemy.reset();
+    });
+    for (let i = 0; i < 2; i++) {
+      const enemy = this.getEnemy();
+      if (enemy) enemy.start();
+    }
   }
   resize(width, height) {
     this.canvas.width = width;
@@ -78,6 +107,13 @@ class Game {
     this.ctx.textAlign = 'center';
     this.ctx.textBaseline = 'middle';
   }
+  toggleFullScreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+    } else if (document.exitFullscreen) {
+      document.exitFullscreen();
+    }
+  }
   checkCollision(rect1, rect2) {
     return (
       rect1.x < rect2.x + rect2.width &&
@@ -88,7 +124,7 @@ class Game {
   }
   createEnemyPool() {
     for (let i = 0; i < this.numberOfEnemies; i++) {
-      this.enemyPool.push(new Enemy(this));
+      this.enemyPool.push(new Beetlemorph(this));
     }
   }
   getEnemy() {
@@ -117,12 +153,21 @@ class Game {
       }
     }
   }
+  handleSpriteTimer(deltaTime) {
+    if (this.spriteTimer < this.spriteInterval) {
+      this.spriteTimer += deltaTime;
+      this.spriteUpdate = false;
+    } else {
+      this.spriteTimer = 0;
+      this.spriteUpdate = true;
+    }
+  }
   drawStatusText() {
     this.ctx.save();
     this.ctx.textAlign = 'left';
     this.ctx.fillText('Score : ' + this.score, 20, 40);
     for (let i = 0; i < this.lives; i++) {
-      this.ctx.fillRect(20 + 15 * i, 60, 10, 40);
+      this.ctx.drawImage(this.crewImage, 20 + 15 * i, 60, 10, 30);
     }
     if (this.lives < 1 || this.score >= this.winningScore) {
       this.triggerGameOver();
@@ -138,8 +183,9 @@ class Game {
     this.ctx.restore();
   }
   render(deltaTime) {
+    this.handleSpriteTimer(deltaTime);
     this.drawStatusText();
-    this.handleEnemies(deltaTime);
+    if (!this.gameOver) this.handleEnemies(deltaTime);
     this.enemyPool.forEach((enemy) => {
       enemy.update();
       enemy.draw();
