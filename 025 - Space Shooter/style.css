@@ -1,0 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Bangers&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: darkolivegreen;
+}
+
+#canvas1 {
+    border: 5px solid mediumseagreen;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    background: url(background1920x1080.png);
+    background-size: cover;
+    background-position: center;
+}
+
+.controls {
+    position: absolute;
+    left: 5px;
+    bottom: 5px;
+    display: flex;
+    flex-direction: column;
+}
+
+.controls > button {
+    padding: 15px 25px;
+    background-color: transparent;
+    color: white;
+    font: 30px Bangers;
+    border: 1px solid silver;
+    margin: 5px;
+    box-shadow: 1px 1px 1px black;
+    text-shadow: 1px 1px 1px black;
+    cursor: pointer;
+    transition: .3s;
+}
+
+.controls > button:is(:hover, :active, :focus, :focus-visible) {
+    background-color: #7a2c8a;
+    box-shadow: 4px 4px 4px black;
+    text-shadow: 2px 2px 2px black;
+    transform: scale(1.04) skew(3deg);
+}

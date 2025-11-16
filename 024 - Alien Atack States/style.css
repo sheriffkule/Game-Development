@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Alfa+Slab+One&display=swap');
+
 * {
     margin: 0;
     padding: 0;
@@ -13,5 +15,20 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    border: 1px solid mediumslateblue;
+    border: 5px solid mediumslateblue;
+    background-image: url('background.png');
+}
+
+img {
+    display: none;
+}
+
+#info {
+    width: 100%;
+    text-align: center;
+    font: 25px 'Alfa Slab One';
+    color: white;
+    letter-spacing: 2px;
+    margin-block-start: 5rem;
+    text-wrap: pretty;
 }
