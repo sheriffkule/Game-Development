@@ -3,8 +3,9 @@ class Enemy {
     this.game = game;
     this.spriteWidth = 100;
     this.spriteHeight = 100;
-    this.width = this.spriteWidth;
-    this.height = this.spriteHeight;
+    this.sizeModifier = Math.random() * 0.3 + 0.8;
+    this.width = this.spriteWidth * this.sizeModifier;
+    this.height = this.spriteHeight * this.sizeModifier;
     this.x;
     this.y;
     this.speedX;
@@ -12,6 +13,8 @@ class Enemy {
     this.frameX;
     this.frameY;
     this.lastFrame;
+    this.minFrame;
+    this.maxFrame;
     this.lives;
     this.free = true;
   }
@@ -53,14 +56,16 @@ class Enemy {
 
       if (this.y > this.game.height) {
         this.reset();
-        this.game.lives--;
+        if (!this.game.gameOver) this.game.lives--;
       }
 
       if (!this.isAlive()) {
-        this.frameX++;
-        if (this.frameX > this.lastFrame) {
-          this.reset();
-          if (!this.game.gameOver) this.game.score++;
+        if (this.game.spriteUpdate) {
+          this.frameX++;
+          if (this.frameX > this.lastFrame) {
+            this.reset();
+            if (!this.game.gameOver) this.game.score++;
+          }
         }
       }
     }
@@ -78,8 +83,10 @@ class Enemy {
         this.width,
         this.height
       );
-      this.game.ctx.strokeRect(this.x, this.y, this.width, this.height);
-      this.game.ctx.fillText(this.lives, this.x + this.width * 0.5, this.y + this.height * 0.5);
+      if (this.game.debug) {
+        this.game.ctx.strokeRect(this.x, this.y, this.width, this.height);
+        this.game.ctx.fillText(this.lives, this.x + this.width * 0.5, this.y - 10);
+      }
     }
   }
 }
@@ -93,12 +100,82 @@ class Beetlemorph extends Enemy {
     super.start();
     this.speedX = 0;
     this.speedY = Math.random() * 2 + 0.2;
-    this.lives = 2;
+    this.lives = 1;
     this.lastFrame = 3;
   }
   update() {
     super.update();
     if (!this.free) {
+      if (this.isAlive()) {
+        this.hit();
+      }
+    }
+  }
+}
+
+class Lobstermorph extends Enemy {
+  constructor(game) {
+    super(game);
+    this.image = document.getElementById('lobstermorph');
+    this.lastFrame = 14;
+  }
+  start() {
+    super.start();
+    this.speedX = 0;
+    this.speedY = Math.random() * 0.5 + 0.2;
+    this.lives = 3;
+  }
+  update() {
+    super.update();
+    if (!this.free) {
+      if (this.lives >= 3) {
+        this.maxFrame = 0;
+      } else if (this.lives == 2) {
+        this.maxFrame = 3;
+      } else if (this.lives === 1) {
+        this.maxFrame = 7;
+      }
+      if (this.isAlive()) {
+        this.hit();
+        if (this.frameX < this.maxFrame && this.game.spriteUpdate) {
+          this.frameX++;
+        }
+      }
+    }
+  }
+}
+
+class Phantommorph extends Enemy {
+  constructor(game) {
+    super(game);
+    this.image = document.getElementById('phantommorph');
+    this.lastFrame = 14;
+  }
+  start() {
+    super.start();
+    this.speedX = Math.random() * 2 - 1;
+    this.speedY = Math.random() * 0.2 + 0.5;
+    this.lives = 1;
+    this.minFrame = 0;
+    this.maxFrame = 2;
+  }
+  handleFrames() {
+    if (this.game.spriteUpdate) {
+      if (this.frameX < this.maxFrame) {
+        this.frameX++;
+      } else {
+        this.frameX = this.minFrame;
+      }
+    }
+  }
+  update() {
+    super.update();
+    if (!this.free) {
+      this.handleFrames();
+      // bounce left right
+      if (this.x <= 0 || this.x >= this.game.width - this.width) {
+        this.speedX *= -1;
+      }
       if (this.isAlive()) {
         this.hit();
       }
