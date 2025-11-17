@@ -1,3 +1,24 @@
+class AudioControl {
+  constructor() {
+    this.newgame = document.getElementById('newgame');
+    this.boom1 = document.getElementById('boom1');
+    this.boom2 = document.getElementById('boom2');
+    this.boom3 = document.getElementById('boom3');
+    this.boom4 = document.getElementById('boom4');
+    this.slide = document.getElementById('slide');
+    this.win = document.getElementById('win');
+    this.lose = document.getElementById('lose');
+    this.scream = document.getElementById('scream');
+
+    this.boomSounds = [this.boom1, this.boom2, this.boom3, this.boom4];
+  }
+  play(audio) {
+    audio.currentTime = 0;
+    audio.volume = 0.3;
+    audio.play();
+  }
+}
+
 class Game {
   constructor(canvas, ctx) {
     this.canvas = canvas;
@@ -13,7 +34,7 @@ class Game {
 
     this.score = 0;
     this.lives;
-    this.winningScore = 20;
+    this.winningScore = 100;
     this.message1 = 'Run!';
     this.message2 = 'Or get eaten!';
     this.message3 = 'Press ENTER or "R" to start!';
@@ -25,6 +46,8 @@ class Game {
     this.spriteTimer = 0;
     this.spriteInterval = 100;
     this.spriteUpdate = false;
+
+    this.sound = new AudioControl();
 
     this.mouse = {
       x: undefined,
@@ -50,30 +73,45 @@ class Game {
       this.resize(e.target.innerWidth, e.target.innerHeight);
     });
 
+    window.addEventListener('mousemove', (e) => {
+      const rect = this.canvas.getBoundingClientRect();
+      this.mouse.x = e.clientX - rect.left;
+      this.mouse.y = e.clientY - rect.top;
+    });
+
     window.addEventListener('mousedown', (e) => {
-      this.mouse.x = e.x;
-      this.mouse.y = e.y;
+      const rect = this.canvas.getBoundingClientRect();
+      this.mouse.x = e.clientX - rect.left;
+      this.mouse.y = e.clientY - rect.top;
       this.mouse.pressed = true;
       this.mouse.fired = false;
     });
 
     window.addEventListener('mouseup', (e) => {
-      this.mouse.x = e.x;
-      this.mouse.y = e.y;
+      const rect = this.canvas.getBoundingClientRect();
+      this.mouse.x = e.clientX - rect.left;
+      this.mouse.y = e.clientY - rect.top;
       this.mouse.pressed = false;
     });
 
     window.addEventListener('touchstart', (e) => {
-      console.log(e);
-      this.mouse.x = e.changedTouches[0].pageX;
-      this.mouse.y = e.changedTouches[0].pageY;
+      const rect = this.canvas.getBoundingClientRect();
+      this.mouse.x = e.changedTouches[0].clientX - rect.left;
+      this.mouse.y = e.changedTouches[0].clientY - rect.top;
       this.mouse.pressed = true;
       this.mouse.fired = false;
     });
 
+    window.addEventListener('touchmove', (e) => {
+      const rect = this.canvas.getBoundingClientRect();
+      this.mouse.x = e.changedTouches[0].clientX - rect.left;
+      this.mouse.y = e.changedTouches[0].clientY - rect.top;
+    });
+
     window.addEventListener('touchend', (e) => {
-      this.mouse.x = e.changedTouches[0].pageX;
-      this.mouse.y = e.changedTouches[0].pageY;
+      const rect = this.canvas.getBoundingClientRect();
+      this.mouse.x = e.changedTouches[0].clientX - rect.left;
+      this.mouse.y = e.changedTouches[0].clientY - rect.top;
       this.mouse.pressed = false;
     });
 
@@ -100,6 +138,8 @@ class Game {
       const enemy = this.getEnemy();
       if (enemy) enemy.start();
     }
+    this.sound.volume = 0.2;
+    this.sound.newgame.play();
   }
   generateCrew() {
     this.crewMembers = [];
@@ -138,13 +178,15 @@ class Game {
   }
   createEnemyPool() {
     for (let i = 0; i < this.numberOfEnemies; i++) {
-      // const randomNumber = Math.random();
-      this.enemyPool.push(new Phantommorph(this));
-      // if (randomNumber < 0.8) {
-      //   this.enemyPool.push(new Lobstermorph(this));
-      // } else {
-      //   this.enemyPool.push(new Beetlemorph(this));
-      // }
+      const randomNumber = Math.random();
+      // this.enemyPool.push(new Phantommorph(this));
+      if (randomNumber > 0.6) {
+        this.enemyPool.push(new Lobstermorph(this));
+      } else if (randomNumber > 0.3) {
+        this.enemyPool.push(new Beetlemorph(this));
+      } else {
+        this.enemyPool.push(new Phantommorph(this));
+      }
     }
   }
   getEnemy() {
@@ -167,9 +209,11 @@ class Game {
       if (this.lives < 1) {
         this.message1 = 'Aargh!!!';
         this.message2 = 'The crew was eaten';
+        this.sound.play(this.sound.lose);
       } else if (this.score >= this.winningScore) {
         this.message1 = 'Well done!!!';
         this.message2 = 'You escaped the swarm!';
+        this.sound.play(this.sound.win);
       }
     }
   }
@@ -225,6 +269,19 @@ class Game {
     this.enemyPool.forEach((enemy) => {
       enemy.draw();
     });
+    this.drawMouse();
+  }
+  drawMouse() {
+    if (this.mouse.x === undefined || this.mouse.y === undefined) return;
+    const radius = 10;
+    const half = radius / 2;
+    this.ctx.save();
+    this.ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    this.ctx.beginPath();
+    this.ctx.arc(this.mouse.x - half, this.mouse.y - half, radius, 0, Math.PI * 2)
+    // this.ctx.rect(this.mouse.x - half, this.mouse.y - half, size, size);
+    this.ctx.fill();
+    this.ctx.restore();
   }
 }
 

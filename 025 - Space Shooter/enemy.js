@@ -57,6 +57,8 @@ class Enemy {
       if (this.y > this.game.height) {
         this.reset();
         if (!this.game.gameOver) this.game.lives--;
+        // this.game.sound.play(this.game.sound.scream);
+        this.game.sound.scream.play();
       }
 
       if (!this.isAlive()) {
@@ -109,6 +111,9 @@ class Beetlemorph extends Enemy {
       if (this.isAlive()) {
         this.hit();
       }
+      if (!this.isAlive()) {
+        this.game.sound.play(this.game.sound.boomSounds[1]);
+      }
     }
   }
 }
@@ -141,6 +146,9 @@ class Lobstermorph extends Enemy {
           this.frameX++;
         }
       }
+      if (!this.isAlive()) {
+        this.game.sound.play(this.game.sound.boomSounds[3]);
+      }
     }
   }
 }
@@ -150,14 +158,21 @@ class Phantommorph extends Enemy {
     super(game);
     this.image = document.getElementById('phantommorph');
     this.lastFrame = 14;
+    this.states = [new Flying(game, this), new Phasing(game, this), new Imploding(game, this)];
+    this.currentState;
+    this.switchTimer = 0;
+    this.switchInterval = Math.random() * 2000 + 1000;
   }
   start() {
     super.start();
     this.speedX = Math.random() * 2 - 1;
     this.speedY = Math.random() * 0.2 + 0.5;
     this.lives = 1;
-    this.minFrame = 0;
-    this.maxFrame = 2;
+    this.setState(Math.floor(Math.random() * 2));
+  }
+  setState(state) {
+    this.currentState = this.states[state];
+    this.currentState.start();
   }
   handleFrames() {
     if (this.game.spriteUpdate) {
@@ -168,17 +183,85 @@ class Phantommorph extends Enemy {
       }
     }
   }
-  update() {
+  switch() {
+    if (this.currentState === this.states[0]) {
+      this.setState(1);
+    } else {
+      this.setState(0);
+    }
+  }
+  hit() {
+    super.hit();
+    if (!this.isAlive()) this.setState(2);
+  }
+  update(deltaTime) {
     super.update();
     if (!this.free) {
-      this.handleFrames();
+      this.currentState.update();
       // bounce left right
       if (this.x <= 0 || this.x >= this.game.width - this.width) {
         this.speedX *= -1;
       }
+
       if (this.isAlive()) {
-        this.hit();
+        if (this.switchTimer < this.switchInterval) {
+          this.switchTimer += deltaTime;
+        } else {
+          this.switchTimer = 0;
+          this.switch();
+        }
       }
     }
   }
+}
+
+class EnemyState {
+  constructor(game, enemy) {
+    this.game = game;
+    this.enemy = enemy;
+  }
+}
+
+class Flying extends EnemyState {
+  start() {
+    this.enemy.minFrame = 0;
+    this.enemy.maxFrame = 2;
+    this.enemy.speedX = Math.random() * 2 - 1;
+    this.enemy.speedY = Math.random() * 0.2 + 0.5;
+    this.enemy.frameX = this.enemy.minFrame;
+  }
+  update() {
+    this.enemy.hit();
+    this.enemy.handleFrames();
+  }
+}
+
+class Phasing extends EnemyState {
+  start() {
+    this.enemy.minFrame = 3;
+    this.enemy.maxFrame = 5;
+    this.enemy.speedX = Math.random() * 2 - 1;
+    this.enemy.speedY = Math.random() * 0.2 + 0.5;
+    this.enemy.frameX = this.enemy.minFrame;
+  }
+  update() {
+    this.enemy.handleFrames();
+    if (this.game.checkCollision(this.enemy, this.game.mouse) && this.game.mouse.pressed) {
+      this.game.mouse.fired = true;
+      this.enemy.y += 25;
+      this.enemy.speedX = 0;
+      this.enemy.speedY = 2;
+      this.game.sound.play(this.game.sound.slide);
+    }
+  }
+}
+
+class Imploding extends EnemyState {
+  start() {
+    this.enemy.minFrame = 6;
+    this.enemy.maxFrame = this.enemy.lastFrame + 1;
+    this.enemy.frameX = this.enemy.minFrame;
+    this.game.sound.play(this.game.sound.boomSounds[Math.floor(Math.random() * 4)]);
+  }
+  update() {}
 }
