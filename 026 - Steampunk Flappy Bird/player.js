@@ -19,12 +19,13 @@ class Player {
     this.barSize;
     this.charging;
     this.image = document.getElementById('player_fish');
+    this.frameY;
   }
   draw() {
     this.game.ctx.drawImage(
       this.image,
       0,
-      0,
+      this.frameY * this.spriteHeight,
       this.spriteWidth,
       this.spriteHeight,
       this.x,
@@ -32,22 +33,32 @@ class Player {
       this.width,
       this.height
     );
-    this.game.ctx.beginPath();
-    this.game.ctx.arc(this.collisionX, this.collisionY, this.collisionRadius, 0, Math.PI * 2);
-    this.game.ctx.stroke();
+    if (this.game.debug) {
+      this.game.ctx.beginPath();
+      this.game.ctx.arc(
+        this.collisionX,
+        this.collisionY,
+        this.collisionRadius,
+        0,
+        Math.PI * 2
+      );
+      this.game.ctx.stroke();
+    }
   }
   update() {
     this.handleEnergy();
+    if (this.speedY >= 0) this.wingsUp();
     this.y += this.speedY;
     this.collisionY = this.y + this.height * 0.5;
     if (!this.isTouching() && !this.charging) {
       this.speedY += this.game.gravity;
     } else {
-      this.speedY = 0;  
+      this.speedY = 0;
     }
     // bottom boundary
     if (this.isTouching()) {
-      this.y = this.game.height - this.height;
+      this.y = this.game.height - this.height - this.game.bottomMargin;
+      this.wingsIdle();
     }
   }
   resize() {
@@ -56,24 +67,44 @@ class Player {
     this.y = this.game.height * 0.5 - this.height * 0.5;
     this.speedY = -5 * this.game.ratio;
     this.flapSpeed = 5 * this.game.ratio;
-    this.collisionRadius = this.width * 0.5;
-    this.collisionX = this.x + this.width * 0.5;
+    this.collisionRadius = 40 * this.game.ratio;
+    this.collisionX = this.x + this.width * 0.7;
     this.collided = false;
     this.barSize = Math.floor(5 * this.game.ratio);
+    this.frameY = 0;
+    this.charging = false;
   }
   startCharge() {
-    this.charging = true;
-    this.game.speed = this.game.maxSpeed;
+    if (this.energy >= this.minEnergy && !this.charging) {
+      this.charging = true;
+      this.game.speed = this.game.maxSpeed;
+      this.wingsCharge();
+      this.game.sound.play(this.game.sound.charge);
+    } else {
+      this.stopCharge();
+    }
   }
   stopCharge() {
     this.charging = false;
     this.game.speed = this.game.minSpeed;
   }
+  wingsIdle() {
+    if (!this.charging) this.frameY = 0;
+  }
+  wingsDown() {
+    if (!this.charging) this.frameY = 1;
+  }
+  wingsUp() {
+    if (!this.charging) this.frameY = 2;
+  }
+  wingsCharge() {
+    this.frameY = 3;
+  }
   isTouchingTop() {
     return this.y <= 0;
   }
   isTouching() {
-    return this.y >= this.game.height - this.height;
+    return this.y >= this.game.height - this.height - this.game.bottomMargin;
   }
   handleEnergy() {
     if (this.game.eventUpdate) {
@@ -93,6 +124,8 @@ class Player {
     this.stopCharge();
     if (!this.isTouchingTop()) {
       this.speedY = -this.flapSpeed;
+      this.game.sound.play(this.game.sound.flapSounds[Math.floor(Math.random() * 5)]);
+      this.wingsDown();
     }
   }
 }

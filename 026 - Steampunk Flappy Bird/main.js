@@ -8,60 +8,96 @@ class Game {
     this.ratio = this.height / this.baseHeight;
     this.background = new Background(this);
     this.player = new Player(this);
+    this.sound = new AudioControl();
     this.obstacles = [];
-    this.numberOfObstacles = 5;
+    this.numberOfObstacles = 100;
     this.gravity;
     this.speed;
     this.minSpeed;
     this.maxSpeed;
     this.score;
     this.gameOver;
+    this.bottomMargin;
     this.timer;
     this.message1;
     this.message2;
+    this.smallFont;
+    this.largeFont;
     this.eventTimer = 0;
     this.eventInterval = 150;
     this.eventUpdate = false;
     this.touchStartX;
     this.swipeDistance = 50;
+    this.debug = false;
+    this.restartButton = document.getElementById('restartButton');
+    this.fullScreenButton = document.getElementById('fullScreenButton');
+    this.debugButton = document.getElementById('debugButton');
 
     this.resize(window.innerWidth, window.innerHeight);
 
     window.addEventListener('resize', (e) => {
       this.resize(e.currentTarget.innerWidth, e.currentTarget.innerHeight);
     });
+    // button controls
+    this.restartButton.addEventListener('click', (e) => {
+      this.resize(window.innerWidth, window.innerHeight);
+    });
+    this.fullScreenButton.addEventListener('click', (e) => {
+      this.toggleFullScreen();
+    });
+    this.debugButton.addEventListener('click', (e) => {
+      this.debug = !this.debug;
+    });
     //mouse controls
     this.canvas.addEventListener('mousedown', (e) => {
       this.player.flap();
+    });
+    this.canvas.addEventListener('mouseup', (e) => {
+      setTimeout(() => {
+        this.player.wingsUp();
+      }, 50);
     });
     // keyboard controls
     window.addEventListener('keydown', (e) => {
       if (e.key === ' ' || e.key === 'Enter') this.player.flap();
       if (e.key === 'Shift' || e.key.toLowerCase() === 'c') this.player.startCharge();
+      if (e.key.toLowerCase() === 'r') this.resize(window.innerWidth, window.innerHeight);
+      if (e.key.toLowerCase() === 'f') this.toggleFullScreen();
+      if (e.key.toLowerCase() === 'd') this.debug = !this.debug;
+    });
+    window.addEventListener('keyup', (e) => {
+      this.player.wingsUp();
     });
     // touch controls
     this.canvas.addEventListener('touchstart', (e) => {
-      this.player.flap();
       this.touchStartX = e.changedTouches[0].pageX;
     });
-    this.canvas.addEventListener('touchmove', e => {
+    this.canvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+    });
+    this.canvas.addEventListener('touchend', (e) => {
       if (e.changedTouches[0].pageX - this.touchStartX > this.swipeDistance) {
         this.player.startCharge();
+      } else {
+        this.player.flap();
       }
-    })
+    });
   }
   resize(width, height) {
     this.canvas.width = width;
     this.canvas.height = height;
-    // this.ctx.fillStyle = 'blue';
-    this.ctx.font = '22px Bungee Spice';
+    this.ctx.fillStyle = 'grey';
     this.ctx.textAlign = 'right';
-    this.ctx.lineWidth = 3;
+    this.ctx.lineWidth = 1;
     this.ctx.strokeStyle = 'white';
     this.width = this.canvas.width;
     this.height = this.canvas.height;
     this.ratio = this.height / this.baseHeight;
 
+    this.bottomMargin = Math.floor(50 * this.ratio);
+    this.smallFont = Math.ceil(20 * this.ratio);
+    this.largeFont = Math.ceil(45 * this.ratio);
+    this.ctx.font = this.smallFont + 'px Bungee Spice';
     this.gravity = 0.15 * this.ratio;
     this.speed = 2 * this.ratio;
     this.minSpeed = this.speed;
@@ -116,27 +152,34 @@ class Game {
       this.eventUpdate = true;
     }
   }
-  drawStatusText() {
-    this.ctx.save();
-    this.ctx.fillText('Score: ' + this.score, this.width - 10, 30);
-    this.ctx.textAlign = 'left';
-    this.ctx.fillText('Timer: ' + this.formatTimer().toFixed(1), 10, 30);
-    if (this.gameOver) {
-      if (this.player.collided) {
-        this.message1 = 'Getting rusty?';
-        this.message2 = 'Collision time ' + this.formatTimer().toFixed(1) + ' seconds!';
-      } else if (this.obstacles.length <= 0) {
+  triggerGameOver() {
+    if (!this.gameOver) {
+      this.gameOver = true;
+      if (this.obstacles.length <= 0) {
+        this.sound.play(this.sound.win);
         this.message1 = 'Nailed it!';
         this.message2 = 'Can yo do it faster than ' + this.formatTimer(1).toFixed(1) + ' seconds?';
+      } else {
+        this.sound.play(this.sound.lose);
+        this.message1 = 'Getting rusty?';
+        this.message2 = 'Collision time ' + this.formatTimer().toFixed(1) + ' seconds!';
       }
-      this.ctx.textAlign = 'center';
-      this.ctx.font = '50px Bungee Spice';
-      this.ctx.fillText(this.message1, this.width * 0.5, this.height * 0.5 - 30);
-      this.ctx.font = '25px Bungee Spice';
-      this.ctx.fillText(this.message2, this.width * 0.5, this.height * 0.5 + 20);
-      this.ctx.fillText('Press R to try again!', this.width * 0.5, this.height * 0.5 + 50);
     }
-    if (this.player.energy <= 20) this.ctx.fillStyle = 'red';
+  }
+  drawStatusText() {
+    this.ctx.save();
+    this.ctx.fillText('Score: ' + this.score, this.width - this.smallFont, this.largeFont);
+    this.ctx.textAlign = 'left';
+    this.ctx.fillText('Timer: ' + this.formatTimer().toFixed(1), this.smallFont, this.largeFont);
+    if (this.gameOver) {
+      this.ctx.textAlign = 'center';
+      this.ctx.font = this.largeFont + 'px Bungee Spice';
+      this.ctx.fillText(this.message1, this.width * 0.5, this.height * 0.5 - this.largeFont, this.width);
+      this.ctx.font = this.smallFont + 'px Bungee Spice';
+      this.ctx.fillText(this.message2, this.width * 0.5, this.height * 0.5 - this.smallFont, this.width);
+      this.ctx.fillText('Press R to try again!', this.width * 0.5, this.height * 0.5, this.width);
+    }
+    if (this.player.energy <= this.player.minEnergy) this.ctx.fillStyle = 'red';
     else if (this.player.energy >= this.player.maxEnergy) this.ctx.fillStyle = 'orangered';
     for (let i = 0; i < this.player.energy; i++) {
       this.ctx.fillRect(
@@ -147,6 +190,13 @@ class Game {
       );
     }
     this.ctx.restore();
+  }
+  toggleFullScreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+    } else if (document.exitFullscreen) {
+      document.exitFullscreen();
+    }
   }
 }
 
@@ -162,7 +212,7 @@ window.addEventListener('load', function () {
   function animate(timeStamp) {
     const deltaTime = timeStamp - lastTime;
     lastTime = timeStamp;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // ctx.clearRect(0, 0, canvas.width, canvas.height);
     game.render(deltaTime);
     requestAnimationFrame(animate);
   }

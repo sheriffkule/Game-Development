@@ -9,7 +9,7 @@ class Obstacles {
     this.y = Math.random() * (this.game.height - this.scaledHeight);
     this.collisionX;
     this.collisionY;
-    this.collisionRadius = this.scaledWidth * 0.5;
+    this.collisionRadius;
     this.speedY = Math.random() < 0.5 ? -1 * this.game.ratio : 1 * this.game.ratio;
     this.markedForDeletion = false;
     this.image = document.getElementById('smallGears');
@@ -25,41 +25,46 @@ class Obstacles {
         this.speedY *= -1;
       }
     } else {
-        this.speedY += 0.1;
+      this.speedY += 0.1;
     }
     if (this.ifOffScreen()) {
       this.markedForDeletion = true;
       this.game.obstacles = this.game.obstacles.filter((obstacle) => !obstacle.markedForDeletion);
       this.game.score++;
-      if (this.game.obstacles.length <= 0) this.game.gameOver = true;
+      if (this.game.obstacles.length <= 0) {
+        this.game.triggerGameOver();
+      }
     }
     if (this.game.checkCollision(this, this.game.player)) {
-      this.game.gameOver = true;
       this.game.player.collided = true;
       this.game.player.stopCharge();
+      this.game.triggerGameOver();
     }
   }
   draw() {
     this.game.ctx.drawImage(
-        this.image,
-        this.frameX * this.spriteWidth,
-        0,
-        this.spriteWidth,
-        this.spriteHeight,
-        this.x,
-        this.y,
-        this.scaledWidth,
-        this.scaledHeight
-    )
-    this.game.ctx.beginPath();
-    this.game.ctx.arc(this.collisionX, this.collisionY, this.collisionRadius, 0, Math.PI * 2);
-    this.game.ctx.stroke();
+      this.image,
+      this.frameX * this.spriteWidth,
+      0,
+      this.spriteWidth,
+      this.spriteHeight,
+      this.x,
+      this.y,
+      this.scaledWidth,
+      this.scaledHeight
+    );
+    if (this.game.debug) {
+      this.game.ctx.beginPath();
+      this.game.ctx.arc(this.collisionX, this.collisionY, this.collisionRadius, 0, Math.PI * 2);
+      this.game.ctx.stroke();
+    }
   }
   resize() {
     this.scaledWidth = this.spriteWidth * this.game.ratio;
     this.scaledHeight = this.spriteHeight * this.game.ratio;
+    this.collisionRadius = this.scaledWidth * 0.4;
   }
   ifOffScreen() {
-    return this.x < -this.scaledWidth || this.y > this.game.height;;
+    return this.x < -this.scaledWidth || this.y > this.game.height;
   }
 }
