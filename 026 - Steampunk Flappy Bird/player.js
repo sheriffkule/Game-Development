@@ -13,18 +13,37 @@ class Player {
     this.collisionY;
     this.collisionRadius;
     this.collided;
+    this.energy = 30;
+    this.maxEnergy = this.energy * 2;
+    this.minEnergy = 15;
+    this.barSize;
+    this.charging;
+    this.image = document.getElementById('player_fish');
   }
   draw() {
-    this.game.ctx.fillRect(this.x, this.y, this.width, this.height);
+    this.game.ctx.drawImage(
+      this.image,
+      0,
+      0,
+      this.spriteWidth,
+      this.spriteHeight,
+      this.x,
+      this.y,
+      this.width,
+      this.height
+    );
     this.game.ctx.beginPath();
     this.game.ctx.arc(this.collisionX, this.collisionY, this.collisionRadius, 0, Math.PI * 2);
     this.game.ctx.stroke();
   }
   update() {
+    this.handleEnergy();
     this.y += this.speedY;
     this.collisionY = this.y + this.height * 0.5;
-    if (!this.isTouching()) {
+    if (!this.isTouching() && !this.charging) {
       this.speedY += this.game.gravity;
+    } else {
+      this.speedY = 0;  
     }
     // bottom boundary
     if (this.isTouching()) {
@@ -40,6 +59,15 @@ class Player {
     this.collisionRadius = this.width * 0.5;
     this.collisionX = this.x + this.width * 0.5;
     this.collided = false;
+    this.barSize = Math.floor(5 * this.game.ratio);
+  }
+  startCharge() {
+    this.charging = true;
+    this.game.speed = this.game.maxSpeed;
+  }
+  stopCharge() {
+    this.charging = false;
+    this.game.speed = this.game.minSpeed;
   }
   isTouchingTop() {
     return this.y <= 0;
@@ -47,7 +75,22 @@ class Player {
   isTouching() {
     return this.y >= this.game.height - this.height;
   }
+  handleEnergy() {
+    if (this.game.eventUpdate) {
+      if (this.energy < this.maxEnergy) {
+        this.energy += 1;
+      }
+      if (this.charging) {
+        this.energy -= 4;
+        if (this.energy <= 0) {
+          this.energy = 0;
+          this.stopCharge();
+        }
+      }
+    }
+  }
   flap() {
+    this.stopCharge();
     if (!this.isTouchingTop()) {
       this.speedY = -this.flapSpeed;
     }

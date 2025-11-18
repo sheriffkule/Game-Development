@@ -9,14 +9,21 @@ class Game {
     this.background = new Background(this);
     this.player = new Player(this);
     this.obstacles = [];
-    this.numberOfObstacles = 1;
+    this.numberOfObstacles = 5;
     this.gravity;
     this.speed;
+    this.minSpeed;
+    this.maxSpeed;
     this.score;
     this.gameOver;
     this.timer;
     this.message1;
     this.message2;
+    this.eventTimer = 0;
+    this.eventInterval = 150;
+    this.eventUpdate = false;
+    this.touchStartX;
+    this.swipeDistance = 50;
 
     this.resize(window.innerWidth, window.innerHeight);
 
@@ -30,16 +37,23 @@ class Game {
     // keyboard controls
     window.addEventListener('keydown', (e) => {
       if (e.key === ' ' || e.key === 'Enter') this.player.flap();
+      if (e.key === 'Shift' || e.key.toLowerCase() === 'c') this.player.startCharge();
     });
     // touch controls
     this.canvas.addEventListener('touchstart', (e) => {
       this.player.flap();
+      this.touchStartX = e.changedTouches[0].pageX;
     });
+    this.canvas.addEventListener('touchmove', e => {
+      if (e.changedTouches[0].pageX - this.touchStartX > this.swipeDistance) {
+        this.player.startCharge();
+      }
+    })
   }
   resize(width, height) {
     this.canvas.width = width;
     this.canvas.height = height;
-    this.ctx.fillStyle = 'blue';
+    // this.ctx.fillStyle = 'blue';
     this.ctx.font = '22px Bungee Spice';
     this.ctx.textAlign = 'right';
     this.ctx.lineWidth = 3;
@@ -50,6 +64,8 @@ class Game {
 
     this.gravity = 0.15 * this.ratio;
     this.speed = 2 * this.ratio;
+    this.minSpeed = this.speed;
+    this.maxSpeed = this.speed * 5;
     this.background.resize();
     this.player.resize();
     this.createObstacles();
@@ -62,6 +78,7 @@ class Game {
   }
   render(deltaTime) {
     if (!this.gameOver) this.timer += deltaTime;
+    this.handlePeriodicEvents(deltaTime);
     this.background.update();
     this.background.draw();
     this.drawStatusText();
@@ -90,6 +107,15 @@ class Game {
   formatTimer() {
     return this.timer * 0.001;
   }
+  handlePeriodicEvents(deltaTime) {
+    if (this.eventTimer < this.eventInterval) {
+      this.eventTimer += deltaTime;
+      this.eventUpdate = false;
+    } else {
+      this.eventTimer = this.eventTimer % this.eventInterval;
+      this.eventUpdate = true;
+    }
+  }
   drawStatusText() {
     this.ctx.save();
     this.ctx.fillText('Score: ' + this.score, this.width - 10, 30);
@@ -109,6 +135,16 @@ class Game {
       this.ctx.font = '25px Bungee Spice';
       this.ctx.fillText(this.message2, this.width * 0.5, this.height * 0.5 + 20);
       this.ctx.fillText('Press R to try again!', this.width * 0.5, this.height * 0.5 + 50);
+    }
+    if (this.player.energy <= 20) this.ctx.fillStyle = 'red';
+    else if (this.player.energy >= this.player.maxEnergy) this.ctx.fillStyle = 'orangered';
+    for (let i = 0; i < this.player.energy; i++) {
+      this.ctx.fillRect(
+        10,
+        this.height - 10 - i * this.player.barSize,
+        this.player.barSize * 5,
+        this.player.barSize
+      );
     }
     this.ctx.restore();
   }
