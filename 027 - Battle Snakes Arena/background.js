@@ -6,8 +6,11 @@ class Background {
     this.width = this.game.cellSize * 8;
     this.height = this.game.cellSize * (this.game.topMargin + 1);
     this.image = document.getElementById('forest_margin_repeat');
+    this.repeats = this.game.width / this.width;
   }
   draw() {
-    this.game.ctx.drawImage(this.image, this.x, this.y)
+    for (let i = 0; i < this.repeats; i++) {
+      this.game.ctx.drawImage(this.image, this.x + this.width * i, this.y, this.width, this.height);
+    }
   }
 }

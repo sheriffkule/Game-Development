@@ -26,7 +26,7 @@ body {
     top: 5px;
     left: 50%;
     translate: -50% 0;
-    padding: 10px;
+    padding: 10px 10px 20px 10px;
     background: rgba(0, 0, 0, 0.8);
     color: white;
     font: 15px Play;
@@ -61,6 +61,7 @@ body {
 
 #scoreScreen {
     margin-block-start: 6px;
+    width: 300px;
     padding: 5px;
     display: flex;
     justify-content: space-between;
@@ -104,4 +105,17 @@ select {
 
 .assets {
     display: none;
+}
+
+#gameMenu {
+    display: none;
+}
+
+#gameOverScreen {
+    background: url('assets/gameOver_forest.png');
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-repeat: no-repeat;
+    background-size: cover;
 }
