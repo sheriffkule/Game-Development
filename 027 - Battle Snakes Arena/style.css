@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Bungee&display=swap');
+/* @import url('https://fonts.googleapis.com/css2?family=Bungee&display=swap'); */
+@import url('https://fonts.googleapis.com/css2?family=Play:wght@400;700&family=Unbounded&display=swap');
 
 * {
     margin: 0;
@@ -27,6 +28,8 @@ body {
     translate: -50% 0;
     padding: 10px;
     background: rgba(0, 0, 0, 0.8);
+    color: white;
+    font: 15px Play;
 }
 
 #buttons {
@@ -36,6 +39,7 @@ body {
 }
 
 #buttons button {
+    font: 13px Play;
     background: black;
     color: white;
     width: 80px;
@@ -53,4 +57,51 @@ body {
     &:active {
         transform: scale(1.05);
     }
+}
+
+#scoreScreen {
+    margin-block-start: 6px;
+    padding: 5px;
+    display: flex;
+    justify-content: space-between;
+    column-gap: 25px;
+}
+
+#scoreScreen > div {
+    display: grid;
+    row-gap: 6px;
+}
+
+#playerChoice {
+    padding: 5px 10px;
+}
+
+.playerLabel {
+    margin-block-start: 10px;
+    font-size: 20px;
+}
+
+select {
+    outline: none;
+    border: none;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    cursor: pointer;
+    transition: .15s;
+
+    &:hover {
+        background: navy;
+    }
+
+    &:focus-visible {
+        border: 1px solid rgba(255, 255, 255, 0.4);
+    }
+
+    option {
+        background: rgba(0, 0, 0, 0.8);
+    }
+}
+
+.assets {
+    display: none;
 }
