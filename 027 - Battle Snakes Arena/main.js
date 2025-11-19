@@ -14,6 +14,9 @@ class Game {
 
     this.player1;
     this.player2;
+    this.player3;
+    this.player4;
+    this.food;
     this.gameObject;
 
     window.addEventListener('resize', (e) => {
@@ -25,13 +28,18 @@ class Game {
     this.canvas.width = width - (width % this.cellSize);
     this.canvas.height = height - (height % this.cellSize);
     this.ctx.fillStyle = 'orange';
+    this.ctx.font = '30px Bungee';
+    this.ctx.textBaseline = 'top';
     this.width = this.canvas.width;
     this.height = this.canvas.height;
     this.columns = Math.floor(this.width / this.cellSize);
     this.rows = Math.floor(this.height / this.cellSize);
     this.player1 = new Keyboard1(this, 0, 0, 1, 0, 'orangered');
-    this.player2 = new Keyboard2(this, this.columns - 1, 0, 0, 1, 'magenta');
-    this.gameObject = [this.player1, this.player2];
+    this.player2 = new ComputerAi(this, this.columns - 1, 0, 0, 1, 'magenta');
+    this.player3 = new ComputerAi(this, this.columns - 1, this.rows - 1, -1, 0, 'yellow');
+    this.player4 = new ComputerAi(this, 0, this.rows - 1, 0, -1, 'darkblue');
+    this.food = new Food(this);
+    this.gameObject = [this.player1, this.player2, this.player3, this.player4, this.food];
   }
   drawGrid() {
     for (let y = 0; y < this.rows; y++) {
@@ -39,6 +47,15 @@ class Game {
         this.ctx.strokeRect(x * this.cellSize, y * this.cellSize, this.cellSize, this.cellSize);
       }
     }
+  }
+  drawStatusText() {
+    this.ctx.fillText('P1: ' + this.player1.score, this.cellSize, this.cellSize);
+    this.ctx.fillText('P2: ' + this.player2.score, this.cellSize, this.cellSize * 2);
+    this.ctx.fillText('P3: ' + this.player3.score, this.cellSize, this.cellSize * 3);
+    this.ctx.fillText('P4: ' + this.player4.score, this.cellSize, this.cellSize * 4);
+  }
+  checkCollision(a, b) {
+    return a.x === b.x && a.y === b.y;
   }
   handlePeriodicEvents(deltaTime) {
     if (this.eventTimer < this.eventInterval) {
@@ -58,6 +75,7 @@ class Game {
         object.draw();
         object.update();
       });
+      this.drawStatusText();
     }
   }
 }

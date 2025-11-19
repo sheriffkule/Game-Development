@@ -1,14 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Battle Snakes Arena</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
     <canvas id="canvas1"></canvas>
+
+    <div id="controls">
+      <div id="buttons">
+        <button id="startButton">Start</button>
+        <button id="debugButton">Debug</button>
+        <button id="fullScreenButton">Full Screen</button>
+      </div>
+    </div>
+
+    <script src="food.js"></script>
     <script src="snake.js"></script>
     <script src="main.js"></script>
-</body>
+  </body>
 </html>

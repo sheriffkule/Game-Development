@@ -9,8 +9,19 @@ class Snake {
     this.width = this.game.cellSize;
     this.height = this.game.cellSize;
     this.moving = true;
+    this.score = 0;
+    this.length = 2;
+    this.segments = [];
+    this.readyToTurn = true;
   }
   update() {
+    this.readyToTurn = true;
+    // check collision
+    if (this.game.checkCollision(this, this.game.food)) {
+      this.game.food.reset();
+      this.score++;
+      this.length++;
+    }
     //boundaries
     if (
       (this.x <= 0 && this.speedX < 0) ||
@@ -24,31 +35,55 @@ class Snake {
     if (this.moving) {
       this.x += this.speedX;
       this.y += this.speedY;
+      this.segments.unshift({ x: this.x, y: this.y });
+      if (this.segments.length > this.length) {
+        this.segments.pop();
+      }
     }
   }
   draw() {
-    this.game.ctx.fillStyle = this.color;
-    this.game.ctx.fillRect(this.x * this.game.cellSize, this.y * this.game.cellSize, this.width, this.height);
+    this.segments.forEach((segment, i) => {
+      if (i === 0) this.game.ctx.fillStyle = 'goldenrod';
+      else this.game.ctx.fillStyle = this.color;
+      this.game.ctx.fillRect(
+        segment.x * this.game.cellSize,
+        segment.y * this.game.cellSize,
+        this.width,
+        this.height
+      );
+    });
   }
   turnUp() {
-    this.speedX = 0;
-    this.speedY = -1;
-    this.moving = true;
+    if (this.speedY === 0 && this.readyToTurn) {
+      this.speedX = 0;
+      this.speedY = -1;
+      this.moving = true;
+      this.readyToTurn = false;
+    }
   }
   turnDown() {
-    this.speedX = 0;
-    this.speedY = 1;
-    this.moving = true;
+    if (this.speedY === 0 && this.readyToTurn) {
+      this.speedX = 0;
+      this.speedY = 1;
+      this.moving = true;
+      this.readyToTurn = false;
+    }
   }
   turnLeft() {
-    this.speedX = -1;
-    this.speedY = 0;
-    this.moving = true;
+    if (this.speedX === 0 && this.readyToTurn) {
+      this.speedX = -1;
+      this.speedY = 0;
+      this.moving = true;
+      this.readyToTurn = false;
+    }
   }
   turnRight() {
-    this.speedX = 1;
-    this.speedY = 0;
-    this.moving = true;
+    if (this.speedX === 0 && this.readyToTurn) {
+      this.speedX = 1;
+      this.speedY = 0;
+      this.moving = true;
+      this.readyToTurn = false;
+    }
   }
 }
 
@@ -82,7 +117,7 @@ class ComputerAi extends Snake {
   constructor(game, x, y, speedX, speedY, color) {
     super(game, x, y, speedX, speedY, color);
     this.turnTimer = 0;
-    this.turnInterval = 5;
+    this.turnInterval = Math.floor(Math.random() * this.game.columns + 1);
   }
   update() {
     super.update();
@@ -91,6 +126,7 @@ class ComputerAi extends Snake {
     } else {
       this.turnTimer = 0;
       this.turn();
+      this.turnInterval = Math.floor(Math.random() * this.game.columns + 1);
     }
   }
   turn() {
