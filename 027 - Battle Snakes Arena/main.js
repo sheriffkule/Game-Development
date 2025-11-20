@@ -4,7 +4,7 @@ class Game {
     this.ctx = context;
     this.width;
     this.height;
-    this.cellSize = 50;
+    this.cellSize = 80;
     this.columns;
     this.rows;
     this.topMargin = 2;
@@ -14,26 +14,27 @@ class Game {
     this.eventUpdate = false;
 
     this.gameOver = true;
-    this.winningScore = 2;
+    this.winningScore = 20;
 
     this.player1;
     this.player2;
     this.player3;
     this.player4;
     this.food;
-    this.gameObject;
-    this.gameUi = new Ui(this);
     this.background;
+    this.gameObject;
+    this.debug = true;
+    this.gameUi = new Ui(this);
 
     window.addEventListener('keyup', (e) => {
-      if (e.key === 'f') {
-        this.toggleFullScreen();
-      }
+      if (e.key === '-') this.toggleFullScreen();
+      else if (e.key === '+') this.debug = !this.debug;
     });
     window.addEventListener('resize', (e) => {
       this.resize(e.currentTarget.innerWidth, e.currentTarget.innerHeight);
     });
     this.resize(window.innerWidth, window.innerHeight);
+    this.start();
   }
   resize(width, height) {
     this.canvas.width = width - (width % this.cellSize);
@@ -117,7 +118,7 @@ class Game {
     if (this.eventUpdate && !this.gameOver) {
       this.ctx.clearRect(0, 0, this.width, this.height);
       this.background.draw();
-      this.drawGrid();
+      if (this.debug) this.drawGrid();
       this.gameObject.forEach((object) => {
         object.draw();
         object.update();

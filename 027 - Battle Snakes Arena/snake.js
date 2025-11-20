@@ -10,10 +10,18 @@ class Snake {
     this.height = this.game.cellSize;
     this.moving = true;
     this.score = 0;
-    this.length = 2;
+    this.length = 3;
     this.segments = [];
+    for (let i = 0; i < this.length; i++) {
+      this.x += this.speedX;
+      this.y += this.speedY;
+      this.segments.unshift({ x: this.x, y: this.y, frameX: 0, frameY: 0 });
+    }
     this.readyToTurn = true;
     this.name = name;
+    this.image = document.getElementById('snake_corgi');
+    this.spriteWidth = 200;
+    this.spriteHeight = 200;
   }
   update() {
     this.readyToTurn = true;
@@ -36,7 +44,7 @@ class Snake {
     if (this.moving) {
       this.x += this.speedX;
       this.y += this.speedY;
-      this.segments.unshift({ x: this.x, y: this.y });
+      this.segments.unshift({ x: this.x, y: this.y, frameX: 0, frameY: 0 });
       if (this.segments.length > this.length) {
         this.segments.pop();
       }
@@ -49,9 +57,24 @@ class Snake {
   }
   draw() {
     this.segments.forEach((segment, i) => {
-      if (i === 0) this.game.ctx.fillStyle = 'goldenrod';
-      else this.game.ctx.fillStyle = this.color;
-      this.game.ctx.fillRect(
+      if (this.game.debug) {
+        if (i === 0) this.game.ctx.fillStyle = 'goldenrod';
+        else this.game.ctx.fillStyle = this.color;
+        this.game.ctx.fillRect(
+          segment.x * this.game.cellSize,
+          segment.y * this.game.cellSize,
+          this.width,
+          this.height
+        );
+      }
+
+      this.setSpriteFrame(i);
+      this.game.ctx.drawImage(
+        this.image,
+        segment.frameX * this.spriteWidth,
+        segment.frameY * this.spriteHeight,
+        this.spriteWidth,
+        this.spriteHeight,
         segment.x * this.game.cellSize,
         segment.y * this.game.cellSize,
         this.width,
@@ -91,6 +114,70 @@ class Snake {
       this.readyToTurn = false;
     }
   }
+  setSpriteFrame(index) {
+    const segment = this.segments[index];
+    const prevSegment = this.segments[index - 1] || 0;
+    const nextSegment = this.segments[index + 1] || 0;
+
+    if (index === 0) {
+      // head
+      if (segment.y < nextSegment.y) {
+        // up
+        segment.frameX = 1;
+        segment.frameY = 2;
+      } else if (segment.y > nextSegment.y) {
+        //down
+        segment.frameX = 0;
+        segment.frameY = 4;
+      } else if (segment.x < nextSegment.x) {
+        // left
+        segment.frameX = 0;
+        segment.frameY = 0;
+      } else if (segment.x > nextSegment.x) {
+        // right
+        segment.frameX = 2;
+        segment.frameY = 1;
+      }
+    } else if (index === this.segments.length - 1) {
+      // tail
+      if (prevSegment.y < segment.y) {
+        // up
+        segment.frameX = 1;
+        segment.frameY = 4;
+      } else if (prevSegment.y > segment.y) {
+        //down
+        segment.frameX = 0;
+        segment.frameY = 2;
+      } else if (prevSegment.x < segment.y) {
+        // left
+        segment.frameX = 2;
+        segment.frameY = 0;
+      } else if (prevSegment > segment.x) {
+        // right
+        segment.frameX = 0;
+        segment.frameY = 1;
+      }
+    } else {
+      // body
+      if (nextSegment.x < segment.x && prevSegment.x > segment.x) {
+        // horizontal right
+        segment.frameX = 5;
+        segment.frameY = 3;
+      } else if (prevSegment.x < segment.x && nextSegment.x > segment.x) {
+        // horizontal left
+        segment.frameX = 5;
+        segment.frameY = 2;
+      } else if (prevSegment.y < segment.y && nextSegment.y > segment.y) {
+        // vertical up
+        segment.frameX = 1;
+        segment.frameY = 3;
+      } else if (nextSegment.y < segment.y && prevSegment.y > segment.y) {
+        // vertical down
+        segment.frameX = 0;
+        segment.frameY = 3;
+      }
+    }
+  }
 }
 
 class Keyboard1 extends Snake {
@@ -98,10 +185,10 @@ class Keyboard1 extends Snake {
     super(game, x, y, speedX, speedY, color, name);
 
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowUp' || e.key === 'w') this.turnUp();
-      else if (e.key === 'ArrowDown' || e.key === 's') this.turnDown();
-      else if (e.key === 'ArrowLeft' || e.key === 'a') this.turnLeft();
-      else if (e.key === 'ArrowRight' || e.key === 'd') this.turnRight();
+      if (e.key === 'ArrowUp') this.turnUp();
+      else if (e.key === 'ArrowDown') this.turnDown();
+      else if (e.key === 'ArrowLeft') this.turnLeft();
+      else if (e.key === 'ArrowRight') this.turnRight();
     });
   }
 }
