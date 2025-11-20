@@ -36,6 +36,8 @@ body {
     width: 300px;
     display: flex;
     justify-content: space-around;
+    margin: 0 auto;
+    margin-block-end: 4px;
 }
 
 #buttons button {
@@ -60,12 +62,12 @@ body {
 }
 
 #scoreScreen {
-    margin-block-start: 6px;
     width: 300px;
     padding: 5px;
     display: flex;
     justify-content: space-between;
     column-gap: 25px;
+    margin: 0 auto;
 }
 
 #scoreScreen > div {
@@ -103,12 +105,29 @@ select {
     }
 }
 
+input {
+    background: linear-gradient(to right, #111 50%, #111 50%, gray);
+    background-size: 200% 100%;
+    background-position: 100%;
+    color: white;
+    border: none;
+    outline: none;
+    padding: 2px 4px;
+    margin-block-start: 4px;
+    transition: .25s;
+
+    &:is(:focus, :focus-within) {
+        background-position-x: 20%;
+        outline: 1px solid rgba(255, 255, 255, 0.4);
+    }
+}
+
 .assets {
     display: none;
 }
 
 #gameMenu {
-    display: none;
+    display: block;
 }
 
 #gameOverScreen {
@@ -118,4 +137,15 @@ select {
     height: 100%;
     background-repeat: no-repeat;
     background-size: cover;
+}
+
+#message1 {
+    font-size: 30px;
+    text-align: center;
+    text-wrap: pretty;
+}
+
+#message2 {
+    font-size: 20px;
+    text-align: center;
 }

@@ -13,13 +13,15 @@ class Snake {
     this.length = 3;
     this.segments = [];
     for (let i = 0; i < this.length; i++) {
-      this.x += this.speedX;
-      this.y += this.speedY;
+      if (i > 0) {
+        this.x += this.speedX;
+        this.y += this.speedY;
+      }
       this.segments.unshift({ x: this.x, y: this.y, frameX: 0, frameY: 0 });
     }
     this.readyToTurn = true;
     this.name = name;
-    this.image = document.getElementById('snake_corgi');
+    this.image = document.getElementById('void_wolf');
     this.spriteWidth = 200;
     this.spriteHeight = 200;
   }
@@ -52,7 +54,7 @@ class Snake {
 
     // win condition
     if (this.score >= this.game.winningScore) {
-      this.game.gameUi.triggerGameOver();
+      this.game.gameUi.triggerGameOver(this);
     }
   }
   draw() {
@@ -123,20 +125,30 @@ class Snake {
       // head
       if (segment.y < nextSegment.y) {
         // up
-        segment.frameX = 1;
-        segment.frameY = 2;
+        if (this.game.food.y === segment.y - 1 && this.game.food.x === segment.x) {
+          segment.frameX = 7;
+          segment.frameY = 1;
+        } else {
+          segment.frameX = 1;
+          segment.frameY = 2;
+        }
       } else if (segment.y > nextSegment.y) {
         //down
-        segment.frameX = 0;
-        segment.frameY = 4;
+        if (this.game.food.y === segment.y + 1 && this.game.food.x === segment.x) {
+          segment.frameX = 7;
+          segment.frameY = 3;
+        } else {
+          segment.frameX = 0;
+          segment.frameY = 4;
+        }
       } else if (segment.x < nextSegment.x) {
         // left
-        segment.frameX = 0;
-        segment.frameY = 0;
+        segment.frameX = 4;
+        segment.frameY = 2;
       } else if (segment.x > nextSegment.x) {
         // right
-        segment.frameX = 2;
-        segment.frameY = 1;
+        segment.frameX = 6;
+        segment.frameY = 3;
       }
     } else if (index === this.segments.length - 1) {
       // tail
@@ -148,11 +160,11 @@ class Snake {
         //down
         segment.frameX = 0;
         segment.frameY = 2;
-      } else if (prevSegment.x < segment.y) {
+      } else if (prevSegment.x < segment.x) {
         // left
         segment.frameX = 2;
         segment.frameY = 0;
-      } else if (prevSegment > segment.x) {
+      } else if (prevSegment.x > segment.x) {
         // right
         segment.frameX = 0;
         segment.frameY = 1;
@@ -175,6 +187,45 @@ class Snake {
         // vertical down
         segment.frameX = 0;
         segment.frameY = 3;
+      }
+      // bend
+      else if (prevSegment.x < segment.x && nextSegment.y > segment.y) {
+        // up left
+        segment.frameX = 4;
+        segment.frameY = 0;
+      } else if (prevSegment.y > segment.y && nextSegment.x > segment.x) {
+        // left down
+        segment.frameX = 3;
+        segment.frameY = 0;
+      } else if (prevSegment.x > segment.x && nextSegment.y < segment.y) {
+        // down right
+        segment.frameX = 3;
+        segment.frameY = 1;
+      } else if (prevSegment.y < segment.y && nextSegment.x < segment.x) {
+        // right up
+        segment.frameX = 4;
+        segment.frameY = 1;
+      }
+      // bend clock wise
+      else if (nextSegment.x < segment.x && prevSegment.y > segment.y) {
+        // right down
+        segment.frameX = 3;
+        segment.frameY = 2;
+      } else if (nextSegment.y < segment.y && prevSegment.x < segment.x) {
+        // down left
+        segment.frameX = 3;
+        segment.frameY = 3;
+      } else if (nextSegment.x > segment.x && prevSegment.y < segment.y) {
+        // left up
+        segment.frameX = 2;
+        segment.frameY = 3;
+      } else if (nextSegment.y > segment.y && prevSegment.x > segment.x) {
+        // up right
+        segment.frameX = 2;
+        segment.frameY = 2;
+      } else {
+        segment.frameX = 6;
+        segment.frameY = 0;
       }
     }
   }
@@ -214,19 +265,26 @@ class ComputerAi extends Snake {
   }
   update() {
     super.update();
-    if (this.turnTimer < this.turnInterval) {
-      this.turnTimer += 1;
-    } else {
-      this.turnTimer = 0;
+    if (
+      (this.x === this.game.food.x && this.speedY === 0) ||
+      (this.y === this.game.food.y && this.speedX === 0)
+    ) {
       this.turn();
-      this.turnInterval = Math.floor(Math.random() * 8) + 1;
+    } else {
+      if (this.turnTimer < this.turnInterval) {
+        this.turnTimer += 1;
+      } else {
+        this.turn();
+        this.turnInterval = Math.floor(Math.random() * 8) + 5;
+      }
     }
   }
   turn() {
+    this.turnTimer = 0;
     if (this.speedY === 0) {
-      Math.random() < 0.5 ? this.turnUp() : this.turnDown();
+      this.game.food.y < this.y ? this.turnUp() : this.turnDown();
     } else if (this.speedX === 0) {
-      Math.random() < 0.5 ? this.turnLeft() : this.turnRight();
+      this.game.food.x < this.x ? this.turnLeft() : this.turnRight();
     }
   }
 }
