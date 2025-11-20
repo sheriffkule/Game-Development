@@ -31,52 +31,87 @@
         <div id="message1">Welcome to the battle arena!</div>
         <div id="message2">Choose your fighters!</div>
         <div id="playerChoice">
-          <div class="player1">
-            <p class="playerLabel">Player 1</p>
-            <label for="player1controls">Controls:</label>
-            <select name="player1controls" id="player1controls">
-              <option value="arrows">Keyboard Arrows</option>
-              <option value="ai">Computer AI</option>
+          <div class="player1 player">
+            <label for="player1character">Player 1:</label>
+            <select name="player1character" id="player1character">
+              <option value="snake_corgi">Snake Corgi</option>
+              <option value="spectral_schnoodle">Spectral Schnoodle</option>
+              <option value="void_wolf">Void Wolf</option>
+              <option value="sticky_saberhound" selected>Sticky Saberhound</option>
             </select>
             <div>
               <label for="player1name">Name: </label>
               <input type="text" id="player1name" value="P1" />
             </div>
-          </div>
-          <div class="player2">
-            <p class="playerLabel">Player 2</p>
-            <label for="player2controls">Controls:</label>
-            <select name="player2controls" id="player2controls">
+            <label for="player1controls">Controls:</label>
+            <select name="player1controls" id="player1controls">
+              <option value="arrows">Keyboard Arrows</option>
               <option value="ai">Computer AI</option>
-              <option value="wsad">Keyboard WSAD</option>
+            </select>
+          </div>
+
+          <div class="player2 player">
+            <label for="player2character">Player 2:</label>
+            <select name="player2character" id="player2character">
+              <option value="snake_corgi">Snake Corgi</option>
+              <option value="spectral_schnoodle">Spectral Schnoodle</option>
+              <option value="void_wolf" selected>Void Wolf</option>
+              <option value="sticky_saberhound">Sticky Saberhound</option>
             </select>
             <div>
               <label for="player2name">Name: </label>
               <input type="text" id="player2name" value="Danger Noodle" />
             </div>
-          </div>
-          <div class="player3">
-            <p class="playerLabel">Player 3</p>
-            <label for="player3controls">Controls:</label>
-            <select name="player3controls" id="player3controls">
+            <label for="player2controls">Controls:</label>
+            <select name="player2controls" id="player2controls">
               <option value="ai">Computer AI</option>
+              <option value="wsad">Keyboard WSAD</option>
+            </select>
+          </div>
+
+          <div class="player3 player">
+            <label for="player3character">Player 3:</label>
+            <select name="player3character" id="player3character">
+              <option value="snake_corgi">Snake Corgi</option>
+              <option value="spectral_schnoodle" selected>Spectral Schnoodle</option>
+              <option value="void_wolf">Void Wolf</option>
+              <option value="sticky_saberhound">Sticky Saberhound</option>
             </select>
             <div>
               <label for="player3name">Name: </label>
               <input type="text" id="player3name" value="Ekans" />
             </div>
-          </div>
-          <div class="player4">
-            <p class="playerLabel">Player 4</p>
-            <label for="player4controls">Controls:</label>
-            <select name="player4controls" id="player4controls">
+            <label for="player3controls">Controls:</label>
+            <select name="player3controls" id="player3controls">
               <option value="ai">Computer AI</option>
+            </select>
+          </div>
+
+          <div class="player4 player">
+            <label for="player4character">Player 4:</label>
+            <select name="player4character" id="player4character">
+              <option value="snake_corgi">Snake Corgi</option>
+              <option value="spectral_schnoodle">Spectral Schnoodle</option>
+              <option value="void_wolf">Void Wolf</option>
+              <option value="sticky_saberhound">Sticky Saberhound</option>
             </select>
             <div>
               <label for="player4name">Name: </label>
               <input type="text" id="player4name" value="Nagini" />
             </div>
+            <label for="player4controls">Controls:</label>
+            <select name="player4controls" id="player4controls">
+              <option value="ai">Computer AI</option>
+            </select>
           </div>
+        </div>
+        <div class="ai_difficulty">
+          <label for="ai_difficulty">Difficulty:</label>
+          <select name="ai_difficulty" id="ai_difficulty">
+            <option value="40">Slow Noodles</option>
+            <option value="15" selected>Challengers</option>
+            <option value="1">Ultimate Hunger</option>
+          </select>
         </div>
       </div>
     </div>
@@ -84,10 +119,13 @@
     <div class="assets">
       <!-- <img src="assets/forest_margin_repeat.png" id="forest_margin_repeat" /> -->
       <img src="assets/forest_margin_repeat_1600x600.png" id="forest_margin_repeat" />
-      <!-- <img src="assets/magic_berry1.png" id="magic_berry1"> -->
-      <img src="assets/snake_corgi.png" alt="" id="snake_corgi">
-      <img src="assets/mushroom_sprite.png" id="mushroom_sprite">
-      <img src="assets/void_wolf.png" id="void_wolf">
+      <img src="assets/magic_berry1.png" id="magic_berry1" />
+      <img src="assets/snake_corgi.png" alt="" id="snake_corgi" />
+      <img src="assets/mushroom_sprite.png" id="mushroom_sprite" />
+      <img src="assets/food.png" id="food" />
+      <img src="assets/void_wolf.png" id="void_wolf" />
+      <img src="assets/sticky_saberhound.png" id="sticky_saberhound" />
+      <img src="assets/spectral_schnoodle.png" id="spectral_schnoodle" />
     </div>
 
     <script src="background.js"></script>

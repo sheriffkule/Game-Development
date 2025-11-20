@@ -75,13 +75,18 @@ body {
     row-gap: 6px;
 }
 
-#playerChoice {
+#playerChoice,
+.ai_difficulty {
     padding: 5px 10px;
 }
 
-.playerLabel {
-    margin-block-start: 10px;
-    font-size: 20px;
+.player {
+    border-top: 1px solid grey;
+    padding-block: 4px;
+}
+
+.player:last-child {
+    border-bottom: 1px solid grey;
 }
 
 select {

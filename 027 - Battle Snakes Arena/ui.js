@@ -33,6 +33,11 @@ class Ui {
     this.player2name = document.getElementById('player2name');
     this.player3name = document.getElementById('player3name');
     this.player4name = document.getElementById('player4name');
+    // character
+    this.player1character = document.getElementById('player1character');
+    this.player2character = document.getElementById('player2character');
+    this.player3character = document.getElementById('player3character');
+    this.player4character = document.getElementById('player4character');
     // messages
     this.message1 = document.getElementById('message1');
     this.message2 = document.getElementById('message2');
@@ -48,7 +53,7 @@ class Ui {
     this.gameOverUi();
     if (winner) {
       this.message1.innerText = winner.name + ' wins!';
-      this.message2.innerText = 'Winning score ' + winner.score;
+      this.message2.innerText = 'Game time ' + this.game.formatTimer() + ' seconds!';
     } else {
       this.message1.innerText = 'Welcome to the battle arena!';
       this.message1.innerText = 'Choose your fighters!';
