@@ -109,25 +109,42 @@
           <label for="ai_difficulty">Difficulty:</label>
           <select name="ai_difficulty" id="ai_difficulty">
             <option value="40">Slow Noodles</option>
-            <option value="15" selected>Challengers</option>
-            <option value="1">Ultimate Hunger</option>
+            <option value="20" selected>Challengers</option>
+            <option value="3">Ultimate Hunger</option>
           </select>
         </div>
       </div>
     </div>
 
+    <canvas id="canvas2"></canvas>
+
     <div class="assets">
       <!-- <img src="assets/forest_margin_repeat.png" id="forest_margin_repeat" /> -->
       <img src="assets/forest_margin_repeat_1600x600.png" id="forest_margin_repeat" />
+      <!-- food -->
       <img src="assets/magic_berry1.png" id="magic_berry1" />
       <img src="assets/snake_corgi.png" alt="" id="snake_corgi" />
       <img src="assets/mushroom_sprite.png" id="mushroom_sprite" />
       <img src="assets/food.png" id="food" />
+      <!-- snakes -->
       <img src="assets/void_wolf.png" id="void_wolf" />
       <img src="assets/sticky_saberhound.png" id="sticky_saberhound" />
       <img src="assets/spectral_schnoodle.png" id="spectral_schnoodle" />
+      <!-- sounds -->
+       <audio id="bite1" src="assets/bite1.mp3"></audio>
+       <audio id="bite2" src="assets/bite2.mp3"></audio>
+       <audio id="bite3" src="assets/bite3.mp3"></audio>
+       <audio id="bite4" src="assets/bite4.mp3"></audio>
+       <audio id="bite5" src="assets/bite5.mp3"></audio>
+       <audio id="bad_food" src="assets/bad_food.mp3"></audio>
+       <audio id="start" src="assets/start.mp3"></audio>
+       <audio id="restart" src="assets/restart.mp3"></audio>
+       <audio id="win" src="assets/win.mp3"></audio>
+       <audio id="button" src="assets/button.mp3"></audio>
     </div>
 
+    <script src="sounds.js"></script>
+    <script src="particles.js"></script>
     <script src="background.js"></script>
     <script src="ui.js"></script>
     <script src="food.js"></script>

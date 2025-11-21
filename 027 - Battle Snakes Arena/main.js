@@ -1,7 +1,9 @@
 class Game {
-  constructor(canvas, context) {
+  constructor(canvas, context, canvas2, context2) {
     this.canvas = canvas;
     this.ctx = context;
+    this.canvas2 = canvas2;
+    this.ctx2 = context2;
     this.width;
     this.height;
     this.cellSize = 80;
@@ -15,7 +17,7 @@ class Game {
     this.timer = 0;
 
     this.gameOver = true;
-    this.winningScore = 20;
+    this.winningScore = 2;
 
     this.player1;
     this.player2;
@@ -26,6 +28,11 @@ class Game {
     this.gameObject;
     this.debug = false;
     this.gameUi = new Ui(this);
+    this.sound = new AudioControl();
+
+    this.particles = [];
+    this.numberOfParticles = 50;
+    this.createParticlePool();
 
     window.addEventListener('keyup', (e) => {
       if (e.key === '-') this.toggleFullScreen();
@@ -43,6 +50,12 @@ class Game {
     this.ctx.fillStyle = 'orange';
     this.ctx.font = '30px Bungee';
     this.ctx.textBaseline = 'top';
+
+    this.canvas2.width = this.canvas.width;
+    this.canvas2.height = this.canvas.height;
+    this.ctx2.fillStyle = 'gold';
+    this.ctx2.lineWidth = 2;
+
     this.width = this.canvas.width;
     this.height = this.canvas.height;
     this.columns = Math.floor(this.width / this.cellSize);
@@ -80,7 +93,9 @@ class Game {
   start() {
     if (!this.gameOver) {
       this.gameUi.triggerGameOver();
+      this.sound.play(this.sound.restart);
     } else {
+      this.sound.play(this.sound.start);
       this.gameOver = false;
       this.timer = 0;
       this.gameUi.gameplayUi();
@@ -122,6 +137,23 @@ class Game {
       this.eventUpdate = true;
     }
   }
+  createParticlePool() {
+    for (let i = 0; i < this.numberOfParticles; i++) {
+      this.particles.push(new Particle(this));
+    }
+  }
+  getParticle() {
+    for (let i = 0; i < this.particles.length; i++) {
+      if (this.particles[i].free) return this.particles[i];
+    }
+  }
+  handleParticles() {
+    this.ctx2.clearRect(0, 0, this.width, this.height);
+    for (let i = 0; i < this.particles.length; i++) {
+      this.particles[i].update();
+      this.particles[i].draw();
+    }
+  }
   render(deltaTime) {
     this.handlePeriodicEvents(deltaTime);
     if (!this.gameOver) this.timer += deltaTime;
@@ -135,6 +167,7 @@ class Game {
       });
       this.gameUi.update();
     }
+    this.handleParticles();
   }
 }
 
@@ -144,7 +177,12 @@ window.addEventListener('load', function () {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 
-  const game = new Game(canvas, ctx);
+  const canvas2 = document.getElementById('canvas2');
+  const ctx2 = canvas2.getContext('2d');
+  canvas2.width = window.innerWidth;
+  canvas2.height = window.innerHeight;
+
+  const game = new Game(canvas, ctx, canvas2, ctx2);
 
   let lastTime = 0;
   function animate(timeStamps) {
