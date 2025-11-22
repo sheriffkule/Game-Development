@@ -1,0 +1,36 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: darkolivegreen;
+}
+
+#controls {
+    display: flex;
+    justify-content: space-around;
+    padding: 10px;
+    margin-block-start: 20px;
+}
+
+#controls > button {
+    padding: 5px 10px;
+}
+
+canvas {
+    background: blue;
+    position: relative;
+    left: 50%;
+    top: 10px;
+    translate: -50% 0;
+    height: 320px;
+    width: 320px;
+    image-rendering: crisp-edges;
+    image-rendering: pixelated;
+}
+
+img {
+    display: none;
+}
