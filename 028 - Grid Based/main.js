@@ -13,6 +13,15 @@ window.addEventListener('load', function () {
   ctx.font = '18px "Press Start 2P"';
   ctx.textBaseline = 'top';
 
+  canvas.addEventListener('click', () => {
+    if (GAME.gameOver) {
+      resetGame();
+      GAME.loop = setInterval(animate, 250);
+    }
+  });
+
+  resetGame();
+
   function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -26,7 +35,9 @@ window.addEventListener('load', function () {
       ctx.textAlign = 'center';
       ctx.fillStyle = 'black';
       ctx.font = '40px "Press Start 2P"';
-      ctx.fillText('GAME OVER!', GAME.width * 0.5, GAME.height * 0.6, GAME.width * 0.95);
+      ctx.fillText('GAME OVER!', GAME.width * 0.5, GAME.height * 0.4, GAME.width * 0.95);
+      ctx.font = '18px "Press Start 2P"';
+      ctx.fillText('Click here to restart!!', GAME.width * 0.5, GAME.height * 0.4 + 60, GAME.width * 0.95);
       clearInterval(GAME.loop);
     }
   }
