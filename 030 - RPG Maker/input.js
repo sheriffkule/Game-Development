@@ -1,7 +1,7 @@
-const LEFT = 'LEFT';
-const RIGHT = 'RIGHT';
-const UP = 'UP';
-const DOWN = 'DOWN';
+export const LEFT = 'LEFT';
+export const RIGHT = 'RIGHT';
+export const UP = 'UP';
+export const DOWN = 'DOWN';
 
 export class Input {
   constructor() {
@@ -40,5 +40,8 @@ export class Input {
     const index = this.keys.indexOf(key);
     if (index === -1) return;
     this.keys.splice(index, 1);
+  }
+  get lastKey() {
+    return this.keys[0];
   }
 }

@@ -1,6 +1,6 @@
-import { Hero } from "./hero.js";
-import { Input } from "./input.js";
-import { World } from "./world.js";
+import { Hero } from './hero.js';
+import { Input } from './input.js';
+import { World } from './world.js';
 
 export const TILE_SIZE = 32;
 export const COLS = 15;
@@ -9,19 +9,44 @@ const GAME_WIDTH = TILE_SIZE * COLS;
 const GAME_HEIGHT = TILE_SIZE * ROWS;
 
 window.addEventListener('load', function () {
-  /** @type {HTMLCanvasElement} */
   const canvas = document.getElementById('canvas1');
   const ctx = canvas.getContext('2d');
   canvas.width = GAME_WIDTH;
   canvas.height = GAME_HEIGHT;
 
-  const world = new World()
-  world.drawGrid(ctx)
+  class Game {
+    constructor() {
+      this.world = new World();
+      this.hero = new Hero({
+        game: this,
+        sprite: {
+          image: document.getElementById('hero1'),
+          x: 0,
+          y: 0,
+          width: 64,
+          height: 64,
+          image: '',
+        },
+        position: { x: 1 * TILE_SIZE, y: 2 * TILE_SIZE },
+      });
+      this.input = new Input();
+    }
+    render() {
+      this.hero.update();
 
-  const hero = new Hero({
-    position: {x: 2, y: 2}
-  })
-  hero.draw(ctx)
+      this.world.drawBackground(ctx);
+      this.world.drawGrid(ctx);
+      this.hero.draw(ctx);
+      this.world.drawForeground(ctx);
+    }
+  }
 
-  const input = new Input();
+  const game = new Game();
+
+  function animate() {
+    requestAnimationFrame(animate);
+    // ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+    game.render(ctx);
+  }
+  this.requestAnimationFrame(animate);
 });
