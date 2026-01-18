@@ -1,5 +1,4 @@
 body {
-    background-color: black;
     background-image: url('images/bg.png');
     margin: 0;
     padding: 0;
@@ -13,7 +12,7 @@ aside {
     position: fixed;
     height: 100vh;
     left: 100%;
-    margin-left: -250px;
+    margin-left: -240px;
     background-color: #ddd;
     border-left: 5px solid #bbb;
     padding: 20px;
@@ -37,6 +36,7 @@ aside {
     height: 32px;
     background-image: url('images/body0.png');
     background-position: 64px 0;
+    margin-top: 14px;
 }
 
 .character .head {
@@ -209,7 +209,7 @@ aside ul {
     background-position: 0 -96px;
     margin-top: -3px;
     margin-left: 4px;
-    animation: headbob3 0.74x infinite;
+    animation: headbob3 0.75s infinite;
 }
 
 .character.walkRight .body {
@@ -273,11 +273,13 @@ aside ul {
 .track {
     border-style: solid;
     border-collapse: separate;
+    display: table;
     border-width: 16px;
     -moz-border-image: url('images/outer.png') 14 15 14 16 repeat;
     -webkit-border-image: url('images/outer.png') 14 15 14 16 repeat;
     -o-border-image: url('images/outer.png') 14 15 14 16 repeat;
     border-image: url('images/outer.png') 14 15 14 16 repeat;
+    background-image: url('images/mud.png');
     position: absolute;
     height: 80vh;
     width: 80vw;
@@ -290,13 +292,12 @@ aside ul {
     border-image: url('images/inner.png');
     border-image-slice: 16 16 16 16 fill;
     border-image-width: 16px 16px 16px 16px;
-    border-image-outset: 0 0 0 0;
+    border-image-outset: 0px 0px 0px 0px;
     border-image-repeat: round round;
     border-collapse: separate;
     margin-top: 15vh;
     margin-left: 10vw;
     display: table;
-    border: 1px solid transparent;
     background-color: green;
     width: 60vw;
     height: 50vh;
@@ -304,4 +305,385 @@ aside ul {
 
 .horse {
     background-image: url('images/horse2.png');
+}
+
+.horse.runLeft {
+    width: 96px;
+    height: 60px;
+    display: block;
+    background-position: 0 -256px;
+    animation: horseLeft steps(1) 0.5s infinite;
+}
+
+@keyframes horseLeft {
+    from, to {
+        background-position: 0 -256px;
+    }
+    50% {
+        background-position: 0 -450px;
+    }
+}
+
+.horse.runRight {
+    width: 96px;
+    height: 60px;
+    display: block;
+    background-position: 0 -320px;
+    animation: horseRight steps(1) 0.5s infinite;
+}
+
+@keyframes horseRight {
+    from, to {
+        background-position: 0 -320px;
+    }
+    50% {
+        background-position: 0 -512px;
+    }
+}
+
+.horse.runDown {
+    width: 48px;
+    height: 64px;
+    background-position: 48px 192px;
+    animation: horseDown steps(1) 0.75s infinite;
+}
+
+@keyframes horseDown {
+    from, to {
+        background-position: 48px -192px;
+    }
+    33% {
+        background-position: 48px -380px;
+    }
+    66% {
+        background-position: 48px 0;
+    }
+}
+
+.horse.runUp {
+    width: 48px;
+    height: 64px;
+    background-position: 0 192px;
+    animation: horseUp steps(1) infinite;
+}
+
+@keyframes horseUp {
+    from, to {
+        background-position: 0 -192px;
+    }
+    33% {
+        background-position: 0 -380px;
+    }
+    66% {
+        background-position: 0 0;
+    }
+}
+
+#startline {
+    width: 2vw;
+    height: 15vh;
+    background-color: #eee;
+    background-image: linear-gradient(45deg, black 25%, transparent 25%, transparent 75%, black 75%, black),
+    linear-gradient(-45deg, black 25%, transparent 25%, transparent 75%, black 75%, black);
+    background-size: 1vw 1vw;
+    position: absolute;
+    margin-left: 20vw;
+    opacity: 0.7;
+}
+
+#horse1 {
+    position: absolute;
+    top: 4vh;
+    z-index: 999;
+}
+
+#horse4 .rider .head {
+    background-image: url('images/head2.png');
+}
+
+#horse4 .rider .body {
+    background-image: url('images/body3.png');
+}
+
+#horse3 .rider .head {
+    background-image: url('images/head1.png');
+}
+
+#horse3 .rider .body {
+    background-image: url('images/body1.png');
+}
+
+#horse2 .rider .head {
+    background-image: url('images/head4.png');
+}
+
+#horse2 .rider .body {
+    background-image: url('images/body4.png');
+}
+
+#horse2 {
+    position: absolute;
+    top: 8vh;
+    z-index: 999;
+    background-image: url('images/horse3.png');
+}
+
+#horse3 {
+    position: absolute;
+    top: 12vh;
+    z-index: 999;
+    background-image: url('images/horse1.png');
+}
+
+#horse4 {
+    position: absolute;
+    top: 16vh;
+    z-index: 999;
+    background-image: url('images/horse4.png');
+}
+
+.horse {
+    left: 20vw;
+}
+
+.horse.standLeft {
+    background-position: 0 -64px;
+    width: 96px;
+    height: 60px;
+}
+
+.horse.standLeft .rider .body {
+    background-position: -32px -320px;
+}
+
+.horse.standLeft .rider .head {
+    background-position: 0 -32px;
+}
+
+.horse.standRight {
+    background-position: 0 -128px;
+    width: 96px;
+    height: 60px;
+}
+
+.horse.standRight .rider {
+    margin-left: -15px;
+}
+
+.horse.standRight .rider .body {
+    background-position: -96px -320px;
+}
+
+.horse.standRight .rider .head {
+    background-position: 0 -96px;
+}
+
+.horse .rider .head {
+    position: absolute;
+    margin-left: 40px;
+    margin-top: -16px;
+    background-image: url('images/head0.png');
+    width: 32px;
+    height: 32px;
+}
+
+.horse .rider .body {
+    background-image: url('images/body0.png');
+    width: 32px;
+    height: 32px;
+    margin-left: 40px;
+    margin-top: 8px;
+}
+
+.horse:is(.runDown, .runRight, .runLeft) .rider {
+    animation: riderBob1 0.75s infinite;
+}
+
+.horse.runLeft .rider .body {
+    background-position: -32px -320px;
+}
+
+.horse.runRight .rider {
+    margin-left: -15px;
+}
+
+.horse.runRight .rider .head {
+    background-position: 0 -96px;
+    animation: headbob4 0.5s infinite;
+}
+
+.horse.runRight .rider .body {
+    background-position: -96px -320px;
+}
+
+.horse.runDown,
+.horse.runUp {
+    margin-left: 32px;
+}
+
+.horse.runDown .rider {
+    margin-left: -32px;
+}
+
+.horse.runDown .rider .head {
+    background-position: 0 -64px;
+    animation: headbob5 .5s infinite;
+}
+
+.horse.runDown .rider .body {
+    background-position: -64px -320px;
+    margin-top: -16px;
+}
+
+.horse.runUp .rider {
+    margin-left: -32px;
+    animation: riderBob2 0.75s infinite;
+}
+
+.horse.runUp .rider .head {
+    background-position: 0 0;
+    animation: headbob5 0.5s infinite;
+}
+
+.horse.runUp .rider .body {
+    background-position: 0 -320px;
+    margin-top: -16px;
+}
+
+.horse.runLeft .rider .head {
+    background-position: 0 -32px;
+    animation: headbob4 0.5s infinite;
+}
+
+@keyframes headbob4 {
+    from, to {
+        margin-left: 40px;
+    }
+    50% {
+        margin-left: 42px;
+    }
+}
+
+@keyframes headbob5 {
+    from, to {
+        margin-top: -10px;
+    }
+    50% {
+        margin-top: -8px;
+    }
+}
+
+@keyframes riderBob1 {
+    from, to {
+        margin-top: 8px;
+    }
+    50% {
+        margin-top: 10px;
+    }
+}
+
+@keyframes riderBob2 {
+    from, to {
+        margin-top: 18px;
+    }
+    50% {
+        margin-top: 20px;
+    }
+}
+
+#start {
+    float: right;
+    margin: 1vw;
+    padding: 1vw;
+    background: #cf142b;
+    border-radius: 28px;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #fff;
+    font-size: 20px;
+    padding: 10px 20px;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 2px 2px 2px #333;
+    transition: 0.15s;
+
+    &:hover {
+        color: orange;
+    }
+    &:active {
+        scale: 0.99;
+    }
+}
+
+#start:disabled {
+    background: gray;
+}
+
+#bet,
+#results {
+    background-color: #ffefb4;
+    padding: 1vw;
+    width: 20vw;
+    border: 2px solid #555;
+    border-radius: 20px;
+    margin-top: 5vh;
+    margin-left: 2vw;
+    overflow: auto;
+    float: left;
+}
+
+#funds {
+    font-weight: bold;
+}
+
+#funds::before {
+    content: '$ ';
+}
+
+label, input, select {
+    float: left;
+    display: block;
+    width: 8vw;
+    margin-bottom: 0.5vh;
+    padding: 6px 4px;
+    font-size: 16px;
+    border: none;
+
+    &:focus {
+        background: #eee;
+        outline: 1px solid #555;
+    }
+}
+
+label {
+    clear: left;
+}
+
+#results {
+    width: auto;
+    position: absolute;
+    margin-top: 8vh;
+    margin-left: 48vw;
+}
+
+#results td {
+    height: 30px;
+    width: 30px;
+    background-repeat: no-repeat;
+    background-position: 0 -64px;
+}
+
+#results .horse1 {
+    background-image: url('images/head0.png');
+}
+
+#results .horse2 {
+    background-image: url('images/head4.png');
+}
+
+#results .horse3 {
+    background-image: url('images/head1.png');
+}
+
+#results .horse4 {
+    background-image: url('images/head2.png');
 }

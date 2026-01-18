@@ -60,7 +60,7 @@ class Horse {
     let horse = this;
     setTimeout(() => {
       horse.x--;
-      horse.element.style = horse.x + 'vw';
+      horse.element.style.left = horse.x + 'vw';
       if (horse.x > 12.5 - horse.number * 2.5) {
         horse.moveLeft();
       } else {
@@ -75,14 +75,14 @@ class Horse {
     let horse = this;
     setTimeout(() => {
       horse.y--;
-      horse.element.style = horse.y + 'vh';
+      horse.element.style.top = horse.y + 'vh';
       if (horse.y > horse.originalY) {
         horse.speed = Math.random() * 10 + 10;
         horse.moveUp();
       } else {
         horse.element.className = 'horse runRight';
         horse.lap++;
-        horse.moveRight;
+        horse.moveRight();
       }
     }, 1000 / this.speed);
   }
@@ -108,9 +108,9 @@ class Horse {
 
     // Win horse
     if (results.length === 1) {
-      // If win horse is the bet horse, then add the fund
+      // If win horse is the bet horse, then add 5 times the fund
       if (this.number === bethorse) {
-        funds += amount;
+        funds += amount * 5;
       } else {
         funds -= amount;
       }
@@ -131,9 +131,9 @@ let amount;
 // Start the function when the document is loaded
 document.addEventListener('DOMContentLoaded', function (event) {
   let horse1 = new Horse('horse1', 20, 4);
-  let horse2 = new Horse('horse1', 20, 8);
-  let horse3 = new Horse('horse1', 20, 12);
-  let horse4 = new Horse('horse1', 20, 16);
+  let horse2 = new Horse('horse2', 20, 8);
+  let horse3 = new Horse('horse3', 20, 12);
+  let horse4 = new Horse('horse4', 20, 16);
 
   // Event listener to the start button
   document.getElementById('start').onclick = function () {
@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', function (event) {
     } else {
       // started the game
       this.disabled = true; // Disable the start button
-      let tds = document.querySelector('#results .result'); // Get all cells of result table
+      let tds = document.querySelectorAll('#results .result'); // Get all cells of result table
       for (let i = 0; i < tds.length; i++) {
         tds[i].className = 'result'; // Reset results
       }
