@@ -95,3 +95,213 @@ aside ul {
 .bodies li {
     background-position: 64px 0;
 }
+
+#body0 {
+    background-image: url('images/body0.png');
+}
+
+#body1 {
+    background-image: url('images/body1.png');
+}
+
+#body2 {
+    background-image: url('images/body2.png');
+}
+
+#body3 {
+    background-image: url('images/body3.png');
+}
+
+#body4 {
+    background-image: url('images/body4.png');
+}
+
+.tree {
+    float: right;
+    margin-top: 2vh;
+    margin-right: 5vw;
+}
+
+#opponent {
+    left: 500px;
+    top: 500px;
+}
+
+#opponent .body {
+    background-image: url('images/body1.png');
+}
+
+#opponent .head {
+    background-image: url('images/head1.png');
+}
+
+.character.standUp .head {
+    background-position: 0 0;
+}
+
+.character.standDown .head {
+    background-position: 0 -64px;
+}
+
+.character.standLeft .head {
+    background-position: 0 -32px;
+}
+
+.character.standRight .head {
+    background-position: 0 -96px;
+}
+
+.character.standUp .body {
+    background-position: 0 0;
+}
+
+.character.standDown .body {
+    background-position: -64px 0;
+}
+
+.character.standLeft .body {
+    background-position: -32px 0;
+}
+
+.character.standRight .body {
+    background-position: -96px 0;
+}
+
+.character.walkUp .head {
+    background-position: 0 0;
+    animation: headbob 0.5s infinite;
+}
+
+.character.walkUp .body {
+    animation: walkup 1s steps(3) infinite;
+}
+
+.character.walkDown .head {
+    background-position: 0 -64px;
+    animation: headbob 0.75s infinite;
+}
+
+.character.walkDown .body {
+    animation: walkdown 1s steps(3) infinite;
+}
+
+.character.walkLeft .head {
+    background-position: 0 -32px;
+    margin-top: -3px;
+    margin-left: -2px;
+    animation: headbob2 0.75s infinite;
+}
+
+.character.walkLeft .body {
+    animation: walkleft 1s steps(3px) infinite;
+}
+
+@keyframes walkleft {
+    from, to {
+        background-position: -32px -32px;
+    }
+    50% {
+        background-position: -32px -128px;
+    }
+}
+
+.character.walkRight .head {
+    background-position: 0 -96px;
+    margin-top: -3px;
+    margin-left: 4px;
+    animation: headbob3 0.74x infinite;
+}
+
+.character.walkRight .body {
+    animation: walkright 1s steps(3) infinite;
+}
+
+@keyframes walkright {
+    from, to {
+        background-position: -96px -32px;
+    }
+    50% {
+        background-position: -96px -128px;
+    }
+}
+
+@keyframes walkup {
+    from, to {
+        background-position: 0 -32px;
+    }
+    50% {
+        background-position: 0 -128px;
+    }
+}
+
+@keyframes walkdown {
+    from, to {
+        background-position: -64px -32px;
+    }
+    50% {
+        background-position: -64px -128px;
+    }
+}
+
+@keyframes headbob {
+    from, to {
+        margin-top: 0;
+    }
+    50% {
+        margin-top: 1px;
+    }
+}
+
+@keyframes headbob2 {
+    from, to {
+        margin-left: -2px;
+    }
+    50% {
+        margin-left: 0;
+    }
+}
+
+@keyframes headbob3 {
+    from, to {
+        margin-left: 2px;
+    }
+    50% {
+        margin-left: 0;
+    }
+}
+
+.track {
+    border-style: solid;
+    border-collapse: separate;
+    border-width: 16px;
+    -moz-border-image: url('images/outer.png') 14 15 14 16 repeat;
+    -webkit-border-image: url('images/outer.png') 14 15 14 16 repeat;
+    -o-border-image: url('images/outer.png') 14 15 14 16 repeat;
+    border-image: url('images/outer.png') 14 15 14 16 repeat;
+    position: absolute;
+    height: 80vh;
+    width: 80vw;
+    margin: 5vw;
+    margin-top: 5vh;
+}
+
+.track .inner {
+    background-image: url('images/bg.png');
+    border-image: url('images/inner.png');
+    border-image-slice: 16 16 16 16 fill;
+    border-image-width: 16px 16px 16px 16px;
+    border-image-outset: 0 0 0 0;
+    border-image-repeat: round round;
+    border-collapse: separate;
+    margin-top: 15vh;
+    margin-left: 10vw;
+    display: table;
+    border: 1px solid transparent;
+    background-color: green;
+    width: 60vw;
+    height: 50vh;
+}
+
+.horse {
+    background-image: url('images/horse2.png');
+}

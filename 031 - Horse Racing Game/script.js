@@ -1,15 +1,17 @@
-// Create a JS Object for a horse with 3 parameters: HTML, ID, position x and y
-function Horse(id, x, y) {
-  this.element = document.getElementById(id); // html element of the horse
-  this.speed = Math.random() * 10 + 10; // random speed for each horse
-  this.originalX = x; // original x position
-  this.originalY = y; // original y position
-  this.x = x;
-  this.y = y;
-  this.number = parseInt(id.replace(/[\D]/g, '')); // number of horse (1,2,3,4)
-  this.lap = 0; // current lap of the horse
+// Create a JS class for a horse with 3 parameters: HTML, ID, position x and y
+class Horse {
+  constructor(id, x, y) {
+    this.element = document.getElementById(id); // html element of the horse
+    this.speed = Math.random() * 10 + 10; // random speed for each horse
+    this.originalX = x; // original x position
+    this.originalY = y; // original y position
+    this.x = x;
+    this.y = y;
+    this.number = parseInt(id.replace(/[\D]/g, '')); // number of horse (1,2,3,4)
+    this.lap = 0; // current lap of the horse
+  }
 
-  this.moveRight = function () {
+  moveRight() {
     let horse = this; // assign horse to this object
 
     // use setTimeout to have delay in moving the horse
@@ -36,10 +38,10 @@ function Horse(id, x, y) {
         }
       }
     }, 1000 / this.speed);
-  };
+  }
 
   // Do the same for moveDown, moveLeft, moveUp
-  this.moveDown = function () {
+  moveDown() {
     let horse = this;
     setTimeout(function () {
       horse.y++;
@@ -52,8 +54,9 @@ function Horse(id, x, y) {
         horse.moveLeft();
       }
     }, 1000 / this.speed);
-  };
-  this.moveLeft = function () {
+  }
+
+  moveLeft() {
     let horse = this;
     setTimeout(() => {
       horse.x--;
@@ -66,8 +69,9 @@ function Horse(id, x, y) {
         horse.moveUp();
       }
     }, 1000 / this.speed);
-  };
-  this.moveUp = function () {
+  }
+
+  moveUp() {
     let horse = this;
     setTimeout(() => {
       horse.y--;
@@ -81,16 +85,93 @@ function Horse(id, x, y) {
         horse.moveRight;
       }
     }, 1000 / this.speed);
-  };
+  }
 
   // Trigger the horse by run
-  this.run = function () {
+  run() {
     this.element.className = 'horse runRight';
     this.moveRight();
-  };
-  this.arrive = function () {
+  }
+
+  arrive() {
     // Stop the horse run by change class to standRight
     this.element.className = 'horse standRight';
     this.lap = 0; // Reset the lap
-  };
+
+    // Show the results
+    let tds = document.querySelectorAll('#results .result'); // Get all table cells to display the result
+    // results.length is the current arrive position
+    tds[results.length].className = 'result horse' + this.number;
+
+    // Push the horse number to results array, according to the results array, we know the orter of race results
+    results.push(this.number);
+
+    // Win horse
+    if (results.length === 1) {
+      // If win horse is the bet horse, then add the fund
+      if (this.number === bethorse) {
+        funds += amount;
+      } else {
+        funds -= amount;
+      }
+      document.getElementById('funds').innerText = funds;
+    } else if (results.length === 4) {
+      // All horse arrived, enable again the start button
+      document.getElementById('start').disabled = false;
+    }
+  }
 }
+
+let num_lap = 1;
+let results = [];
+let funds = 100;
+let bethorse;
+let amount;
+
+// Start the function when the document is loaded
+document.addEventListener('DOMContentLoaded', function (event) {
+  let horse1 = new Horse('horse1', 20, 4);
+  let horse2 = new Horse('horse1', 20, 8);
+  let horse3 = new Horse('horse1', 20, 12);
+  let horse4 = new Horse('horse1', 20, 16);
+
+  // Event listener to the start button
+  document.getElementById('start').onclick = function () {
+    amount = parseInt(document.getElementById('amount').value);
+
+    // Check for negative or zero amount
+    if (amount <= 0) {
+      alert('Please enter a positive bet amount!');
+      return;
+    }
+
+    // Check for invalid amount (not a number)
+    if (isNaN(amount)) {
+      alert('Please enter a valid bet amount!');
+      return;
+    }
+
+    num_lap = parseInt(document.getElementById('num_lap').value);
+    bethorse = parseInt(document.getElementById('bethorse').value);
+
+    if (funds < amount) {
+      alert('Not enough funds!');
+    } else if (num_lap <= 0) {
+      alert('Number of lap must be greater than 0!');
+    } else {
+      // started the game
+      this.disabled = true; // Disable the start button
+      let tds = document.querySelector('#results .result'); // Get all cells of result table
+      for (let i = 0; i < tds.length; i++) {
+        tds[i].className = 'result'; // Reset results
+      }
+
+      document.getElementById('funds').innerText = funds;
+      results = []; // Results array is to save the horse number s when the race is finished
+      horse1.run();
+      horse2.run();
+      horse3.run();
+      horse4.run();
+    }
+  };
+});
