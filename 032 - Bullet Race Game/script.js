@@ -18,154 +18,154 @@ Util.getRandomInt = function (min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
-function Obstacle(lanes, laneNo) {
-  let _this = this;
-  this._init = function () {
+class Obstacle {
+  constructor(lanes, laneNo) {
     this.element = document.createElement('img');
     this.laneNo = laneNo;
     this.lanes = lanes;
     this.element.className = 'obstacle';
     this.element.setAttribute('src', 'images/obstacle.png');
-    this.lane[laneNo].appendChild(this.element);
+    this.lanes[laneNo].appendChild(this.element);
     this.dynamicMarginTop = 1;
-  };
-
-  this._init();
+  }
 }
 
-function ObstacleManager(lanes, car) {
-  let _this = this;
-  this._init = function () {
+class ObstacleManager {
+  constructor(lanes, car) {
     this.lanes = lanes;
     this.car = car;
     this.obstacles = [];
-  };
+  }
 
-  this.generateObstacles = function () {
-    _this.obstacleGeneratorId = setInterval(_this._generateObstacle, OBSTACLE_APPEARANCE_GAP);
-  };
+  generateObstacles() {
+    this.obstacleGeneratorId = setInterval(this._generateObstacle.bind(this), OBSTACLE_APPEARANCE_GAP);
+  }
 
-  this._generateObstacle = function () {
-    if (_this.obstacles.length < 3) {
-      let laneNo;
-      laneNo = Util().getRandomInt(0, _this.lanes.length - 1);
-      let obstacle = new Obstacle(_this.lanes, laneNo);
-      _this.obstacles.push(obstacle);
-
+  _generateObstacle() {
+    if (this.obstacles.length < 3) {
+      let laneNo = Util.getRandomInt(0, this.lanes.length - 1);
+      let obstacle = new Obstacle(this.lanes, laneNo);
+      this.obstacles.push(obstacle);
       return obstacle;
     }
-  };
+  }
 
-  this.refreshObstacles = function () {
+  refreshObstacles() {
     let updateObstacles = [];
-    for (let i = 0; i < _this.obstacles.length; i++) {
-      _this.obstacles[i].element.style.top = _this.obstacles[i].dynamicMarginTop + 'px';
-      if (!(parseInt(_this.obstacles[i].element.style.top) > NFS_HEIGHT - CAR_BOTTOM)) {
-        _this.obstacles[i].dynamicMarginTop += PX_DX;
-        updateObstacles.push(_this.obstacles[i]);
+    for (let i = 0; i < this.obstacles.length; i++) {
+      this.obstacles[i].element.style.top = this.obstacles[i].dynamicMarginTop + 'px';
+      if (!(parseInt(this.obstacles[i].element.style.top) > NFS_HEIGHT - CAR_BOTTOM)) {
+        this.obstacles[i].dynamicMarginTop += PX_DX;
+        updateObstacles.push(this.obstacles[i]);
       } else {
-        _this.obstacles[i].element.parentElement.removeChild(_this.obstacles[i].element);
-        for (let j = 0; j < _this.obstacles.length; j++) {
-          if (_this.obstacles[j].element.parentElement === _this.obstacles[i].element.parentElement) {
-            _this.obstacles[j].element.style.top =
-              _this.obstacles[j].dynamicMarginTop + OBSTACLE_HEIGHT + 'px';
+        // Obstacle passed - award 10 points
+        if (window.nfs) {
+          window.nfs.addScore(10);
+        }
+        this.obstacles[i].element.parentElement.removeChild(this.obstacles[i].element);
+        for (let j = 0; j < this.obstacles.length; j++) {
+          if (this.obstacles[j].element.parentElement === this.obstacles[i].element.parentElement) {
+            this.obstacles[j].element.style.top = this.obstacles[j].dynamicMarginTop + OBSTACLE_HEIGHT + 'px';
           }
         }
       }
     }
-    _this.obstacles = updateObstacles;
-  };
+    this.obstacles = updateObstacles;
+  }
 
-  this.removeObstacle = function (obstacle) {
-    let index = this.obstacle.indexOf(obstacle);
-
+  removeObstacle(obstacle) {
+    let index = this.obstacles.indexOf(obstacle);
     if (index !== -1) {
-      this.obstacles[index].element.parentElement.removeChild(this.obstacles[index].element);
+      // Remove from DOM
+      if (obstacle.element && obstacle.element.parentElement) {
+        obstacle.element.parentElement.removeChild(obstacle.element);
+      }
+      // Remove from array
       this.obstacles.splice(index, 1);
     }
-  };
+  }
 
-  this.getOldestObstacleInLane = function () {
+  getOldestObstacleInLane(bulletLane) {
     let obstacle;
-    for (let i = 0; i < _this.obstacles.length; i++) {
-      if (_this.obstacles[i].laneNo === bulletLane) {
-        if (obstacle === undefined || _this.obstacles[i].dynamicMarginTop > obstacle.dynamicMarginTop) {
-          obstacle = _this.obstacles[i];
+    for (let i = 0; i < this.obstacles.length; i++) {
+      if (this.obstacles[i].laneNo === bulletLane) {
+        if (obstacle === undefined || this.obstacles[i].dynamicMarginTop > obstacle.dynamicMarginTop) {
+          obstacle = this.obstacles[i];
         }
       }
     }
-
     return obstacle;
-  };
+  }
 
-  this.stop = function () {
+  stop() {
     if (this.obstacleGeneratorId) {
       clearInterval(this.obstacleGeneratorId);
       this.obstacleGeneratorId = false;
     }
-  };
-
-  this._init();
+  }
 }
 
-function CollisionHandler(car, obstacleManager) {
-  let _this = this;
-  this._init = function () {
+class CollisionHandler {
+  constructor(car, obstacleManager) {
     this.car = car;
     this.obstacleManager = obstacleManager;
-  };
+  }
 
-  this.checkCollisions = function () {
-    for (let i = 0; i < _this.obstacleManager.obstacles.length; i++) {
-      return _this._checkCollision(_this.obstacleManager.obstacles[i]);
+  checkCollisions() {
+    for (let i = 0; i < this.obstacleManager.obstacles.length; i++) {
+      if (this._checkCollision(this.obstacleManager.obstacles[i])) {
+        return true;
+      }
     }
-  };
+    return false;
+  }
 
-  this._checkCollision = function (obstacle0) {
+  _checkCollision(obstacle0) {
     if (
       obstacle0.dynamicMarginTop + OBSTACLE_HEIGHT > NFS_HEIGHT - CAR_HEIGHT &&
-      obstacle0.laneNo === _this.car.currentLane
+      obstacle0.laneNo === this.car.currentLane
     ) {
       return true;
     }
-  };
+  }
 
-  this.checkShot = function () {
+  checkShot() {
     let bulletLane;
 
-    for (let i = 0; i < _this.obstacleManager.lanes.length; i++) {
-      if (_this.obstacleManager.lanes[i].getElementByClassName('bullets').length > 0) {
+    for (let i = 0; i < this.obstacleManager.lanes.length; i++) {
+      if (this.obstacleManager.lanes[i].getElementsByClassName('bullets').length > 0) {
         bulletLane = i;
         break;
       }
     }
 
-    let oldestObstacleInCurrentLane = obstacleManager.getOldestObstacleInLane(bulletLane);
-    if (oldestObstacleInCurrentLane !== undefined && _this.car.gun.bullets !== undefined) {
+    let oldestObstacleInCurrentLane = this.obstacleManager.getOldestObstacleInLane(bulletLane);
+    if (oldestObstacleInCurrentLane !== undefined && this.car.gun.bullets !== undefined) {
       if (
-        _this.car.gun.dynamicBulletBottom +
+        this.car.gun.dynamicBulletBottom +
           oldestObstacleInCurrentLane.dynamicMarginTop +
           CAR_HEIGHT +
           OBSTACLE_HEIGHT >
         NFS_HEIGHT
       ) {
-        _this.car.gun.stop();
-        _this.car.enableGun();
-        _this.obstacleManager.removeObstacle(oldestObstacleInCurrentLane);
+        // Obstacle destroyed - award 20 points
+        if (window.nfs) {
+          window.nfs.addScore(20);
+        }
+        this.car.gun.stop();
+        this.car.enableGun();
+        this.obstacleManager.removeObstacle(oldestObstacleInCurrentLane);
       }
     }
-    if (_this.car.gun.dynamicBulletBottom + CAR_HEIGHT > NFS_HEIGHT) {
-      _this.car.gun.stop();
-      _this.car.enableGun();
+    if (this.car.gun.dynamicBulletBottom + CAR_HEIGHT > NFS_HEIGHT) {
+      this.car.gun.stop();
+      this.car.enableGun();
     }
-  };
-
-  this._init();
+  }
 }
 
-function Car(currentLane, lanes) {
-  let _this = this;
-  this._init = function () {
+class Car {
+  constructor(currentLane, lanes) {
     this.currentLane = currentLane;
     this.lanes = lanes;
     this.element = document.createElement('img');
@@ -173,64 +173,217 @@ function Car(currentLane, lanes) {
     this.element.setAttribute('src', 'images/car.png');
     this.lanes[this.currentLane].appendChild(this.element);
     this.gun = new Gun(this.lanes);
-  };
+  }
 
-  this._changeLane = function (laneNumber) {
-    if (_this.currentLane !== laneNumber) {
-      _this.lanes[laneNumber].appendChild(_this.element);
+  _changeLane(laneNumber) {
+    if (this.currentLane !== laneNumber) {
+      this.currentLane = laneNumber;
+      this.lanes[laneNumber].appendChild(this.element);
     }
-    if (_this.currentLane > laneNumber) {
-      _this.currentLane--;
-    } else if (_this.currentLane < laneNumber) {
-      _this.currentLane++;
-    }
-  };
+  }
 
-  this._keyNavigation = function (e) {
+  _keyNavigation(e) {
     switch (e.which) {
       case 37:
-        _this._changeLane(_this.currentLane - 1 < 0 ? 0 : _this.currentLane - 1);
+        this._changeLane(this.currentLane - 1 < 0 ? 0 : this.currentLane - 1);
         break;
       case 39:
-        _this._changeLane(
-          _this.currentLane + 1 > _this.lanes.length - 1 ? _this.lanes.length - 1 : _this.currentLane + 1,
+        this._changeLane(
+          this.currentLane + 1 > this.lanes.length - 1 ? this.lanes.length - 1 : this.currentLane + 1,
         );
+        break;
+      case 32:
+        e.preventDefault();
         break;
       default:
         return;
     }
-  };
+  }
 
-  this._fireGunEvent = function (e) {
+  _fireGunEvent(e) {
     switch (e.which) {
       case 32:
-        _this._disableGun();
-        _this.gun.fireBullets(_this.currentLane);
+        e.preventDefault();
+        this._disableGun();
+        this.gun.fireBullets(this.currentLane);
         break;
     }
-  };
+  }
 
-  this.enableGun = function () {
-    document.addEventListener('keyup', this._fireGunEvent, false);
-  };
+  enableGun() {
+    document.addEventListener('keyup', this._fireGunEvent.bind(this), false);
+  }
 
-  this._disableGun = function () {
-    document.removeEventListener('keyup', this._fireGunEvent, false);
-  };
+  _disableGun() {
+    document.removeEventListener('keyup', this._fireGunEvent.bind(this), false);
+  }
 
-  this._initEvents = function () {
-    document.addEventListener('keydown', this._keyNavigation, false);
+  _initEvents() {
+    document.addEventListener('keydown', this._keyNavigation.bind(this), false);
     this.enableGun();
-  };
+  }
 
-  this._removeEvents = function () {
-    document.removeEventListener('keydown', this._keyNavigation, false);
+  _removeEvents() {
+    document.removeEventListener('keydown', this._keyNavigation.bind(this), false);
     this._disableGun();
-  };
+  }
 
-  this.stop = function () {
-    _this._removeEvents();
-  };
-
-  this._init();
+  stop() {
+    this._removeEvents();
+  }
 }
+
+class Gun {
+  constructor(lanes) {
+    this.lanes = lanes;
+    this.bullets = undefined;
+    this.bulletId = undefined;
+    this.bulletLane = undefined;
+    this.dynamicBulletBottom = 0;
+  }
+
+  fireBullets(currentLane) {
+    // Only fire if no bullet exists
+    if (this.bullets !== undefined) {
+      return;
+    }
+
+    let bulletElement = document.createElement('img');
+    bulletElement.setAttribute('src', 'images/bullets.png');
+    bulletElement.className = 'bullets';
+    this.lanes[currentLane].appendChild(bulletElement);
+    
+    this.bullets = bulletElement;
+    this.bulletLane = currentLane;
+    this.dynamicBulletBottom = INITIAL_BULLETS_BOTTOM;
+
+    this.bulletId = requestAnimationFrame(this.animateFireBullets.bind(this));
+  }
+
+  animateFireBullets() {
+    if (!this.bullets) return;
+    
+    this.dynamicBulletBottom += PX_DX;
+    this.bullets.style.bottom = this.dynamicBulletBottom + 'px';
+
+    this.bulletId = requestAnimationFrame(this.animateFireBullets.bind(this));
+  }
+
+  stop() {
+    if (this.bulletId) {
+      cancelAnimationFrame(this.bulletId);
+      this.bulletId = undefined;
+    }
+    if (this.bullets && this.bullets.parentElement) {
+      this.bullets.parentElement.removeChild(this.bullets);
+    }
+    this.bullets = undefined;
+    this.bulletLane = undefined;
+    this.dynamicBulletBottom = 0;
+  }
+}
+
+function disableTextSelection() {
+  const style = document.createElement('style');
+  style.innerHTML = 'body {user-select:none}';
+  document.head.appendChild(style);
+}
+
+disableTextSelection();
+
+class NFS {
+  constructor() {
+    this.lanes = document.getElementsByClassName('lane');
+    this.container = document.getElementById('container');
+    this.obstacles = [];
+    this.car = new Car(Util.getRandomInt(0, this.lanes.length - 1), this.lanes);
+    this.obstacleManager = new ObstacleManager(this.lanes, this.car);
+    this.collisionHandler = new CollisionHandler(this.car, this.obstacleManager);
+
+    this.dynamicBackgroundPositionY = 1;
+    this.score = 0;
+    this.roadDistance = 0;
+
+    document.getElementById('toggle').addEventListener('click', () => {
+      if (document.getElementById('toggle').innerHTML === 'Start') {
+        this.score = 0;
+        this.roadDistance = 0;
+        this.addScore(0); // Reset display
+        this.obstacleManager.generateObstacles();
+        this.play();
+        this.car._initEvents();
+        this._startTime();
+        document.getElementById('toggle').innerHTML = 'Pause';
+      } else if (document.getElementById('toggle').innerHTML === 'Pause') {
+        this.stop();
+        document.getElementById('toggle').innerHTML = 'Start';
+      }
+    });
+  }
+
+  _startTime() {
+    this.timeId = setInterval(function () {
+      GAME_TIME++;
+    }, 1000);
+  }
+
+  _stopTime() {
+    if (this.timeId) {
+      clearInterval(this.timeId);
+      this.timeId = false;
+    }
+  }
+
+  addScore(points) {
+    this.score += points;
+    document.getElementById('score').innerText = this.score;
+  }
+
+  play() {
+    this.dynamicBackgroundPositionY += PX_DX;
+    this.container.style.backgroundPositionY = this.dynamicBackgroundPositionY + 'px';
+
+    // Track road distance for scoring (1 point per 2000px)
+    this.roadDistance += PX_DX;
+    if (this.roadDistance >= 2000) {
+      this.addScore(1);
+      this.roadDistance = 0;
+    }
+
+    this.obstacleManager.refreshObstacles();
+
+    if (GAME_TIME % GAME_TIME_DX === 0) {
+      PX_DX += PX_DX_DX;
+      OBSTACLE_APPEARANCE_GAP -= OBSTACLE_APPEARANCE_DX;
+    }
+
+    this.playId = window.requestAnimationFrame(this.play.bind(this));
+
+    if (this.collisionHandler.checkCollisions()) {
+      this.gameOver();
+    }
+
+    this.collisionHandler.checkShot();
+  }
+
+  gameOver() {
+    let gameOver = document.createElement('div');
+    gameOver.className = 'game-over';
+    gameOver.innerHTML = `GAME OVER<br>Your Score: ${this.score}`;
+    this.container.appendChild(gameOver);
+    this.stop();
+    if (confirm('GameOver! Restart Game Y/N')) {
+      window.location = 'index.html';
+    }
+  }
+
+  stop() {
+    this.obstacleManager.stop();
+    window.cancelAnimationFrame(this.playId);
+    this.car.stop();
+    this._stopTime();
+  }
+}
+
+let nfs = new NFS();
+window.nfs = nfs;
