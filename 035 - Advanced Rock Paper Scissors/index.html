@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Advanced Rock Paper Scissors</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Advanced Rock Paper Scissors</h1>
+        <p class="subtitle">Test your luck and strategy in this classic game with a modern twist!</p>
+      </header>
+
+      <div class="game-area">
+        <div class="player-section">
+          <h2 class="section-title">You</h2>
+          <div class="choice-display" id="player-choice">
+            <i class="fas fa-question"></i>
+          </div>
+          <div class="score" id="player-score">0</div>
+        </div>
+
+        <div class="computer-section">
+          <h2 class="section-title">Computer</h2>
+          <div class="choice-display" id="computer-choice">
+            <i class="fas fa-question"></i>
+          </div>
+          <div class="score" id="computer-score">0</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="choice-btn rock" data-choice="rock">
+          <i class="fas fa-hand-rock"></i>
+        </button>
+        <button class="choice-btn paper" data-choice="paper">
+          <i class="fas fa-hand-paper"></i>
+        </button>
+        <button class="choice-btn scissors" data-choice="scissors">
+          <i class="fas fa-hand-scissors"></i>
+        </button>
+      </div>
+
+      <div class="result-section">
+        <div id="result-text">Make your move to start the game!</div>
+        <div class="game-stats">
+          <div class="stat">
+            <div class="stat-value" id="games-played">0</div>
+            <div class="stat-label">Games Played</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="win-rate">0%</div>
+            <div class="stat-label">Win Rate</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="current-streak">0</div>
+            <div class="stat-label">Current Streak</div>
+          </div>
+        </div>
+        <div class="action-buttons">
+          <button class="action-btn" id="reset-btn">Reset Game</button>
+          <button class="action-btn" id="auto-play-btn">Auto Play</button>
+        </div>
+      </div>
+
+      <div class="rules-section">
+        <h2 class="rules-title">Game Rules</h2>
+        <ul class="rules-list">
+          <li><i class="fas fa-hand-rock"></i> Rock crushes Scissors</li>
+          <li><i class="fas fa-hand-paper"></i> Paper covers Rock</li>
+          <li><i class="fas fa-hand-scissors"></i> Scissors cut Paper</li>
+          <li><i class="fas fa-trophy"></i> First to reach 10 points wins the match!</li>
+        </ul>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
