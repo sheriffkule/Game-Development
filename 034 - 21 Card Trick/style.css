@@ -1,6 +1,6 @@
 :root {
-    --card-w: 64px;
-    --card-h: 92px;
+    --card-w: 128px;
+    --card-h: 184px;
     --gap: 10px;
 }
 
@@ -62,7 +62,7 @@ h1 {
     border-radius: 8px;
     backface-visibility: hidden;
     font-weight: 700;
-    font-size: 14px;
+    font-size: 44px;
     border: 1px solid #0006;
 }
 
@@ -105,4 +105,21 @@ button {
         opacity: 0.5;
         cursor: not-allowed;
     }
+}
+
+#result {
+    margin-top: 14px;
+    font-size: 20px;
+    color: #9ef1b2;
+    min-height: 28px;
+}
+
+#restart {
+    display: none;
+    margin-top: 12px;
+}
+
+.highlight {
+    box-shadow: 0 0 10px 4px #f0c000;
+    border: 2px solid #f0c000;
 }
