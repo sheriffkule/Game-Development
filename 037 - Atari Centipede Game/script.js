@@ -258,9 +258,132 @@
           ) {
             seg.y += CELL_H; // drive
             // leave direction the same
+          } else {
+            seg.x += cent.dir * s;
+            const hitEdge = seg.x < 0 || seg.x > W - SEG_SIZE;
+            const hitMushroom =
+              gridR >= 0 &&
+              gridR < GRID_ROWS &&
+              girdC >= 0 &&
+              girdC < GRID_COLS &&
+              mushrooms[gridR][girdC].hp > 0;
+            if (hitEdge || hitMushroom) {
+              seg.y += CELL_H;
+              cent.dir *= -1;
+              seg.x = Math.max(0, Math.min(W - SEG_SIZE, seg.x));
+            }
           }
+        } else {
+          const prev = cont.segments[i - 1];
+          const dx = prev.x - seg.x;
+          const dy = prev.y - seg.y;
+          seg.x += dx * 0.25;
+          seg.y += dy * 0.25;
         }
       }
     });
+
+    // bullets collisions
+    for (let bi = bullets.length - 1; bi >= 0; bi--) {
+      const b = bullets[bi];
+      // bullet <-> centipede
+      let hit = false;
+      for (let ci = centipedes.length - 1; ci >= 0 && !hit; ci--) {
+        const cent = centipedes[ci];
+        for (let si = 0; si < cent.segments.length; si++) {
+          const seg = cent.segments[si];
+          const segRect = { x: seg.x, y: seg.y, w: SEG_SIZE, h: SEG_SIZE };
+          if (rectIntersect(b, segRect)) {
+            bullets.splice(bi, 1);
+            // spawn mushroom in the cell
+            const gc = Math.floor(seg.x / CELL_W);
+            const gr = Math.floor(seg.y / CELL_H);
+            if (gr >= 0 && gr < GRID_ROWS && gc >= 0 && gc < GRID_COLS) {
+              mushrooms[gr][gc].hp = Math.min(3, (mushrooms[gr][gc].hp || 0) + 2);
+            }
+            // scoring: head = 100, body = 10
+            awardScore(si === 0 ? 100 : 10);
+            // split centipede
+            const before = cent.segments.slice(0, si);
+            const after = cent.segments.slice(si + 1).map((s) => ({ x: s.x, y: s.y }));
+            const newCents = [];
+            if (before.length > 0) newCents.push({ segments: before, dir: cent.dir, speed: cent.speed });
+            if (after.length > 0) newCents.push({ segments: after, dir: cent.dir, speed: cent.speed });
+            centipedes.splice(ci, 1, ...newCents);
+            hit = true;
+            break;
+          }
+        }
+      }
+      if (hit) continue;
+
+      // bullet <-> spider
+      if (spider.active) {
+        const spiderRect = { x: spider.x - 8, y: spider.y - 8, w: 16, h: 16 };
+        if (rectIntersect(b, spiderRect)) {
+          bullets.splice(bi, 1);
+          // spider score based on distance from player
+          const dist = Math.abs(spider.x - player.x);
+          const pts = dist < W / 3 ? 900 : dist < (2 * W) / 3 ? 600 : 300;
+          awardScore(pts);
+          spider.active = false;
+          continue;
+        }
+      }
+
+      // bullet <-> flea
+      if (flea.active) {
+        const fleaRect = { x: flea.x - 8, y: flea.y - 8, w: 16, h: 16 };
+        if (rectIntersect(b, fleaRect)) {
+          bullets.splice(bi, 1);
+          awardScore(200);
+          flea.active = false;
+          continue;
+        }
+      }
+
+      // bullet <-> scorpion
+      if (scorpion.active) {
+        const scRect = { x: scorpion.x - 8, y: scorpion.y - 8, w: 16, h: 16 };
+        if (rectIntersect(b, scRect)) {
+          bullets.splice(bi, 1);
+          awardScore(1000);
+          scorpion.active = false;
+          continue;
+        }
+      }
+
+      // bullet <-> mushroom
+      const gc = Math.floor(b.x / CELL_W);
+      const gr = Math.floor(b.y / CELL_H);
+      if (gr >= 0 && gr < GRID_ROWS && gc >= 0 && gc < GRID_COLS && mushrooms[gr][gc].hp > 0) {
+        mushrooms[gr][gc].hp--;
+        bullets.splice(br, 1);
+        awardScore(10);
+      }
+    }
+
+    // bullets cleaned above
+    // Update spider/flea/scorpion
+    updateSpider(dt);
+    updateFlea(dt);
+    updateScorpion(dt);
+
+    // move spider/flea/scorpion spawn timers
+    nextSpiderSpawn -= dt;
+    nextFleaSpawn -= dt;
+    nextScorpionSpawn -= dt;
+    if (nextSpiderSpawn <= 0 && !spider.active) {
+      spawnSpider();
+      nextSpiderSpawn = Math.random() * 12000 + 8000;
+    }
+    if (nextFleaSpawn <= 0 && !flea.active) {
+      spawnFlea();
+      nextFleaSpawn = Math.random() * 15000 + 10000;
+    }
+    if (nextScorpionSpawn <= 0 && !scorpion.active) {
+      spawnScorpion();
+      nextScorpionSpawn = Math.random() * 18000 + 15000;
+    }
   }
 };
