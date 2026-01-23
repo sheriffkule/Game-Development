@@ -19,14 +19,20 @@ canvas {
     background: #000;
     display: block;
     border: 3px solid #083;
-    margin: 10px auto;
+    margin: 20px auto;
     image-rendering: pixelated;
 }
 
 .controls {
     font-size: 12px;
     opacity: .85;
-    margin-top: 8px;
+    margin-block: 20px;
+    max-width: 800px;
+    padding-inline-start: 40px;
+
+    span {
+        font-size: 26px;
+    }
 }
 
 button {
