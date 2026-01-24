@@ -1,4 +1,4 @@
-() => {
+(() => {
   /** @type {HTMLCanvasElement} */
   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
@@ -43,7 +43,7 @@
   }
 
   function makeEmptyMushrooms() {
-    mushrooms.Array.from({ length: GRID_ROWS }, () =>
+    mushrooms = Array.from({ length: GRID_ROWS }, () =>
       Array.from({ length: GRID_COLS }, () => ({ hp: 0, poison: false })),
     );
   }
@@ -69,7 +69,7 @@
     const prev = score;
     score += amount;
     // Extra life every 12,000
-    if ((prev < nextExtraLife) & (score >= nextExtraLife)) {
+    if ((prev < nextExtraLife) && (score >= nextExtraLife)) {
       lives++;
       nextExtraLife += 12000;
     }
@@ -111,7 +111,7 @@
       if (!paused) requestAnimationFrame(update);
       return;
     }
-    if ((e.code = 'KeyR')) {
+    if ((e.code === 'KeyR')) {
       reset();
       requestAnimationFrame(update);
       return;
@@ -252,8 +252,8 @@
           if (
             gridR >= 0 &&
             gridR < GRID_ROWS &&
-            girdC >= 0 &&
-            girdC < GRID_COLS &&
+            gridC >= 0 &&
+            gridC < GRID_COLS &&
             mushrooms[gridR][gridC].poison
           ) {
             seg.y += CELL_H; // drive
@@ -264,9 +264,9 @@
             const hitMushroom =
               gridR >= 0 &&
               gridR < GRID_ROWS &&
-              girdC >= 0 &&
-              girdC < GRID_COLS &&
-              mushrooms[gridR][girdC].hp > 0;
+              gridC >= 0 &&
+              gridC < GRID_COLS &&
+              mushrooms[gridR][gridC].hp > 0;
             if (hitEdge || hitMushroom) {
               seg.y += CELL_H;
               cent.dir *= -1;
@@ -274,11 +274,15 @@
             }
           }
         } else {
-          const prev = cont.segments[i - 1];
+          const prev = cent.segments[i - 1];
           const dx = prev.x - seg.x;
           const dy = prev.y - seg.y;
           seg.x += dx * 0.25;
           seg.y += dy * 0.25;
+        }
+        // Wrap centipede to top when it exits bottom
+        if (seg.y > H) {
+          seg.y = -SEG_SIZE;
         }
       }
     });
@@ -358,7 +362,7 @@
       const gr = Math.floor(b.y / CELL_H);
       if (gr >= 0 && gr < GRID_ROWS && gc >= 0 && gc < GRID_COLS && mushrooms[gr][gc].hp > 0) {
         mushrooms[gr][gc].hp--;
-        bullets.splice(br, 1);
+        bullets.splice(bi, 1);
         awardScore(10);
       }
     }
@@ -473,4 +477,100 @@
     ctx.fillStyle = '#2a9d2a';
     ctx.fillRect(x + 6, y + 6, 8, 8);
   }
-};
+
+  function drawGrid() {
+    for (let r = 0; r < GRID_ROWS; r++) {
+      for (let c = 0; c < GRID_COLS; c++) {
+        drawMushroomCell(r, c);
+      }
+    }
+  }
+
+  function drawPlayer() {
+    ctx.fillStyle = '#0ff';
+    ctx.fillRect(player.x - 10, player.y - 6, 20, 12);
+    ctx.fillRect(player.x - 2, player.y - 16, 4, 10);
+  }
+
+  function drawBullets() {
+    ctx.fillStyle = '#ff0';
+    bullets.forEach((b) => ctx.fillRect(b.x - 2, b.y, b.w, b.h));
+  }
+
+  function drawCentipedes() {
+    centipedes.forEach((cent) =>
+      cent.segments.forEach((seg, idx) => {
+        ctx.fillStyle = idx === 0 ? '#ff0000' : '#ff66ff';
+        ctx.fillRect(seg.x, seg.y, SEG_SIZE, SEG_SIZE);
+      }),
+    );
+  }
+
+  function drawSpider() {
+    if (!spider.active) return;
+    ctx.fillStyle = '#00ffff';
+    ctx.fillRect(spider.x - 8, spider.y - 8, 16, 16);
+  }
+
+  function drawFlea() {
+    if (!flea.active) return;
+    ctx.fillStyle = '#ff8800';
+    ctx.fillRect(flea.x - 8, flea.y - 8, 16, 16);
+  }
+
+  function drawScorpion() {
+    if (!scorpion.active) return;
+    ctx.fillStyle = '#00aa00';
+    ctx.fillRect(scorpion.x - 8, scorpion.y - 8, 16, 16);
+  }
+
+  function draw() {
+    clear();
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, W, H);
+    drawGrid();
+    drawCentipedes();
+    drawBullets();
+    drawPlayer();
+    drawSpider();
+    drawFlea();
+    drawScorpion();
+    // HUD top-left (green) padded score
+    ctx.fillStyle = '#00ff00';
+    ctx.font = '14px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('Score: ' + score.toString().padStart(8, '0'), 10, 20);
+    ctx.fillText('Lives: ' + lives, 10, 40);
+    ctx.fillText('Level: ' + level, 10, 60);
+    ctx.textAlign = 'start';
+  }
+
+  function drawStart() {
+    clear();
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#00ff00';
+    ctx.font = '28px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('PRESS START / RESTART', W / 2, H / 2 - 20);
+    ctx.font = '14px monospace';
+    ctx.fillText('←→ or A/D to move - Space to shoot - r to restart - P to pause', W / 2, H / 2 + 10);
+    ctx.textAlign = 'start';
+  }
+
+  function drawPaused() {
+    ctx.fillStyle = 'rgba(0,0,0,0.45)';
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#00ff00';
+    ctx.font = '28px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('PAUSED', W / 2, H / 2);
+    ctx.textAlign = 'start';
+  }
+
+  // expose simple debug controls
+  window.__game = { reset, spawnMushrooms, spawnCentipede };
+
+  // initial screen
+  drawStart();
+})();
