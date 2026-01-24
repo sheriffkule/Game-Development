@@ -385,5 +385,92 @@
       spawnScorpion();
       nextScorpionSpawn = Math.random() * 18000 + 15000;
     }
+
+    // centipede collides with player
+    for (const cent of centipedes) {
+      for (const seg of cent.segments) {
+        const segRect = { x: seg.x, y: seg.y, w: SEG_SIZE, h: SEG_SIZE };
+        const playerRect = { x: player.x - 8, y: player.y - 6, w: 16, h: 12 };
+        if (rectIntersect(segRect, playerRect)) {
+          lives--;
+          if (lives <= 0) {
+            running = false;
+          } else {
+            player.x = W / 2;
+            bullets = [];
+          }
+        }
+      }
+    }
+
+    // spider touches player
+    if (spider.active) {
+      const sRect = { x: spider.x - 8, y: spider.y - 8, w: 16, h: 16 };
+      const pRect = { x: player.x - 8, y: player.y - 6, w: 16, h: 12 };
+      if (rectIntersect(sRect, pRect)) {
+        lives--;
+        spider.active = false;
+        if (lives <= 0) running = false;
+      }
+    }
+
+    // flea touches player
+    if (flea.active) {
+      const fRect = { x: flea.x - 8, y: flea.y - 8, w: 16, h: 16 };
+      const pRect = { x: player.x - 8, y: player.y - 6, w: 16, h: 12 };
+      if (rectIntersect(fRect, pRect)) {
+        lives--;
+        flea.active = false;
+        if (lives <= 0) running = false;
+      }
+    }
+
+    // scorpion touches player
+    if (scorpion.active) {
+      const scRect = { x: scorpion.x - 8, y: scorpion.y - 8, w: 16, h: 16 };
+      const pRect = { x: player.x - 8, y: player.y - 6, w: 16, h: 12 };
+      if (rectIntersect(scRect, pRect)) {
+        lives--;
+        scorpion.active = false;
+        if (lives <= 0) running = false;
+      }
+    }
+
+    // check win
+    const totalSegments = centipedes.reduce((acc, c) => acc + c.segments.length, 0);
+    if (totalSegments === 0) {
+      awardScore(1000);
+      nextLevel();
+    }
+
+    draw();
+  }
+
+  // Drawing functions
+  function clear() {
+    ctx.clearRect(0, 0, W, H);
+  }
+
+  function drawMushroomCell(r, c) {
+    const cell = mushrooms[r][c];
+    if (!cell || cell.hp <= 0) return;
+    const x = c * CELL_W + (CELL_W / 2 - 10);
+    const y = r * CELL_H + 8;
+    // cap color depends on hp and poison
+    let capColor = cell.poison
+      ? '#ffffff'
+      : cell.hp === 3
+        ? '#8000ff'
+        : cell.hp === 2
+          ? '#ff66ff'
+          : '#ffd6ff';
+    ctx.fillStyle = capColor;
+    // draw cap - semicircle
+    ctx.beginPath();
+    ctx.arc(x + 10, y + 6, 10, Math.PI, 0);
+    ctx.fill();
+    // stem
+    ctx.fillStyle = '#2a9d2a';
+    ctx.fillRect(x + 6, y + 6, 8, 8);
   }
 };
