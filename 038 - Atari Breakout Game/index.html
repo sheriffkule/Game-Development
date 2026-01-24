@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Atari Breakout</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <a id="soundButton" onclick="muteSound()">
+      <img src="assets/unmute.png" id="soundImg" width="32" height="32" />
+    </a>
+    <span id="gameTitle">ATARI BREAKOUT</span>
+    <img src="assets/information.png" id="infoButton" width="32" height="32" onclick="showInfo()" />
+
+    <div id="canvasDiv">
+      <button id="startButton" onclick="startGame">START</button>
+      <canvas id="gameScreen" width="800" height="400"></canvas>
+
+      <div id="canvasTextScreen">
+        <span id="topTitle"></span>
+        <span id="centerSpan"></span>
+        <span id="bottomMessage"></span>
+      </div>
+    </div>
+
+    <div id="infoDiv">
+      <span id="closeInfo" onclick="showInfo()">&times;</span>
+      <span class="infoTitle">Atari Breakout</span>
+
+      <div id="instructions">
+        <p class="infoTitle" style="font-size: 2rem; left: 0; top: 0">Game Instructions</p>
+        <br />
+        <span>Use your mouse or arrow keys to play.</span>
+        <br />
+        <span>Bounce the ball until you destroy all the blocks without letting it fall.</span>
+      </div>
+    </div>
+
+    <script src="entities.js"></script>
+    <script src="utils.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
