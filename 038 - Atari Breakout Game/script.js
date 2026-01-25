@@ -21,42 +21,44 @@ ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
 let game;
 
-function gameState() {
-  this.blockHitAudio = new Sound('assets/hit-block.wav');
-  this.padHitAudio = new Sound('assets/hit-pad.wav');
-  this.canRestart = false;
-  this.pointsDict = {
-    4: 10,
-    3: 20,
-    2: 30,
-    1: 40,
-    0: 50,
-  };
-  this.timeTicks = 0;
-  this.pause = false;
-  this.gameLevel = 0;
-  this.gamePoints = 0;
-  this.playerLives = 2;
-  this.blocksDestroyed = 0;
-  this.tab = new Tab(WIDTH / 2 - 150 / 2, 350, 150, 10, ctx);
-  this.ball = new Ball(WIDTH / 2 - 8, HEIGHT, 8, 4, ctx);
+class gameState {
+  constructor() {
+    this.blockHitAudio = new Sound('assets/hit-block.wav');
+    this.padHitAudio = new Sound('assets/hit-pad.wav');
+    this.canRestart = false;
+    this.pointsDict = {
+      4: 10,
+      3: 20,
+      2: 30,
+      1: 40,
+      0: 50,
+    };
+    this.timerTicks = 0;
+    this.pause = false;
+    this.gameLevel = 0;
+    this.gamePoints = 0;
+    this.playerLives = 3;
+    this.blocksDestroyed = 0;
+    this.tab = new Tab(WIDTH / 2 - 150 / 2, 350, 150, 10, ctx);
+    this.ball = new Ball(WIDTH / 2 - 8, HEIGHT, 8, 4, ctx);
 
-  this.level0Blocks = generateBlocks(0, ctx);
-  this.level1Blocks = generateBlocks(1, ctx);
-  this.level2Blocks = generateBlocks(2, ctx);
-  this.level3Blocks = generateBlocks(3, ctx);
-  this.level4Blocks = generateBlocks(4, ctx);
-  this.allLevelBlocks = [
-    this.level0Blocks,
-    this.level1Blocks,
-    this.level2Blocks,
-    this.level3Blocks,
-    this.level4Blocks,
-  ];
-  this.ball.ballStart();
-  this.timerId = setInterval(updateGameArea, 1);
+    this.level0Blocks = generateBlocks(0, ctx);
+    this.level1Blocks = generateBlocks(1, ctx);
+    this.level2Blocks = generateBlocks(2, ctx);
+    this.level3Blocks = generateBlocks(3, ctx);
+    this.level4Blocks = generateBlocks(4, ctx);
+    this.allLevelBlocks = [
+      this.level0Blocks,
+      this.level1Blocks,
+      this.level2Blocks,
+      this.level3Blocks,
+      this.level4Blocks,
+    ];
+    this.ball.ballStart();
+    this.timerId = setInterval(updateGameArea, 1);
 
-  canvasTextScreen.style.display = 'none';
+    canvasTextScreen.style.display = 'none';
+  }
 }
 
 function updateGameArea() {
@@ -78,17 +80,17 @@ function updateGameArea() {
       game.ball.ballChangeDirection(detectCollision(game.ball, game.tab));
     }
 
-    let blockThatCollide = detectCollision(game.ball, game.allLevelBlocks);
+    let blockThatCollide = detectBlockCollision(game.ball, game.allLevelBlocks);
     if (blockThatCollide) {
       game.gamePoints += game.pointsDict[blockThatCollide[0]];
-      game.allLevelBlocks[blockThatCollide[0]].splice([blockThatCollide[1]], 1);
+      game.allLevelBlocks[blockThatCollide[0]].splice(blockThatCollide[1], 1);
       game.ball.ballChangeDirection('topCollide');
       if (blockThatCollide[0] < game.ball.level) {
         game.ball.speed = game.ball.levelSpeed[blockThatCollide[0]];
       }
     }
 
-    if (game.playerLives < 0) {
+    if (game.playerLives <= 0) {
       finishGame('GAME OVER');
     }
     if (game.blocksDestroyed >= 45) {
@@ -98,8 +100,21 @@ function updateGameArea() {
 
   ctx.font = '25px Rajdhani';
   ctx.fillStyle = 'white';
-  ctx.fillText(game.playerLives + 1, 20, HEIGHT - 20);
-  ctx.fillText(game.gamePoints, WIDTH - 50, HEIGHT - 20);
+  ctx.fillText('Lives: ' + game.playerLives, 20, HEIGHT - 20);
+  ctx.fillText('Points: ' + game.gamePoints, WIDTH - 120, HEIGHT - 20);
+
+  if (game.pause) {
+    // Draw semi-transparent overlay
+    ctx.fillStyle = 'rgba(0,0,0,0.2)';
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    
+    // Draw "PAUSED" text
+    ctx.font = '50px Rajdhani';
+    ctx.fillStyle = 'white';
+    ctx.textAlign = 'center';
+    ctx.fillText('PAUSED', WIDTH / 2, HEIGHT / 2);
+    ctx.textAlign = 'left';
+  }
 }
 
 document.addEventListener('keydown', controlKeydown);
@@ -110,6 +125,13 @@ canvas.addEventListener('mousemove', (event) => {
 });
 
 function controlKeydown(event) {
+  if (!game) return;
+  
+  // Only allow controls if game is not finished
+  if (game.canRestart) return;
+  
+  event.preventDefault();
+  
   switch (event.keyCode) {
     case 37:
       game.tab.changeTabMovement('left');
@@ -121,6 +143,9 @@ function controlKeydown(event) {
       if (game.canRestart) {
         game = new gameState();
       }
+      break;
+    case 32:
+      game.pause = !game.pause;
       break;
   }
 }

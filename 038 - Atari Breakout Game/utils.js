@@ -29,6 +29,7 @@ function detectCollision(ball, obj2) {
   }
   if (ball.y < 0) {
     game.blockHitAudio.sound.play();
+    return 'topCollide';
   }
 
   if (ball.y > HEIGHT + 10) {
@@ -44,7 +45,7 @@ function detectBlockCollision(ball, blocksArray) {
 
       if (ball.x > block.x && ball.x < block.x + block.width) {
         if (ball.y > block.y && ball.y < block.y + block.height) {
-          game.blockHitAudio.play();
+          game.blockHitAudio.sound.play();
           game.blocksDestroyed++;
 
           return [i, j];
@@ -53,4 +54,57 @@ function detectBlockCollision(ball, blocksArray) {
     }
   }
   return false;
+}
+
+function finishGame(message) {
+  clearInterval(game.timerId);
+  
+  // Draw semi-transparent overlay
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+  
+  canvasTextScreen.style.display = 'block';
+  document.getElementById('topTitle').innerText = message;
+  document.getElementById('centerSpan').innerText = game.gamePoints;
+  document.getElementById('bottomMessage').innerText = 'PRESS ENTER TO PLAY AGAIN';
+  game.canRestart = true;
+}
+
+class Sound {
+  constructor(src) {
+    this.sound = document.createElement('audio');
+    this.sound.src = src;
+    this.sound.setAttribute('preload', 'auto');
+    this.sound.setAttribute('controls', 'none');
+    this.sound.style.display = 'none';
+    this.sound.volume = 0.5;
+    document.body.appendChild(this.sound);
+  }
+
+  play() {
+    this.sound.play();
+  }
+}
+
+function muteSound() {
+  let audios = document.querySelectorAll('audio');
+  for (let i = 0; i < audios.length; i++) {
+    if (muteFlag) {
+      audios[i].muted = false;
+      document.getElementById('soundImg').src = 'assets/unmute.png';
+    } else {
+      audios[i].muted = true;
+      document.getElementById('soundImg').src = 'assets/mute.png';
+    }
+  }
+  muteFlag = !muteFlag;
+}
+
+function showInfo() {
+  if (infoFlag) {
+    document.getElementById('infoDiv').style.display = 'none';
+  } else {
+    document.getElementById('infoDiv').style.display = 'flex';
+  }
+  infoFlag = !infoFlag;
 }
