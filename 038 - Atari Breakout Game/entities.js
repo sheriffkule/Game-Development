@@ -59,4 +59,79 @@ function Ball(x, y, radius, level, ctx) {
     directions = ['rightUp', 'leftYp'];
     this.direction = directions[Math.floor(Math.random() * directions.length)];
   };
+
+  this.ballOver = () => {
+    document.getElementById('topTitle').innerText = '';
+    document.getElementById('centerSpan').innerText = '';
+    document.getElementById('bottomMessage').innerText = '';
+    game.playerLives--;
+    if (game.playerLives >= 0) {
+      game.timerTicks = 0;
+      game.pause = true;
+      let count = 3;
+      let spanElement = document.getElementById('centerSpan');
+      spanElement.innerText = count;
+      let countdownSpan = setInterval(() => {
+        count--;
+        spanElement.innerText = count;
+      }, 750);
+      canvasTextScreen.style.display = 'block';
+      setTimeout(() => {
+        game.pause = false;
+        canvasTextScreen.style.display = 'none';
+        clearInterval(countdownSpan);
+      }, 3000);
+      this.ballStart();
+    }
+  };
+
+  this.ballChangeDirection = (collision) => {
+    if (collision) {
+      revertDirections = {
+        tabCollide: {
+          rightUp: 'rightDown',
+          leftUp: 'leftDown',
+          rightDown: 'rightUp',
+          leftDown: 'leftUp',
+        },
+        wallCollide: {
+          rightUp: 'leftDown',
+          leftUp: 'rightDown',
+          rightDown: 'leftDown',
+          leftDown: 'rightDown',
+        },
+        topCollide: {
+          rightUp: 'rightDown',
+          leftUp: 'leftDown',
+          rightDown: 'rightDown',
+          leftDown: 'leftDown',
+        },
+      };
+
+      this.direction = revertDirections[collision][this.direction];
+    } else {
+      this.direction = this.direction;
+    }
+  };
+
+  this.ballMovement = () => {
+    switch (this.direction) {
+      case 'leftUp':
+        this.x -= this.speed;
+        this.y -= this.speed;
+        break;
+      case 'rightUp':
+        this.x += this.speed;
+        this.y -= this.speed;
+        break;
+      case 'leftDown':
+        this.x -= this.speed;
+        this.y += this.speed;
+        break;
+      case 'rightDown':
+        this.x += this.speed;
+        this.y += this.speed;
+        break;
+    }
+  };
 }

@@ -108,3 +108,24 @@ canvas.addEventListener('mousemove', (event) => {
     game.tab.x = event.offsetX - 75;
   }
 });
+
+function controlKeydown(event) {
+  switch (event.keyCode) {
+    case 37:
+      game.tab.changeTabMovement('left');
+      break;
+    case 39:
+      game.tab.changeTabMovement('right');
+      break;
+    case 13:
+      if (game.canRestart) {
+        game = new gameState();
+      }
+      break;
+  }
+}
+
+function startGame() {
+  canvas.style.display = 'block';
+  game = new gameState();
+}
