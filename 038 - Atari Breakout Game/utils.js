@@ -14,3 +14,43 @@ function generateBlocks(level, ctx) {
   }
   return blocksArray;
 }
+
+function detectCollision(ball, obj2) {
+  if (ball.x > obj2.x && ball.x < obj2.x + obj2.width) {
+    if (ball.y > obj2.y && ball.y < obj2.y + obj2.height) {
+      game.padHitAudio.sound.play();
+      return 'tabCollide';
+    }
+  }
+
+  if (ball.x > WIDTH || ball.x < 0) {
+    game.blockHitAudio.sound.play();
+    return 'wallCollide';
+  }
+  if (ball.y < 0) {
+    game.blockHitAudio.sound.play();
+  }
+
+  if (ball.y > HEIGHT + 10) {
+    ball.ballOver();
+  }
+  return false;
+}
+
+function detectBlockCollision(ball, blocksArray) {
+  for (let i = 0; i < blocksArray.length; i++) {
+    for (let j = 0; j < blocksArray[i].length; j++) {
+      let block = blocksArray[i][j];
+
+      if (ball.x > block.x && ball.x < block.x + block.width) {
+        if (ball.y > block.y && ball.y < block.y + block.height) {
+          game.blockHitAudio.play();
+          game.blocksDestroyed++;
+
+          return [i, j];
+        }
+      }
+    }
+  }
+  return false;
+}
