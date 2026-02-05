@@ -22,11 +22,51 @@ body {
 }
 
 h1 {
+    display: inline-block;
     position: absolute;
     top: 20px;
     color: #fff;
     font-size: 48px;
-    text-shadow: 4px 4px 0px black;
+    text-shadow: 3px 3px 0px black;
+}
+
+.info {
+    position: absolute;
+    bottom: 44px;
+    right: -10px;
+}
+
+.info span {
+    position: absolute;
+    font-size: 20px;
+    border: 1px solid white;
+    border-radius: 50%;
+    padding-inline: 10px;
+    cursor: help;
+}
+
+ul {
+    position: absolute;
+    top: 40px;
+    right: -150px;
+    min-width: 260px;
+    background-color: rgb(255 255 255 / 0.5);
+    list-style: none;
+    padding-inline: 6px;
+    opacity: 0;
+    transition: .2s;
+
+    li {
+        font-size: 14px;
+        min-width: fit-content;
+        text-shadow: none;
+        color: black;
+        font-weight: 400;
+    }
+}
+
+.info span:hover ~ ul {
+    opacity: 1;
 }
 
 main {
@@ -102,3 +142,75 @@ main {
 .current-score {
     font-size: 3.5rem;
 }
+
+.btn {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #444;
+    border: none;
+    font-family: inherit;
+    font-size: 1.8rem;
+    text-transform: uppercase;
+    font-weight: 400;
+    transition: all .2s;
+    background-color: rgb(255 255 255 / 0.6);
+    padding: 0.7rem 2.5rem;
+    border-radius: 50px;
+    box-shadow: 0 1.75rem 3.5rem rgb(0 0 0 / 0.1);
+    cursor: pointer;
+
+    &:hover {
+        background-color: rgb(255 255 255 / 0.7);
+        corner-shape: superellipse(0);
+    }
+}
+
+.btn::first-letter {
+    font-size: 2.4rem;
+    display: inline-block;
+    margin-right: 0.5rem;
+}
+
+.btn-hew {
+    top: 4rem;
+}
+
+.btn-roll {
+    top: 40rem;
+}
+
+.btn-hold {
+    top: 47rem;
+}
+
+.btn:active {
+    transform: translate(-50%, 3px);
+    box-shadow: 0 1rem 2rem rgb(0 0 0 / 0.5);
+}
+
+.btn:focus {
+    outline: none;
+}
+
+.dice {
+    position: absolute;
+    left: 50%;
+    top: 16rem;
+    transform: translateX(-50%);
+    height: 10rem;
+    box-shadow: 0 2rem 5rem rgb(0 0 0 / 0.2);
+}
+
+.player-winner {
+    background-color: #2f2f2f;
+}
+
+.player-winner .name {
+    font-weight: 700;
+    color: #c7365f;
+}
+
+/* .hidden {
+    display: none;
+} */
