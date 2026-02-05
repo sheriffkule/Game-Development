@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Circus Tightrope Game</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="stage">
+      <div id="startScreen">
+        <h1>Circus Tightrope</h1>
+        <p>Balance on the tightrope, jump over flames, and survive as long as you can!</p>
+        <button id="startButton">Start Game</button>
+      </div>
+
+      <canvas id="gameCanvas" width="800" height="500"></canvas>
+      <canvas id="confettiCanvas"></canvas>
+
+      <div id="overlay">LEVEL CLEARED!</div>
+      <div id="hud">Score: <span id="score">0</span> | Level: <span id="level">1</span></div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
