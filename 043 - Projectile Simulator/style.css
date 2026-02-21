@@ -1,0 +1,151 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: olivedrab;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.btns, .inputs {
+    margin: 20px;
+}
+
+input[type="number"] {
+    border-radius: 10px;
+    border: 2px solid #aaa;
+    padding: 6px 12px;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+}
+
+button {
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    color: white;
+    background: royalblue;
+    font-size: 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    letter-spacing: 1px;
+    transition: 0.2s ease-in;
+
+    &:hover {
+        transform: translateY(-2px) scale(1.02);
+        background-color: blue;
+        box-shadow: 0 4px 12px rgb(0 0 0 / 0.25);
+    }
+    &:active {
+        transform: translateY(0) scale(1);
+    }
+}
+
+#reset {
+    background-color: crimson;
+
+    &:hover {
+        filter: saturate(2);
+    }
+}
+
+.control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.board {
+    position: relative;
+    margin: 20px;
+    height: 450px;
+}
+
+.board::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    transform: translateY(50%);
+    width: 100%;
+    height: 2px;
+    background-color: black;
+}
+
+.board::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 100%;
+    background-color: black;
+    z-index: -1;
+}
+
+.x {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    transform: translate(200%, 50%);
+}
+
+.y {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: translate(-50%, -100%);
+}
+
+.y::before {
+    position: absolute;
+    content: '';
+    display: inline-block;
+    width: 0.6em;
+    height: 0.6em;
+    border-right: 0.2em solid black;
+    border-top: 0.2em solid black;
+    transform: rotate(-45deg);
+    left: -1px;
+    bottom: -14px;
+}
+
+.x::before {
+    position: absolute;
+    content: '';
+    display: inline-block;
+    width: 0.6em;
+    height: 0.6em;
+    border-right: 0.2em solid black;
+    border-top: 0.2em solid black;
+    transform: rotate(45deg);
+    left: -23px;
+    bottom: 3px;
+}
+
+#projectile {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background-color: darkred;
+    left: 0;
+    bottom: 0;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+}
+
+.path {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: black;
+    border-radius: 50%;
+    z-index: -1;
+}

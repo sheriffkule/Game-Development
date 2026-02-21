@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Projectile Simulator</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <h1>Projectile Simulator</h1>
+    <div class="control">
+      <div class="inputs">
+        <input type="number" name="velocity" id="velocity" placeholder="Initial Velocity" />
+        <input type="number" name="angle" id="angle" placeholder="Angle" />
+      </div>
+      <div class="btns">
+        <button id="launch">Launch</button>
+        <button id="reset">Reset</button>
+      </div>
+    </div>
+    <div class="board">
+      <span class="x">X</span>
+      <span class="y">Y</span>
+      <div id="projectile"></div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
