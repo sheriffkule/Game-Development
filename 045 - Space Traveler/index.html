@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Space Traveler</title>
+    <script src="script.js"></script>
+    <style>
+      body {
+        background-color: #1c253c;
+      }
+    </style>
+  </head>
+  <body>
+    <div style="text-align: center; color: #ccc">
+      <h1>Space Traveler</h1>
+      <br />
+      Arrow keys (left, right) to change direction. <br />
+      Z key to throttle your spaceship. <br />
+    </div>
+    <div style="position: absolute; left: -3%">
+      <canvas id="c1" width="480" height="352"></canvas>
+      <canvas id="c2" width="480" height="352"></canvas>
+    </div>
+  </body>
+  <script type="text/javascript">
+    let trip = new Ballon(this);
+    addEventListener('keydown', trip.kd);
+    addEventListener('keyup', trip.ku);
+    trip.init();
+    setInterval(trip.tick, 32);
+  </script>
+</html>
