@@ -93,4 +93,125 @@ let Ballon = function (arg) {
     };
     return th;
   };
+
+  let point = function (base) {
+    let th = obj(base);
+    th.v = base.v || sv;
+    th.text = base.text;
+    th.tick = function () {
+      th.y += -1;
+      th.age++;
+      th.tick0();
+      return th.age;
+    };
+    th.isout = function () {
+      return th.age > 30;
+    };
+    return th;
+  };
+
+  let balloon = function (base) {
+    let th = obj(base);
+    th.v = sv;
+    th.active = 1;
+    th.tick = function () {
+      th.age++;
+      th.tick();
+      return th.age;
+    };
+    th.banged = function () {
+      return th.active != 1;
+    };
+    return th;
+  };
+
+  let lightning = function (base) {
+    let th = obj(base);
+    th.type = base.type;
+    th.v = sv;
+    th.tick = function () {
+      th.tick0();
+      th.age++;
+      return th.age;
+    };
+    return th;
+  };
+
+  let player = function (base) {
+    let th = obj(base);
+    th.life = base.life || 1;
+    th.lived = -1e4;
+    th.vx = base.vx || 0;
+    th.vy = base.vy || 1;
+    th.acc = 0;
+    th.forward = 1;
+    th.tick = function () {
+      if (th.checkifdead() >= 3) return th.age;
+      th.age++;
+      if (th.checkifdead() == 0) th.lived++;
+      th.vy += 0.2;
+      if (th.vy > 2.8) th.vy = 2.8;
+      if (in_f > 0) {
+        th.vx += (in_r - in_l) * (th.acc > 4 ? 0.2 : 0.24);
+        if (th.vx > 2.8) th.vx = 2.8;
+        if (th.vx < -2.8) th.vx = -2.8;
+      }
+      if (th.acc < 4) {
+        th.vy -= 0.4;
+      } else if (th.acc < 8 || in_f == 0) {
+        th.vy -= 0.32;
+      }
+      if (th.vy < -2.8) th.vy = -2.8;
+      th.x += th.vx;
+      th.y += th.vy;
+      if (th.x <= th.size / 2) th.x = th.size / 2;
+      if (th.y <= th.size / 2) th.y = th.size / 2;
+      if (th.x > w - th.size / 2) th.x = w - th.size / 2;
+      if (th.x > h - th.size / 2) th.y = h - th.size / 2;
+      th.acc++;
+      return th.age;
+    };
+    th.checkifdead = function () {
+      if (state == 2 && th.age - th.lived >= 60) return 3;
+      if (state == 1 && th.life <= 0) return 1;
+      if (state == 2 && th.age - th.lived < 60) return 2;
+      return 0;
+    };
+    return th;
+  };
+
+  this.init = function () {
+    lighttable = dcd(lighttable0);
+    state = 0;
+    init0();
+  };
+
+  let init0 = function () {
+    light = [];
+    water = [];
+    bg = [];
+    frag = [];
+    bal = [];
+    pt = [];
+    score = bal_cnt = bal_cmb = bal_max = spcnt = 0;
+    bas_rank = 1;
+    randflag = false;
+    level = 1;
+    p = player({ x: w / 2, y: h / 2, vy: -3 });
+    if (loaded == 0) {
+      arg.document.getElementById('c1').style.visibility = 'hidden';
+      for (let i = 0; i < sp_name.length; i++) {
+        sp[i] = new Image();
+        sp[i].src = sp_name[i] + '.gif';
+      }
+      ctx[1].font = '12px Consolas';
+      loaded = 1;
+    }
+    for (let i = 0; i < cnt_bg1; i++) bg[i] = bg1({ x: Math.random() * w, y: Math.random() * h });
+    for (let i = 0; i < w / D + 2; i++) {
+      water[water.length] = lightning({ type: 'W', x: D * i + 8, y: 20.5 * D });
+      water[water.length] = lightning({ type: 'W', x: D * i + 8, y: 21.5 * D });
+    }
+    draw();
+  };
 };
