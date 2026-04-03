@@ -214,4 +214,113 @@ let Ballon = function (arg) {
     }
     draw();
   };
+
+  this.tick = function () {
+    p.tick();
+    if (state == 0) {
+      draw();
+      return;
+    }
+    if (state == 3) return;
+    let pd = p.checkifdead();
+    if (pd == 1) {
+      p.lived = p.age;
+      state = 2;
+    }
+    if (state != 3 && pd == 3) {
+      state = 3;
+      draw();
+      return;
+    }
+    if (randflag) {
+      if (t > 300) {
+        randflag = false;
+        t = 0;
+        return;
+      }
+    } else {
+      let tmp = Math.floor(t / D);
+      if (tmp > lighttable.length - 1) {
+        // randflag = true;
+        t = 0;
+        tmp = 0;
+        // return;
+      }
+      if (spcnt === 0) {
+        let str = lighttable[tmp].split('');
+        for (let i = 0; i < str.length; i++) {
+          if (str[i] == 'L') {
+            light[light.length] = lightning({ type: str[i], x: -D / 2, y: D * i + D / 2 });
+          } else if (str[i] == 'W') {
+            water[water.length] = lightning({ type: str[i], x: -D / 2, y: D * i + D / 2 });
+          } else if (str[i] == 'B') {
+            bal[bal.length] = balloon({ x: -D / 2, y: D * i + D / 2 });
+          }
+        }
+      }
+    }
+    for (let i = 0; i < bal.length; ) {
+      bal[i].tick();
+      if (bal[i].isout()) {
+        bal_cmb = 0;
+      }
+      if (bal[i].isout() || bal[i].banged()) bal.splice(i, 1);
+      else i++;
+    }
+    for (let i = 0; i < light.length; ) {
+      light[i].tick();
+      if (light[i].isout()) light.splice(i, 1);
+      else i++;
+    }
+    for (let i = 0; i < water.length; ) {
+      water[i].tick();
+      if (water[i].isout()) water.splice(i, 1);
+      else i++;
+    }
+    if (state == 1) check_collision();
+    p.checkifdead();
+    if (t % 10 == 1 && bg.length < cnt_bg1) {
+      bg[bg.length] = bg1({ y: Math.random() * h, x: -10 });
+    }
+    for (let i = 0; i < bg.length; ) {
+      bg[i].tick();
+      if (bg[i].isout()) bg.splice(i, 1);
+      else i++;
+    }
+    for (let i = 0; i < frag.length; ) {
+      frag[i].tick();
+      if (frag[i].isout()) frag.splice(i, 1);
+      else i++;
+    }
+    for (let i = 0; i < pt.length; ) {
+      pt[i].tick();
+      if (pt[i].isout()) pt.splice(i, 1);
+      else i++;
+    }
+    t++;
+    if (state == 1 && ++t0 % 13 == 0) score += 10;
+    if (++spcnt == D) spcnt = 0;
+    draw();
+  };
+
+  let check_collision = function () {
+    for (let i = 0; i < light.length; i++) {
+      if (Math.abs(light[i].x - p.x) < 8 && Math.abs(light[i].y - p.y) < 8 && --p.life < 0) break;
+    }
+    for (let i = 0; i < water.length; i++) {
+      if (Math.abs(water[i].x - p.x) < 8 && Math.abs(water[i].y - p.y) < 8 && --p.life < 0) break;
+    }
+    for (let i = 0; i < bal.length; i++) {
+      if (Math.abs(bal[i].x - p.x) < D + 2 && Math.abs(bal[i].y - p.y) < D + 2) {
+        bal[i].active = 0;
+        let tmp = 500 + 200 * (bal_rank - 1);
+        bal_cmb++;
+        bal_cnt++;
+        if (bal_cmb > 0 && bal_cmb % 20 == 0) tmp = 2000 * bal_rank++;
+        score += tmp;
+        if (bal_max < bal_cmb) bal_max = bal_cmb;
+        pt[pt.length] = point({ x: bal[i].x, y: bal[i].y, text: tmp });
+      }
+    }
+  };
 };
