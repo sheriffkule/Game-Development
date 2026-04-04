@@ -18,7 +18,7 @@
       Arrow keys (left, right) to change direction. <br />
       Z key to throttle your spaceship. <br />
     </div>
-    <div style="position: absolute; left: -3%">
+    <div>
       <canvas id="c1" width="480" height="352"></canvas>
       <canvas id="c2" width="480" height="352"></canvas>
     </div>
@@ -26,7 +26,7 @@
   <script type="text/javascript">
     let trip = new Ballon(this);
     addEventListener('keydown', trip.kd);
-    addEventListener('keyup', trip.ku);
+    addEventListener('keyup', trip.ky);
     trip.init();
     setInterval(trip.tick, 32);
   </script>
