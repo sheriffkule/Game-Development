@@ -322,5 +322,106 @@ let Ballon = function (arg) {
         pt[pt.length] = point({ x: bal[i].x, y: bal[i].y, text: tmp });
       }
     }
+
+    if (state == 1 && p.life <= 0) {
+      for (let i = 0; i < 60; i++) {
+        frag[frag.length] = bg2({ x: p.x, y: p.y, v: 3, life: 61 });
+      }
+      if (bal_max >= 20) {
+        score += bal_max * bal_rank * 100;
+        pt[pt.length] = point({ x: p.x, y: p.y - 20, v: 0, text: '+' + bal_max * 200 });
+      }
+    }
+  };
+
+  let draw = function () {
+    ctx[1].beginPath();
+    ctx[1].fillStyle = '#000000';
+    if (state == 0 || state == 3) ctx[1].globalAlpha = 0.3;
+    ctx[1].fillRect(0, 0, w, h);
+    if (state != 0 && state != 3) ctx[1].globalAlpha = 1;
+    for (let i = 0; i < bg.length; i++) {
+      ctx[1].fillStyle = bgcol[i % bgcol.length];
+      ctx[1].fillRect(bg[i].x - bg[i].size, bg[i].y - bg[i].size, bg[i].size, bg[i].size);
+    }
+    let ttt = Math.floor(t / 10) % 4;
+    for (let i = 0; i < bal.length; i++) {
+      if (ttt == 0) {
+        ctx[1].drawImage(
+          sp[0],
+          0 * D,
+          0,
+          bal[i].size,
+          bal[i].size,
+          bal[i].x - bal[i].size / 2,
+          bal[i].y - bal[i].size / 2,
+          bal[i].size,
+          bal[i].size,
+        );
+      } else if (ttt == 1 || ttt == 3) {
+        ctx[1].drawImage(
+          sp[0],
+          1 * D,
+          0,
+          bal[i].size,
+          bal[i].size,
+          bal[i].x - bal[i].size / 2,
+          bal[i].y - bal[i].size / 2,
+          bal[i].size,
+          bal[i].size,
+        );
+      } else {
+        ctx[1].save();
+        ctx[1].scale(-1, 1);
+        ctx[1].drawImage(
+          sp[0],
+          0 * D,
+          0,
+          bal[i].size,
+          bal[i].size,
+          (bal[i].x + bal[i].size / 2) * -1,
+          bal[i].y - bal[i].size / 2,
+          bal[i].size,
+          bal[i].size,
+        );
+        ctx[1].restore();
+      }
+    }
+    ctx[1].fillStyle = '#ffffff';
+    let tt = Math.floor(t / 3) % 2;
+    for (let i = 0; i < light.length; i++) {
+      ctx[1].drawImage(
+        sp[0],
+        (2 + tt) * D,
+        0,
+        light[i].size,
+        light[i].size,
+        light[i].x - light[i].size / 2,
+        light[i].y - light[i].size / 2,
+        light[i].size,
+        light[i].size,
+      );
+    }
+    for (let i = 0; i < frag.length; i++) {
+      ctx[1].fillRect(frag[i].x - frag[i].size / 2, frag[i].y - frag[i].size / 2, frag[i].size, frag[i].size);
+    }
+    if (state == 1) {
+      ctx[1].drawImage(sp[0], 4 * D, 0, p.size, p.size, p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+    } else {
+      ctx[1].save();
+      ctx[1].scale(-1, 1);
+      ctx[1].drawImage(
+        sp[0],
+        4 * D,
+        0,
+        p.size,
+        p.size,
+        (p.x + p.size / 2) * -1,
+        p.y - p.size / 2,
+        p.size,
+        p.size,
+      );
+      ctx[1].restore();
+    }
   };
 };
