@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Perya Color Game</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <h1>Perya Color Game</h1>
+
+    <div class="wheel-wrap">
+      <div id="wheel"></div>
+      <div id="highlight" class="highlight-overlay"></div>
+      <div id="pointer"></div>
+    </div>
+
+    <div id="controls">
+      <div class="bet-buttons">
+        <button style="background: yellow" onclick="placeBet('Yellow')">Yellow</button>
+        <button style="background: white" onclick="placeBet('White')">White</button>
+        <button style="background: lightgreen" onclick="placeBet('Green')">Green</button>
+        <button style="background: lightblue; color: #111" onclick="placeBet('Blue')">Blue</button>
+        <button style="background: #ff6b6b; color: #111" onclick="placeBet('Red')">Red</button>
+        <button style="background: pink; color: #111" onclick="placeBet('Pink')">Pink</button>
+      </div>
+
+      <div>Bet Amount: $<input type="number" id="betAmount" value="500" min="100" step="100" /></div>
+
+      <div style="display: flex; gap: 10px; align-items: center">
+        <button
+          id="spinBtn"
+          onclick="spinWheel()"
+          style="
+            background: #ff6f00;
+            color: #fff;
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 800;
+          ">
+          SPIN
+        </button>
+        <button id="revertBtn">Revert Bets</button>
+        <button id="restartBtn">Restart Game</button>
+      </div>
+
+      <div id="balance">Balance: $6000</div>
+      <div id="betsDisplay">No bets placed</div>
+    </div>
+
+    <div id="popup">
+      <div id="popupContent">
+        <h3 id="poputTitle">Result</h3>
+        <div id="popupText" style="margin: 8px 0"></div>
+        <button
+          onclick="closePopup()"
+          style="
+            background: #2e7d32;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+          ">
+          OK
+        </button>
+      </div>
+    </div>
+  </body>
+</html>
