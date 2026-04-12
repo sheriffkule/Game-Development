@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Russian Roulette</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <h1>Russian Roulette</h1>
+
+    <div id="setup">
+      <label for="playerCount">Number of Players (2-6): </label>
+      <input type="number" id="playerCount" min="2" max="6" value="2" />
+      <button id="startGame">Start Game</button>
+    </div>
+
+    <div id="leaderboard">
+      <div id="survivorList">&check; Survivors:</div>
+      <div id="deadList">&#x2620; Dead:</div>
+    </div>
+
+    <div id="game">
+      <div id="chamber">
+        <div class="bullet"></div>
+      </div>
+      <button id="spin" disabled>Spin Chamber</button>
+      <button id="trigger" disabled>Pull Trigger</button>
+      <button id="restart">Restart Game</button>
+      <div id="message">gicule</div>
+    </div>
+
+    <div id="overlay"></div>
+    <div id="winnerBanner"></div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

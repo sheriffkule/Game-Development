@@ -1,0 +1,204 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    background: radial-gradient(circle at center, #2f3149 5%, transparent 12%),
+    linear-gradient(#333 2px, transparent 2px),
+    linear-gradient(90deg, #333 2px, transparent 2px);
+    background-color: #111;
+    background-size:100px 100px, 100px 100px, 100px 100px;
+    background-position: 51px 51px, 0 0, 0 0;
+    color: white;
+    text-align: center;
+    overflow: hidden;
+    min-height: 100vh;
+}
+
+h1 {
+    margin-top: 40px;
+    font-size: 44px;
+    color: crimson;
+    text-shadow: 1px 1px 2px white,
+    2px 2px 2px white;
+}
+
+#setup {
+    margin: 20px;
+}
+
+#game {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+button {
+    padding: 10px 30px;
+    margin: 12px;
+    font-size: 16px;
+    background-color: crimson;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    corner-shape: superellipse(0);
+    transition: all .25s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+    &:hover {
+        corner-shape: superellipse(1);
+        transform: scale(1.03);
+        box-shadow: 0 5px 12px rgb(255 255 255 / 0.3);
+        background-color: orangered;
+    }
+    &:active {
+        transform: scale(1);
+    }
+}
+
+#spin {
+    background: steelblue;
+    color: white;
+}
+
+#trigger {
+    background: darkred;
+    color: white;
+}
+
+#restart {
+    background: green;
+    color: white;
+    display: none;
+    font-size: 20px;
+    padding: 15px 30px;
+    animation: popIn 0.5s ease forwards, emphasize 1.5s infinite alternate;
+    position: fixed;
+    top: 60%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    z-index: 20;
+}
+
+@keyframes popIn {
+    from {
+        transform: translate(-50%, -50%) scale(0);
+    }
+    to {
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+@keyframes emphasize  {
+    from {
+        transform: translate(-50%, -50%) scale(1);
+    }
+    to {
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+}
+
+#message {
+    margin-top: 20px;
+    font-size: 20px;
+    min-height: 40px;
+}
+
+#leaderboard {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    text-align: left;
+    font-size: 16px;
+}
+
+.dead-name {
+    color: red;
+    font-weight: bold;
+    position: relative;
+    display: inline-block;
+}
+
+.dead-blood {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: radial-gradient(circle at center, red 50%, transparent 100%);
+    border-radius: 50%;
+    top: -3px;
+    right: -12px;
+    animation: splatter 1s ease-out forwards;
+}
+
+@keyframes splatter {
+    from {
+        transform: scale(0);
+        opacity: 1;
+    }
+    to {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+.survivor-flash {
+    animation: survivorFlash 0.8s;
+}
+
+@keyframes survivorFlash {
+    from {
+        color: white;
+    }
+    to {
+        color: line;
+    }
+}
+
+.champion-flash {
+    color: gold;
+    font-weight: bold;
+    animation: championGlow 1.5s infinite alternate;
+}
+
+@keyframes championGlow {
+    from {
+        text-shadow: 0 0 5px gold;
+    }
+    to {
+        text-shadow: 0 0 20px gold;
+    }
+}
+
+#winnerBanner {
+    display: none;
+    position: fixed;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 60px;
+    font-weight: bold;
+    color: gold;
+    text-shadow: 2px 2px 15px silver;
+    z-index: 30;
+}
+
+#overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgb(0 0 0 / 0.5);
+    backdrop-filter: blur(5px);
+    pointer-events: none;
+    z-index: 15;
+    transition: opacity 0.5s;
+    opacity: 0;
+}
