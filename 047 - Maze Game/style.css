@@ -1,0 +1,231 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+:root {
+    --border-color: #242424;
+    --border-size: 1px;
+    --border-width: 100%;
+    --cell-size: 20px;
+}
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: radial-gradient(circle at center, silver, #333);
+    overflow: hidden;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 800px;
+}
+
+button {
+    background: #353535;
+    color: #fff;
+    padding: 5px 20px;
+    font-size: large;
+    border: none;
+    box-shadow: 0 4px 8px rgb(0 0 0 / 0.25);
+    border-radius: 14px;
+    corner-shape: bevel;
+    cursor: pointer;
+    transition: .25s;
+
+    &:hover {
+        corner-shape: superellipse(-1);
+        scale: 1.05;
+        transform: translateY(-2px);
+    }
+    &:active {
+        corner-shape: superellipse(0.5);
+        scale: 1;
+    }
+}
+
+.size-input {
+    display: flex;
+    height: 40px;
+    justify-content: center;
+    align-items: center;
+}
+
+input {
+    border: 1px solid #d3dde6;
+    padding: 5px;
+    background: #fff;
+    color: #343434;
+    margin: auto;
+}
+
+label {
+    color: #343434;
+}
+
+.cell.start {
+    background-color: #242424;
+}
+
+.cell.end {
+    background-color: #d64031;
+}
+
+.cell.player {
+    background: radial-gradient(circle at center, #2d3436 0.25rem, transparent 0);
+}
+
+.cell.solution {
+    background-color: #999;
+}
+
+#maze-container {
+    display: grid;
+    gap: 0;
+    border: 5px solid var(--border-color);
+    margin: 20px;
+}
+
+.cell {
+    position: relative;
+    width: var(--cell-size);
+    height: var(--cell-size);
+    background-color: #fff;
+}
+
+.cell::before
+.cell::after {
+    position: absolute;
+    content: '';
+    background-color: var(--border-color);
+    z-index: 1;
+}
+
+.cell.top::before {
+    width: var(--border-width);
+    height: var(--border-size);
+    top: 0;
+    left: 0;
+}
+
+.cell.right::after {
+    width: var(--border-size);
+    height: var(--border-width);
+    top: 0;
+    right: 0;
+}
+
+span {
+    font-size: xx-small;
+}
+
+span.right-gand::before {
+    content: '';
+    display: block;
+    background: #636e72;
+    width: 50%;
+    height: 2px;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+}
+
+span.left-hand::before {
+    content: '';
+    display: block;
+    background: #636e72;
+    width: 50%;
+    height: 2px;
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+}
+
+span.bottom-hand::before {
+    content: '';
+    display: block;
+    background: #636e72;
+    width: 2px;
+    height: 50%;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+span.top-hand::before {
+    content: '';
+    display: block;
+    background: #636e72;
+    width: 2px;
+    height: 50%;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+span.to-left::after {
+    content: '';
+    display: block;
+    background: #636e72;
+    width: 50%;
+    height: 2px;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+}
+
+span.to-right::after {
+    content: '';
+    display: block;
+    background: #636e72;
+    width: 50%;
+    height: 2px;
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+}
+
+span.to-top::after {
+    content: '';
+    display: block;
+    background: #636e72;
+    width: 2px;
+    height: 50%;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+span.to-bottom::after {
+    content: '';
+    display: block;
+    background: #636e72;
+    width: 2px;
+    height: 50%;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+#controls2 {
+    position: absolute;
+    top: 50%;
+    left: 100px;
+    transform: translate(-50%, -50%);
+}
