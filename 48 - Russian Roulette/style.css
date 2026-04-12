@@ -202,3 +202,73 @@ button {
     transition: opacity 0.5s;
     opacity: 0;
 }
+
+#chamber {
+    width: 100px;
+    height: 100px;
+    background: #888;
+    border-radius: 50%;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.bullet {
+    width: 24px;
+    height: 24px;
+    background: gold;
+    border-radius: 50%;
+    position: absolute;
+}
+
+.shake-chamber {
+    animation: chamberShake 0.4s ease;
+}
+
+@keyframes chamberShake {
+    0%{
+        transform: rotate(0deg);
+    }
+    20% {
+        transform: rotate(-10deg);
+    }
+    40% {
+        transform: rotate(10deg);
+    }
+    60% {
+        transform: rotate(-8deg);
+    }
+    80% {
+        transform: rotate(8deg);
+    }
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+.bullet.shake-bullet {
+    animation: bulletShake 0.4s ease;
+}
+
+@keyframes bulletShake {
+    0%{
+        transform: rotate(0deg) translate(0, 0);
+    }
+    20% {
+        transform: rotate(-15deg) translate(-2px, 1px);
+    }
+    40% {
+        transform: rotate(15deg) translate(2px, -1px);
+    }
+    60% {
+        transform: rotate(-10deg) translate(-1px, 2px);
+    }
+    80% {
+        transform: rotate(10deg) translate(1px, -2px);
+    }
+    100% {
+        transform: rotate(0deg) translate(0, 0);
+    }
+}
