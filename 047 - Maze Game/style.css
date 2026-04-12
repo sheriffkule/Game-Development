@@ -29,6 +29,27 @@ body {
     width: 800px;
 }
 
+h1 {
+    margin-bottom: 12px;
+    font-size: 44px;
+    color: transparent;
+    background: linear-gradient(-45deg, black 45%, #972b21 55%, black 65%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    background-size: 200px 100%;
+    animation: move 3s linear infinite;
+}
+
+@keyframes move {
+    to {
+        background-position: 200px 0;
+    }
+}
+
+.btn-container {
+    margin-top: 16px;
+}
+
 button {
     background: #353535;
     color: #fff;
@@ -39,6 +60,7 @@ button {
     border-radius: 14px;
     corner-shape: bevel;
     cursor: pointer;
+    outline: none;
     transition: .25s;
 
     &:hover {
@@ -52,19 +74,14 @@ button {
     }
 }
 
-.size-input {
-    display: flex;
-    height: 40px;
-    justify-content: center;
-    align-items: center;
-}
-
 input {
     border: 1px solid #d3dde6;
     padding: 5px;
     background: #fff;
     color: #343434;
     margin: auto;
+    border-radius: 5px;
+    outline: none;
 }
 
 label {
@@ -101,7 +118,7 @@ label {
     background-color: #fff;
 }
 
-.cell::before
+.cell::before,
 .cell::after {
     position: absolute;
     content: '';
@@ -127,7 +144,7 @@ span {
     font-size: xx-small;
 }
 
-span.right-gand::before {
+span.right-hand::before {
     content: '';
     display: block;
     background: #636e72;
