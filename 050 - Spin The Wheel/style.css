@@ -34,11 +34,7 @@ body {
     }
 }
 
-#manageBtn {
-    position: fixed;
-    top: 14px;
-    left: 14px;
-    z-index: var(--manageBtn-z);
+.btn {
     background: #2f80ed;
     color: #fff;
     border: none;
@@ -56,6 +52,26 @@ body {
     }
     &:active {
         corner-shape: bevel;
+    }
+}
+
+#manageBtn {
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    z-index: var(--manageBtn-z);
+}
+
+.removeBtn {
+    transition: .25s;
+
+    &:hover {
+        filter: saturate(2);
+        transform: scale(1.05);
+        box-shadow: 0 4px 8px rgb(0 0 0 / 0.18);
+    }
+    &:active {
+        transform: scale(1);
     }
 }
 
@@ -123,7 +139,6 @@ input:is(:focus, :focus-within)::placeholder {
     padding: 12px;
     visibility: hidden;
     opacity: 0;
-    backdrop-filter: blur(10px);
     transition: opacity 0.25s ease-in, visibility 0.25s ease-in;
     z-index: var(--modal-z);
 }

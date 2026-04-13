@@ -12,12 +12,13 @@ const manageBtn = document.getElementById('manageBtn');
 const manageModal = document.getElementById('manageModal');
 const prizeListEl = document.getElementById('prizeList');
 const newPrizeInput = document.getElementById('newPrizeInput');
-const closeMenageBtn = document.getElementById('closeMenageBtn');
+const addPrizeBtn = document.getElementById('addPrizeBtn');
 const closeManageBtn = document.getElementById('closeManageBtn');
 const savePrizeBtn = document.getElementById('savePrizeBtn');
 
 const resultModal = document.getElementById('resultModal');
 const winnerText = document.getElementById('winnerText');
+
 const prizeText = document.getElementById('prizeText');
 const playAgainBtn = document.getElementById('playAgainBtn');
 const closeResultBtn = document.getElementById('closeResultBtn');
@@ -144,10 +145,11 @@ function rotationToIndex(rotationRad) {
 }
 
 // spin logic (choose target index, animate)
-function spinWheel() {
+function spinWheel(playerName) {
   if (spinning) return;
-  const playerName = usingPlayerName !== undefined ? usingPlayerName : (playerNameInput.value || '').trim();
-  if (!playerName) {
+  // Use provided playerName or fallback to input
+  const name = (typeof playerName === 'string' && playerName.trim()) ? playerName.trim() : (playerNameInput.value || '').trim();
+  if (!name) {
     alert('Please enter your name to spin the wheel!');
     return;
   }
@@ -212,8 +214,292 @@ function spinWheel() {
 
     // Pulse the winning slice then show modal
     pulseHighlight(winningIndex, 3, 700, () => {
-      showResultModal(playerName, prizes[winningIndex]);
+      showResultModal(name, prizes[winningIndex]);
       // keep controls locked until modal is closed
     });
   }
+
+  requestAnimationFrame(step);
 }
+
+// smooth pulse highlight (alpha rises/falls)
+function pulseHighlight(index, pulses = 3, pulseDuration = 700, callback) {
+  const total = pulses * pulseDuration;
+  const start = performance.now();
+  function frame(now) {
+    const elapsed = now - start;
+    if (elapsed >= total) {
+      drawWheel(currentRotation, null, 0);
+      callback && callback();
+      return;
+    }
+    const pulseProgress = (elapsed % pulseDuration) / pulseDuration;
+    const alpha = Math.sin(pulseProgress * Math.PI);
+    drawWheel(currentRotation, index, alpha * 0.95);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+// show result modal, confetti, sound
+function showResultModal(player, prize) {
+  winnerText.textContent = `${player}, You Won!`;
+  prizeText.textContent = `Prize: ${prize}`;
+  // change background theme
+  changeBackground();
+  resultModal.classList.add('active');
+  startConfetti();
+  try {
+    winSound.currentTime = 0;
+    winSound.play().catch(() => {});
+  } catch (e) {}
+}
+
+function closeResult() {
+  resultModal.classList.remove('active');
+  fadeOutConfetti();
+  spinBtn.disabled = false;
+  manageBtn.disabled = false;
+  playerNameInput.style.visibility = '';
+  spinning = false;
+}
+
+// play again behavior
+playAgainBtn.addEventListener('click', () => {
+  const nameFromInput = (playerNameInput.value || '').trim();
+  const shown = winnerText.textContent.replace(/, You Won!$/, '').trim();
+  const player = nameFromInput || shown || 'Player';
+  // close modal and spin again
+  resultModal.classList.remove('active');
+  fadeOutConfetti();
+  setInterval(() => {
+    spinning = false;
+    spinBtn.disabled = false;
+    manageBtn.disabled = false;
+    spinWheel(player);
+  }, 160);
+});
+
+closeResultBtn.addEventListener('click', closeResult);
+
+// change background themes
+const themes = [
+  'linear-gradient(-45deg,#ff9a9e,#fad0c4,#a1c4fd,#c2e9fb)',
+  'linear-gradient(-45deg,#ffecd2,#fcb69f,#ff9a9e,#fecfef)',
+  'linear-gradient(-45deg,#84fab0,#8fd3f4,#cfd9df,#e2ebf0)',
+  'linear-gradient(-45deg,#f6d365,#fda085,#fbc2eb,#a18cd1)',
+];
+
+function changeBackground() {
+  const t = themes[Math.floor(Math.random() * themes.length)];
+  document.body.style.background = t;
+  document.body.style.backgroundSize = '400% 400%';
+  document.body.style.animation = 'gradientBg 15s ease infinite';
+}
+
+// Manage prizes modal logic
+function openManage() {
+  populatePrizeList();
+  manageModal.classList.add('active');
+}
+
+function closeManage() {
+  manageModal.classList.remove('active');
+}
+
+manageBtn.addEventListener('click', openManage);
+closeManageBtn.addEventListener('click', closeManage);
+
+function populatePrizeList() {
+  prizeListEl.innerHTML = '';
+  prizes.forEach((p, i) => {
+    const li = document.createElement('li');
+    const input = document.createElement('input');
+    input.value = p;
+    input.addEventListener('input', () => {
+      prizes[i] = input.value;
+    });
+    const rem = document.createElement('button');
+    rem.className = 'removeBtn'
+    rem.textContent = 'Remove';
+    rem.style.background = '#ef5350';
+    rem.style.color = '#fff';
+    rem.style.border = 'none';
+    rem.style.padding = '6px 6px';
+    rem.style.borderRadius = '6px';
+    rem.style.cursor = 'pointer';
+    rem.addEventListener('click', () => {
+      prizes.splice(i, 1);
+      populatePrizeList();
+      drawWheel(currentRotation);
+    });
+    li.appendChild(input);
+    li.appendChild(rem);
+    prizeListEl.appendChild(li);
+  });
+}
+
+addPrizeBtn.addEventListener('click', () => {
+  const v = (newPrizeInput.value || '').trim();
+  if (!v) return;
+  prizes.push(v);
+  newPrizeInput.value = '';
+  populatePrizeList();
+  drawWheel(currentRotation);
+});
+
+savePrizeBtn.addEventListener('click', () => {
+  prizes = prizes.map((p) => (typeof p === 'string' ? p.trim() : '')).filter(Boolean);
+  if (prizes.length < 2) {
+    alert('Please have at least 2 prizes!');
+    return;
+  }
+  populatePrizeList();
+  drawWheel(currentRotation);
+  closeManage();
+});
+
+// confetti system
+let confettiParticles = [];
+let confettiFrameId = null;
+let confettiOpacity = 0;
+
+function startConfetti() {
+  confettiParticles = [];
+  const w = confettiCanvas.width / dpr;
+  const h = confettiCanvas.height / dpr;
+  for (let i = 0; i < 150; i++) {
+    confettiParticles.push({
+      x: Math.random() * w,
+      y: Math.random() * h - h,
+      r: Math.random() * 6 + 4,
+      d: Math.random() * 100,
+      color: `hsl(${Math.random() * 360}, 90%, 55%)`,
+      tilt: Math.random() * 15 - 10,
+      tiltAngle: 0,
+      tiltAccel: Math.random() * 0.07 + 0.01,
+    });
+  }
+  confettiOpacity = 0;
+  if (confettiFrameId) cancelAnimationFrame(confettiFrameId);
+  function fadeIn() {
+    confettiOpacity += 0.05;
+    if (confettiOpacity >= 1) {
+      confettiOpacity = 1;
+      confettiFrameId = requestAnimationFrame(() => updateConfetti(confettiOpacity));
+    } else {
+      updateConfetti(confettiOpacity);
+      confettiFrameId = requestAnimationFrame(fadeIn);
+    }
+  }
+  fadeIn();
+}
+
+function updateConfetti(opacity = 1) {
+  const ctx = confettiCtx;
+  const w = confettiCanvas.width / dpr;
+  const h = confettiCanvas.height / dpr;
+  ctx.clearRect(0, 0, w, h);
+  confettiParticles.forEach((p) => {
+    p.tiltAngle += p.tiltAccel;
+    p.y += (Math.cos(p.d) + 3 + p.r) / 2;
+    p.x += Math.sin(p.d);
+    p.tilt = Math.sin(p.tiltAngle) * 12;
+    ctx.beginPath();
+    ctx.lineWidth = p.r;
+    ctx.strokeStyle = p.color.replace('hsl', 'hsla').replace(')', `,${opacity})`);
+    ctx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+    ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+    ctx.stroke();
+    if (p.y > h + 30) {
+      p.y = -10 - Math.random() * h * 0.2;
+      p.x = Math.random() * w;
+    }
+  });
+  confettiFrameId = requestAnimationFrame(() => updateConfetti(opacity));
+}
+
+function fadeOutConfetti() {
+  let op = confettiOpacity || 1;
+  function fade() {
+    op -= 0.05;
+    if (op <= 0) {
+      if (confettiFrameId) {
+        cancelAnimationFrame(confettiFrameId);
+        confettiFrameId = null;
+      }
+      confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+      confettiParticles = [];
+      confettiOpacity = 0;
+      return;
+    }
+    updateConfetti(op);
+    requestAnimationFrame(fade);
+  }
+  fade();
+}
+
+// helper to resize confetti backing store
+function resizeConfettiFull() {
+    dpr = Math.max(window.devicePixelRatio || 1, 1);
+    confettiCanvas.width = Math.round(window.innerWidth * dpr);
+    confettiCanvas.height = Math.round(window.innerHeight * dpr);
+    confettiCanvas.style.width = window.innerWidth + 'px';
+    confettiCanvas.style.height = window.innerHeight + 'px';
+      confettiCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+
+window.addEventListener('resize', () => {
+    resizeAll()
+    resizeConfettiFull()
+})
+
+resizeConfettiFull()
+
+// events and init
+spinBtn.addEventListener('click', spinWheel);
+populatePrizeList()
+drawWheel(currentRotation)
+
+// provide a sane resizeAll in case called above
+function resizeAll() {
+    resizeAll() = null
+    resizeAll() = function() {
+        resizeAll() = function() {}
+    }
+    // Call the real function body
+    dpr = Math.max(window.devicePixelRatio || 1, 1);
+    const shown = Math.min(window.innerWidth * 0.9, 520);
+    displaySize = Math.round(shown);
+    wheelCanvas.style.width = displaySize + 'px';
+    wheelCanvas.style.height = displaySize + 'px';
+    wheelCanvas.width = displaySize * dpr;
+    wheelCanvas.height = displaySize * dpr;
+    wheelCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    center.x = displaySize / 2;
+    center.y = displaySize / 2;
+    radius = displaySize / 2 - 18;
+    drawWheel(currentRotation);
+}
+
+// replace placeholder with proper function
+resizeAll = function() {
+    dpr = Math.max(window.devicePixelRatio || 1, 1);
+    const shown = Math.min(window.innerWidth * 0.9, 520);
+    displaySize = Math.round(shown);
+    wheelCanvas.style.width = displaySize + 'px';
+    wheelCanvas.style.height = displaySize + 'px';
+    wheelCanvas.width = displaySize * dpr;
+    wheelCanvas.height = displaySize * dpr;
+    wheelCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    center.x = displaySize / 2;
+    center.y = displaySize / 2;
+    radius = displaySize / 2 - 18;
+    drawWheel(currentRotation);
+}
+
+window.addEventListener('resize', resizeAll)
+
+// ensure initial sizes are correct before first draw
+resizeAll();
+resizeConfettiFull();

@@ -9,14 +9,14 @@
   <body>
     <canvas id="confettiCanvas"></canvas>
 
-    <button id="manageBtn" title="Manage prizes">&sext; Manage Prizes</button>
+    <button class="btn" id="manageBtn" title="Manage prizes">&sext; Manage Prizes</button>
 
     <div class="center">
       <canvas id="wheelCanvas" aria-label="Prize wheel"></canvas>
 
       <div class="controls">
         <input type="text" id="playerName" placeholder="Enter your name" />
-        <button id="spinBtn">SPIN</button>
+        <button class="btn" id="spinBtn">SPIN</button>
       </div>
     </div>
 
@@ -25,8 +25,8 @@
         <h2 id="winnerText">You Won</h2>
         <div id="prizeText">Prize: -</div>
         <div style="display: flex; gap: 12px; justify-content: center; margin-top: 14px">
-          <button id="playAgainBtn">&#9654; Play Again</button>
-          <button id="closeResultBtn">&times; Close</button>
+          <button class="btn" id="playAgainBtn">&#9654; Play Again</button>
+          <button class="btn" id="closeResultBtn">&times; Close</button>
         </div>
       </div>
     </div>
@@ -36,12 +36,12 @@
         <h2>Manage Prizes</h2>
         <div style="display: flex; gap: 8px; margin-top: 10px">
           <input type="text" id="newPrizeInput" placeholder="New prize (e.g. $5 Gift)" />
-          <button id="addPrizeBtn">Add</button>
+          <button class="btn" id="addPrizeBtn">Add</button>
         </div>
         <ul id="prizeList"></ul>
         <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px">
-          <button id="savePrizeBtn">Save</button>
-          <button id="closeManageBtn">Close</button>
+          <button class="btn" id="savePrizeBtn">Save</button>
+          <button class="btn" id="closeManageBtn">Close</button>
         </div>
       </div>
     </div>
