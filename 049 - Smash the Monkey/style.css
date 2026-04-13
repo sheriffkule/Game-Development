@@ -1,0 +1,120 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    background-size: 30px;
+    background-repeat: space;
+}
+
+body {
+    min-height: 80vh;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #222;
+}
+
+header h1 {
+    font-weight: normal;
+    padding: 10px;
+    letter-spacing: 0.1em;
+    background: rgb(256 256 256 / 0.6);
+    margin-bottom: 20px;
+}
+
+.screen {
+    width: 340px;
+    height: 340px;
+    margin: 10px auto;
+    padding: 0 35px;
+    background: black;
+    outline: 10px solid lightslategrey;
+}
+
+.status {
+    color: white;
+    font-size: 16px;
+    padding: 15px 5px;
+    height: 40px;
+}
+
+.score {
+    float: left;
+}
+
+.score::after {
+    content: ' points';
+}
+
+.time {
+    float: right;
+}
+
+.time::after {
+    content: ' sec';
+}
+
+.box {
+    width: 80px;
+    height: 80px;
+    float: left;
+    margin: 5px;
+    border-bottom: 6px double #eb0c42;
+    position: relative;
+    overflow: hidden;
+}
+
+.box.touched {
+    border-bottom-color: yellow;
+}
+
+.box img {
+    display: block;
+    width: 100%;
+    position: absolute;
+    top: 80px;
+    cursor: pointer;
+    transition: top 0.3s;
+}
+
+.modal {
+    position: absolute;
+    background: rgb(0 0 0 / 0.4);
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal div {
+    background: silver;
+    width: 320px;
+    margin: 50px auto;
+    padding: 50px 0;
+    font-size: 20px;
+    border-radius: 30px;
+    corner-shape: notch;
+}
+
+.modal p {
+    padding: 0 10px 20px;
+}
+
+.modal .end {
+    display: block;
+    padding: 10px;
+    color: #eb0c42;
+    border: 6px double #eb0c42;
+    cursor: pointer;
+    transition: all .4s;
+}
+
+.hidden {
+    display: none;
+}
