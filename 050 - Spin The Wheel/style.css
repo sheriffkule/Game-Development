@@ -185,3 +185,20 @@ input:is(:focus, :focus-within)::placeholder {
     border-radius: 6px;
     border: 1px solid slategray;
 }
+
+#confettiCanvas {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: var(--confetti-z);
+}
+
+@media (width < 480px) {
+    #playerName {
+        min-width: 140px;
+    }
+    #spinBtn {
+        font-size: 16px;
+        padding: 12px 20px;
+    }
+}
