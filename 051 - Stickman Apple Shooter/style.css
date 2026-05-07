@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Bangers&display=swap');
+
 body {
     margin: 0;
     padding: 0;
@@ -11,10 +13,13 @@ body {
 }
 
 h1 {
+    font-family: 'Bangers';
     color: transparent;
     background: linear-gradient(90deg, navy, blue,  navy);
     -webkit-background-clip: text;
     background-clip: text;
+    letter-spacing: 3px;
+    font-size: 3rem;
 }
 
 canvas {

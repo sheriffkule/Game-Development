@@ -290,7 +290,87 @@ function updateArrows() {
     // Apple collision
     let dx = a.x - stickman.x;
     let dy = a.y - (stickman.y - 90);
+    if (Math.sqrt(dx * dx + dy * dy) < 12 && !isDead) {
+      a.stuckInApple = true;
+      a.stuck = true;
+      a.vx = 0;
+      a.vy = 0;
+      a.relX = 0;
+      a.relY = 0;
+      popMessages.push({ x: stickman.x, y: stickman.y - 120, text: 'Good Shot!', life: 60 });
+      setTimeout(() => {
+        score += 100;
+        if (score === 1000) {
+          popMessages.push({
+            x: stickman.x - 100,
+            y: stickman.y - 150,
+            text: 'Fantastic, You are nailing it!',
+            life: 120,
+          });
+        }
+        level++;
+        lives++;
+        stickman.x += 50;
+        if (stickman.x > canvas.width - 50) stickman.x = canvas.width - 50;
+        wind = (Math.random() - 0.5) * 0.05;
+        arrows = [];
+        bloodDrops = [];
+        bloodPools = [];
+      }, 1500);
+    }
   });
+}
+
+// Collision function
+function checkCollisionLine(arrow, cx, cy, radius) {
+  let dist = distanceToSegment(
+    { x: arrow.prevX, y: arrow.prevY },
+    { x: arrow.x, y: arrow.y },
+    { x: cx, y: cy },
+  );
+  if (dist < radius && !arrow.stuck && !isDead) hitStickman(arrow);
+}
+
+function distanceToSegment(p1, p2, c) {
+  let A = p2.x - p1.x;
+  let B = p2.y - p1.y;
+  let dot = ((c.x - p1.x) * A + (c.y - p1.y) * B) / (A * A + B * B);
+  dot = Math.max(0, Math.min(1, dot));
+  let closestX = p1.x + dot * A;
+  let closestY = p1.y + dot * B;
+  return Math.hypot(c.x - closestX, c.y - closestY);
+}
+
+function hitStickman(arrow) {
+  if (arrow.stuck || isDead) return;
+  arrow.stuck = true;
+  arrow.vx = 0;
+  arrow.vy = 0;
+  arrow.relX = arrow.x - stickman.x;
+  arrow.relY = arrow.y - stickman.y;
+  makeBlood(arrow.x, arrow.y);
+  flashTimer = 20;
+  lives--;
+  if (lives <= 0) {
+    isDead = true;
+    setTimeout(gameOver, 6000);
+  }
+}
+
+function gameOver() {
+  alert('Stickman died!\nFinal Score: ' + score + ' | Level: ' + level);
+  score = 0;
+  level = 0;
+  stickman.x = 600;
+  wind = 0;
+  lives = 3;
+  arrows = [];
+  bloodDrops = [];
+  bloodPools = [];
+  flashTimer = 0;
+  isDead = false;
+  fallAngle = 0;
+  hasCollapsed = false;
 }
 
 function drawArrows() {
@@ -299,18 +379,83 @@ function drawArrows() {
   });
 }
 
+function drawPowerBar() {
+  if (isCharging) {
+    ctx.fillStyle = 'blue';
+    ctx.fillRect(30, 250, power, 10);
+  }
+}
+
+function drawUI() {
+  ctx.fillStyle = 'black';
+  ctx.font = '20px Bangers';
+  ctx.letterSpacing = '1px';
+  ctx.fillText('Score: ' + score, 20, 30);
+  ctx.fillText('Level: ' + level, 20, 55);
+  ctx.fillText('Lives: ' + lives, 20, 80);
+  ctx.fillText('Wind: ' + wind.toFixed(3), 20, 105);
+}
+
+function drawPopMessages() {
+  for (let i = popMessages.length - 1; i >= 0; i--) {
+    let m = popMessages[i];
+    ctx.fillStyle = 'green';
+    ctx.font = '20px Bangers';
+    ctx.letterSpacing = '2px';
+    ctx.fillText(m.text, m.x - 40, m.y);
+    m.y -= 0.5;
+    m.life--;
+    if (m.life <= 0) popMessages.splice(i, 1);
+  }
+}
+
 function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawStickman();
   drawBow();
   drawArrows();
+  updateArrows();
   drawBlood();
   updateBlood();
   drawBloodPools();
   bleedFromStuckArrows();
+  drawUI();
+  drawPowerBar();
+  drawPopMessages();
 
   if (flashTimer > 0) flashTimer--;
+  if (releaseAnim.active) {
+    releaseAnim.pull *= 0.85;
+    if (releaseAnim.pull < 1) releaseAnim.active = false;
+  }
+  if (isDead) {
+    if (fallAngle < Math.PI * 0.4) fallAngle += 0.02;
+    else if (!hasCollapsed) {
+      hasCollapsed = true;
+      for (let i = 0; i < 15; i++) {
+        addBloodPool(stickman.x + (Math.random() * 50 - 25), canvas.height - 5, 5);
+      }
+    }
+  }
 
   requestAnimationFrame(gameLoop);
 }
+
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'Space') isCharging = true;
+  if (e.code === 'ArrowUp') angle -= 0.05;
+  if (e.code === 'ArrowDown') angle += 0.05;
+});
+
+document.addEventListener('keyup', (e) => {
+  if (e.code === 'Space') {
+    isCharging = false;
+    shootArrow();
+  }
+});
+
+setInterval(() => {
+  if (isCharging && power < 100) power += 2;
+}, 50);
+
 gameLoop();
