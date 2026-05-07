@@ -140,10 +140,174 @@ function drawBow() {
   ctx.stroke();
 }
 
+function drawArrow(arrow) {
+  ctx.strokeStyle = 'black';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(arrow.x, arrow.y);
+  ctx.lineTo(arrow.x - 28 * Math.cos(arrow.angle), arrow.y - 28 * Math.sin(arrow.angle));
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(arrow.x, arrow.y);
+  ctx.lineTo(arrow.x - 10 * Math.cos(arrow.angle - 0.3), arrow.y - 10 * Math.sin(arrow.angle - 0.3));
+  ctx.lineTo(arrow.x - 10 * Math.cos(arrow.angle + 0.3), arrow.y - 10 * Math.sin(arrow.angle + 0.3));
+  ctx.closePath();
+  ctx.fillStyle = 'black';
+  ctx.fill();
+}
+
+function drawArrowRelative(relX, relY, angle) {
+  ctx.strokeStyle = 'black';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(relX, relY);
+  ctx.lineTo(relX - 28 * Math.cos(angle), relY - 28 * Math.sin(angle));
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(relX, relY);
+  ctx.lineTo(relX - 10 * Math.cos(angle - 0.3), relX - 10 * Math.sin(angle - 0.3));
+  ctx.lineTo(relX - 10 * Math.cos(angle + 0.3), relX - 10 * Math.sin(angle + 0.3));
+  ctx.closePath();
+  ctx.fillStyle = 'black';
+  ctx.fill();
+}
+
+// Blood
+function drawBlood() {
+  bloodDrops.forEach((d) => {
+    ctx.fillStyle = 'rba(200,0,0,0.9)';
+    ctx.beginPath();
+    ctx.arc(d.x, d.y, d.size, 0, Math.PI * 2);
+    ctx.fill();
+  });
+}
+
+function updateBlood() {
+  bloodDrops.forEach((d) => {
+    d.vy += 0.1;
+    d.x += d.vx;
+    d.y += d.vy;
+    if (d.size > 0.5) d.size *= 0.98;
+    if (d.y > canvas.height - 5) {
+      addBloodPool(d.x, canvas.height - 5, d.size);
+      d.remove = true;
+    }
+  });
+  bloodDrops = bloodDrops.filter((d) => !d.remove);
+}
+
+function makeBlood(x, y) {
+  for (let i = 0; i < 4; i++) {
+    let angle = Math.random() * Math.PI;
+    let speed = Math.random() * 2 + 1;
+    bloodDrops.push({
+      x: x,
+      y: y,
+      vx: Math.cos(angle) * speed * 0.5,
+      vy: Math.sin(angle) * speed,
+      size: Math.random() * 2 + 1,
+      remove: false,
+    });
+  }
+}
+
+function addBloodPool(x, y, size) {
+  let pool = bloodPools.find((p) => Math.abs(p.x - x) < 20);
+  if (pool) pool.radius += size * 0.5;
+  else bloodPools.push({ x: x, y: y, radius: size * 2 });
+}
+
+function drawBloodPools() {
+  bloodPools.forEach((p) => {
+    if (isDead && p.radius < 100) p.radius += 0.15;
+    let gradient = ctx.createRadialGradient(p.x, p.y, p.radius * 0.3, p.x, p.y, p.radius);
+    gradient.addColorStop(0, 'rgba(150,0,0,0.9)');
+    gradient.addColorStop(1, 'rgba(100,0,0,0.4)');
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+    ctx.fill();
+  });
+}
+
+function bleedFromStuckArrows() {
+  arrows.forEach((a) => {
+    if (a.stuck && !a.stuckInApple) {
+      if (Math.random() < 0.2) makeBlood(stickman.x + a.relX, stickman.y + a.relY);
+      if (isDead && Math.random() < 0.6) {
+        for (let i = 0; i < 2; i++) {
+          makeBlood(stickman.x + a.relX, stickman.y + a.relY);
+          addBloodPool(stickman.x + a.relX, canvas.height - 5, 2);
+        }
+      }
+    }
+  });
+  if (isDead && hasCollapsed && Math.random() < 0.8) {
+    addBloodPool(stickman.x, canvas.height - 5, 3);
+  }
+}
+
+// Arrow Mechanics
+function shootArrow() {
+  if (isDead) return;
+  let speed = power * 0.5 * 0.95 ** (level - 1);
+  arrows.push({
+    x: 60,
+    y: 320,
+    vx: speed * Math.cos(angle),
+    vy: speed * Math.sin(angle),
+    angle: angle,
+    stuck: false,
+    stuckInApple: false,
+    prevX: 60,
+    prevY: 320,
+  });
+  releaseAnim.active = true;
+  releaseAnim.pull = power * 0.3;
+  power = 0;
+}
+
+function updateArrows() {
+  arrows.forEach((a) => {
+    if (a.stuck) return;
+
+    // Move arrow
+    a.prevX = a.x;
+    a.prevY = a.y;
+    a.x += a.vx;
+    a.y += a.vy;
+    a.vx += wind;
+    a.vy += 0.2;
+    a.angle = Math.atan2(a.vy, a.vx);
+
+    // Collision Check
+    checkCollisionLine(a, stickman.x, stickman.y - 60, 20); // head
+    checkCollisionLine(a, stickman.x, stickman.y, 40); // body
+    checkCollisionLine(a, stickman.x, stickman.y + 60, 40); // legs
+
+    // Apple collision
+    let dx = a.x - stickman.x;
+    let dy = a.y - (stickman.y - 90);
+  });
+}
+
+function drawArrows() {
+  arrows.forEach((a) => {
+    if (!a.stuck) drawArrow(a);
+  });
+}
+
 function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawStickman();
   drawBow();
+  drawArrows();
+  drawBlood();
+  updateBlood();
+  drawBloodPools();
+  bleedFromStuckArrows();
 
   if (flashTimer > 0) flashTimer--;
 
