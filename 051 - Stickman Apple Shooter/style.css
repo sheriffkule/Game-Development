@@ -1,0 +1,23 @@
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    height: 100vh;
+    background: radial-gradient(silver, black);
+}
+
+h1 {
+    color: transparent;
+    background: linear-gradient(90deg, navy, blue,  navy);
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+canvas {
+    background: #aaa;
+    border: 2px solid #333;
+}
