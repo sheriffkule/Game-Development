@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tower of Hanoi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <h1>Tower of Hanoi</h1>
+    <div class="menu">
+      <button class="gamebtn startbtn">Start</button>
+      <button class="btn plateadd"><i class="fa fa-plus fa-lg" aria-hidden="true"></i></button>
+      <p class="noofPlates">No of Plates: 3</p>
+      <button class="btn platedel"><i class="fa fa-minus fa-lg" aria-hidden="true"></i></button>
+      <button class="gamebtn resetbtn">Reset</button>
+    </div>
+
+    <div class="container">
+      <div class="bars-div">
+        <div class="bar" id="bar-1" ondrop="drop(event)" ondragover="allowDrop(event)">
+          <div class="plate" id="plate-3" draggable="false" ondragstart="drag(event)"></div>
+          <div class="plate" id="plate-2" draggable="false" ondragstart="drag(event)"></div>
+          <div class="plate" id="plate-1" draggable="false" ondragstart="drag(event)"></div>
+        </div>
+        <div class="bar" id="bar-2" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="bar" id="bar-3" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+      </div>
+      <div class="base"></div>
+    </div>
+
+    <div class="bottom">
+      <button class="btn undobtn" id="undo"><i class="fa-solid fa-arrow-rotate-left" aria-hidden="true"></i></button>
+      <div class="bottom-ps">
+        <p class="countsteps">No of Steps: 0</p>
+        <p id="timeshow">Time Left: 1:00</p>
+      </div>
+      <button class="btn redobtn" id="redo"><i class="fa-solid fa-arrow-rotate-right" aria-hidden="true"></i></button>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
