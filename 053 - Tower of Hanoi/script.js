@@ -25,6 +25,18 @@ resetGameBtn.addEventListener('click', resetGame);
 undoStateBtn.addEventListener('click', undoFunc);
 redoStateBtn.addEventListener('click', redoFunc);
 
+// Add drag and drop event listeners to bars
+for (let i = 0; i < barsDivs.length; i++) {
+  barsDivs[i].addEventListener('dragover', allowDrop);
+  barsDivs[i].addEventListener('drop', drop);
+}
+
+// Add drag event listeners to existing plates
+const existingPlates = document.querySelectorAll('.plate');
+existingPlates.forEach(plate => {
+  plate.addEventListener('dragstart', drag);
+});
+
 function setPlateDrags() {
   for (let i = 0; i < barsDivs.length; i++) {
     if (barsDivs[i].childNodes.length >= 1) {
@@ -211,20 +223,27 @@ function drag(ev) {
 function drop(ev) {
   ev.preventDefault();
   let data = ev.dataTransfer.getData('text');
-  let x = document.getElementById(data);
+  let draggedPlate = document.getElementById(data);
+  let targetBar = ev.target.classList.contains('bar') ? ev.target : ev.target.closest('.bar');
 
-  if (x.parentElement.lastElementChild.id == data) {
-    if (ev.target.className == 'bar') {
-      if (ev.target.childNodes.length == 0 || ev.target.lastElementChild.id > data) {
-        redoStateBtn.disabled = true;
-        redoStateArray.length = 0;
-        undoStateArray.push({ plate: data, source: x.parentElement.id, dest: ev.target.id });
-        ev.target.appendChild(document.getElementById(data));
-        stepCount += 1;
-        showStepCount();
-        setPlateDrags();
-        time = time + 5;
-      }
+  if (!draggedPlate || !targetBar) return;
+
+  if (draggedPlate.parentElement.lastElementChild === draggedPlate) {
+    if (targetBar.childNodes.length === 0 || 
+        (targetBar.lastElementChild && parseInt(draggedPlate.id.split('-')[1]) < parseInt(targetBar.lastElementChild.id.split('-')[1]))) {
+      
+      redoStateArray = [];
+      undoStateArray.push({ 
+        plate: data, 
+        source: draggedPlate.parentElement.id, 
+        dest: targetBar.id 
+      });
+      
+      targetBar.appendChild(draggedPlate);
+      stepCount += 1;
+      showStepCount();
+      setPlateDrags();
+      time = time + 5;
     }
   }
 }

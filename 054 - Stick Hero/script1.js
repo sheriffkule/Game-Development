@@ -1,9 +1,21 @@
+/*
+
+
+
+If you want to know how this game was made, check out this video, that explains how it's made: 
+
+https://youtu.be/eue3UdFvwPo
+
+Follow me on twitter for more: https://twitter.com/HunorBorbely
+
+*/
+
 // Extend the base functionality of JavaScript
 Array.prototype.last = function () {
   return this[this.length - 1];
 };
 
-// A sinus function that accepts degrees instead of radians
+// A sinus function that acceps degrees instead of radians
 Math.sinus = function (degree) {
   return Math.sin((degree / 180) * Math.PI);
 };
@@ -13,12 +25,14 @@ let phase = 'waiting'; // waiting | stretching | turning | walking | transitioni
 let lastTimestamp; // The timestamp of the previous requestAnimationFrame cycle
 
 let heroX; // Changes when moving forward
-let heroY; // nly changes when falling
+let heroY; // Only changes when falling
 let sceneOffset; // Moves the whole game
 
 let platforms = [];
 let sticks = [];
 let trees = [];
+
+// Todo: Save high score to localStorage (?)
 
 let score = 0;
 
@@ -46,13 +60,14 @@ const walkingSpeed = 4;
 const transitioningSpeed = 2;
 const fallingSpeed = 2;
 
-const heroWidth = 17;
-const heroHeight = 30;
+const heroWidth = 17; // 24
+const heroHeight = 30; // 40
 
 const canvas = document.getElementById('game');
-const ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth;
+canvas.width = window.innerWidth; // Make the Canvas full screen
 canvas.height = window.innerHeight;
+
+const ctx = canvas.getContext('2d');
 
 const introductionElement = document.getElementById('introduction');
 const perfectElement = document.getElementById('perfect');
@@ -113,7 +128,7 @@ function generateTree() {
 
   const x = furthestX + minimumGap + Math.floor(Math.random() * (maximumGap - minimumGap));
 
-  const treeColors = ['#6d8821', '#8fac34', '#98b333'];
+  const treeColors = ['#6D8821', '#8FAC34', '#98B333'];
   const color = treeColors[Math.floor(Math.random() * 3)];
 
   trees.push({ x, color });
@@ -164,13 +179,12 @@ window.addEventListener('mouseup', function (event) {
 window.addEventListener('resize', function (event) {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
-
   draw();
 });
 
 window.requestAnimationFrame(animate);
 
-// Main game loop
+// The main game loop
 function animate(timestamp) {
   if (!lastTimestamp) {
     lastTimestamp = timestamp;
@@ -194,7 +208,7 @@ function animate(timestamp) {
         const [nextPlatform, perfectHit] = thePlatformTheStickHits();
         if (nextPlatform) {
           // Increase score
-          score += perfectHit ? 200 : 100;
+          score += perfectHit ? 2 : 1;
           scoreElement.innerText = score;
 
           if (perfectHit) {
@@ -251,7 +265,7 @@ function animate(timestamp) {
       if (sticks.last().rotation < 180) sticks.last().rotation += (timestamp - lastTimestamp) / turningSpeed;
 
       heroY += (timestamp - lastTimestamp) / fallingSpeed;
-      const maxHeroY = platformHeight + 100 + (window.innerHeight - canvasHeight) * 0.5;
+      const maxHeroY = platformHeight + 100 + (window.innerHeight - canvasHeight) / 2;
       if (heroY > maxHeroY) {
         restartButton.style.display = 'block';
         return;
@@ -271,7 +285,6 @@ function animate(timestamp) {
 // Returns the platform the stick hit (if it didn't hit any stick then return undefined)
 function thePlatformTheStickHits() {
   if (sticks.last().rotation != 90) throw Error(`Stick is ${sticks.last().rotation}°`);
-
   const stickFarX = sticks.last().x + sticks.last().length;
 
   const platformTheStickHits = platforms.find(
@@ -281,8 +294,8 @@ function thePlatformTheStickHits() {
   // If the stick hits the perfect area
   if (
     platformTheStickHits &&
-    platformTheStickHits.x + platformTheStickHits.w * 0.5 - perfectAreaSize * 0.5 < stickFarX &&
-    stickFarX < platformTheStickHits.x + platformTheStickHits.w * 0.5 + perfectAreaSize * 0.5
+    platformTheStickHits.x + platformTheStickHits.w / 2 - perfectAreaSize / 2 < stickFarX &&
+    stickFarX < platformTheStickHits.x + platformTheStickHits.w / 2 + perfectAreaSize / 2
   )
     return [platformTheStickHits, true];
 
@@ -296,7 +309,7 @@ function draw() {
   drawBackground();
 
   // Center main canvas area to the middle of the screen
-  ctx.translate((window.innerWidth - canvasWidth) * 0.5 - sceneOffset, (window.innerHeight - canvasHeight) * 0.5);
+  ctx.translate((window.innerWidth - canvasWidth) / 2 - sceneOffset, (window.innerHeight - canvasHeight) / 2);
 
   // Draw scene
   drawPlatforms();
@@ -321,7 +334,7 @@ function drawPlatforms() {
       x,
       canvasHeight - platformHeight,
       w,
-      platformHeight + (window.innerHeight - canvasHeight) * 0.5,
+      platformHeight + (window.innerHeight - canvasHeight) / 2,
     );
 
     // Draw perfect area only if hero did not yet reach the platform
@@ -340,10 +353,10 @@ function drawPlatforms() {
 function drawHero() {
   ctx.save();
   ctx.fillStyle = 'black';
-  ctx.translate(heroX - heroWidth * 0.5, heroY + canvasHeight - platformHeight - heroHeight * 0.5);
+  ctx.translate(heroX - heroWidth / 2, heroY + canvasHeight - platformHeight - heroHeight / 2);
 
   // Body
-  drawRoundedRect(-heroWidth * 0.5, -heroHeight * 0.5, heroWidth, heroHeight - 4, 5);
+  drawRoundedRect(-heroWidth / 2, -heroHeight / 2, heroWidth, heroHeight - 4, 5);
 
   // Legs
   const legDistance = 5;
@@ -362,7 +375,7 @@ function drawHero() {
 
   // Band
   ctx.fillStyle = 'red';
-  ctx.fillRect(-heroWidth * 0.5 - 1, -12, heroWidth + 2, 4.5);
+  ctx.fillRect(-heroWidth / 2 - 1, -12, heroWidth + 2, 4.5);
   ctx.beginPath();
   ctx.moveTo(-9, -14.5);
   ctx.lineTo(-17, -18.5);
@@ -413,15 +426,15 @@ function drawSticks() {
 
 function drawBackground() {
   // Draw sky
-  let gradient = ctx.createLinearGradient(0, 0, 0, window.innerHeight);
-  gradient.addColorStop(0, '#bbd691');
-  gradient.addColorStop(1, '#fef1e1');
+  var gradient = ctx.createLinearGradient(0, 0, 0, window.innerHeight);
+  gradient.addColorStop(0, '#BBD691');
+  gradient.addColorStop(1, '#FEF1E1');
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
 
   // Draw hills
-  drawHill(hill1BaseHeight, hill1Amplitude, hill1Stretch, '#95c629');
-  drawHill(hill2BaseHeight, hill2Amplitude, hill2Stretch, '#659f1c');
+  drawHill(hill1BaseHeight, hill1Amplitude, hill1Stretch, '#95C629');
+  drawHill(hill2BaseHeight, hill2Amplitude, hill2Stretch, '#659F1C');
 
   // Draw trees
   trees.forEach((tree) => drawTree(tree.x, tree.color));
@@ -453,14 +466,14 @@ function drawTree(x, color) {
   const treeCrownWidth = 10;
 
   // Draw trunk
-  ctx.fillStyle = '#7d833c';
-  ctx.fillRect(-treeTrunkWidth * 0.5, -treeTrunkHeight, treeTrunkWidth, treeTrunkHeight);
+  ctx.fillStyle = '#7D833C';
+  ctx.fillRect(-treeTrunkWidth / 2, -treeTrunkHeight, treeTrunkWidth, treeTrunkHeight);
 
   // Draw crown
   ctx.beginPath();
-  ctx.moveTo(-treeCrownWidth * 0.5, -treeTrunkHeight);
+  ctx.moveTo(-treeCrownWidth / 2, -treeTrunkHeight);
   ctx.lineTo(0, -(treeTrunkHeight + treeCrownHeight));
-  ctx.lineTo(treeCrownWidth * 0.5, -treeTrunkHeight);
+  ctx.lineTo(treeCrownWidth / 2, -treeTrunkHeight);
   ctx.fillStyle = color;
   ctx.fill();
 
