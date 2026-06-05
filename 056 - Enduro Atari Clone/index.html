@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Enduro - Atari Game</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <h1>Enduro Clone Game</h1>
+    <div id="game">
+      <div id="sky"></div>
+      <div id="mountains">
+        <div class="mountain"></div>
+        <div class="mountain"></div>
+        <div class="mountain"></div>
+        <div class="mountain"></div>
+      </div>
+      <div id="terrain"></div>
+      <div class="hidden" id="fog"></div>
+      <canvas id="canvas"></canvas>
+      <div id="cars"></div>
+      <div class="player car" id="car"></div>
+      <div id="ui">
+        <div id="panel">
+          <div id="km"><a></a><a>0</a><a>0</a><a>0</a><a>0</a><a>0</a></div>
+          <div id="lap"><a>1</a></div>
+          <div id="position"><a>P</a><a>2</a><a>0</a><a>0</a></div>
+        </div>
+      </div>
+    </div>
+    <h1 id="click">PRESS START!</h1>
+    <p>
+      Left/Right Arrow or A/D to start steer and <br />
+      Up Arrow, W or Space to accelerate
+    </p>
+
+    <script src="script.js"></script>
+  </body>
+</html>
