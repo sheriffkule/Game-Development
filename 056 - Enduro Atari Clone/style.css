@@ -1,15 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
 body {
     overflow: hidden;
     font-family: "Lato", sans-serif;
     background-color: #333;
+}
+
+h1 {
+    color: white;
+    text-align: center;
+    cursor: pointer;
+    margin-block: 30px;
 }
 
 p {
@@ -93,6 +94,8 @@ p {
 #fog {
     width: 200%;
     height: 80px;
+    top: 0;
+    left: -50%;
     background: rgb(200 200 200 / 0.7);
     box-shadow: 0 45px 45px rgb(200 200 200 / 0.7);
 }
@@ -148,4 +151,77 @@ p {
     position: absolute;
     top: 7px;
     left: 29px;
+}
+
+#car.player {
+    width: 45px;
+    left: calc(50% - 20px);
+    bottom: 55px;
+}
+
+#ui {
+    top: 185px;
+    padding: 5px;
+    background: #000;
+}
+
+#panel {
+    width: 120px;
+    height: 36px;
+    margin: 0 auto;
+    background: #922;
+    padding: 5px 20px;
+    font-family: monospace;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+#panel div {
+    float: left;
+    background-color: #c95;
+    height: 16px;
+    color: #000;
+    overflow: hidden;
+}
+
+#panel a {
+    position: relative;
+    padding: 0 2.5px;
+    float: left;
+    width: 10px;
+    height: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: scaleX(1.4);
+    transform-origin: 0 0;
+    margin-right: 5px;
+}
+
+#km {
+    width: 120px;
+    margin-bottom: 5px;
+}
+
+#km a:last-child {
+    background: #000;
+    color: #c95;
+    height: 100%;
+}
+
+#lap {
+    width: 20px;
+    margin-right: 20px;
+}
+
+#position {
+    width: 80px;
+}
+
+#position a:first-child {
+    float: left;
+}
+
+.hidden {
+    display: none;
 }
