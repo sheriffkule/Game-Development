@@ -1,0 +1,109 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(#111, #444, #111);
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    color: white;
+}
+
+h1 {
+    margin-bottom: 12px;
+}
+
+.game-container {
+    display: flex;
+    justify-content: space-around;
+    margin: 20px;
+    padding: 10px;
+
+    h3 {
+        text-align: center;
+        margin-top: 35px;
+        font-size: 12px;
+    }
+}
+
+.bowl {
+    width: 100px;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    background: transparent;
+    transition: transform 0.5s;
+
+    &:hover {
+        transform: scale(1.1);
+        transition: 0.15s;
+    }
+}
+
+.bowl img {
+    width: 100px;
+    height: 60px;
+    margin-top: -30px;
+    display: block;
+    transition: 0.5s;
+
+    &:hover {
+        transform: scale(1.1);
+        transition: 0.2s;
+    }
+}
+
+.ball {
+    width: 25px;
+    height: 25px;
+    background-color: red;
+    border-radius: 50%;
+    border: 2px solid white;
+    position: absolute;
+    top: 60px;
+    left: calc(50% - 15px);
+    transition: all 0.5s;
+}
+
+#message {
+    margin-top: 20px;
+    font-size: 1.25rem;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    margin-top: 20px;
+    border-radius: 20px;
+    font-family: inherit;
+    transition: 0.2s;
+
+    &:hover {
+        background-color: skyblue;
+        transform: scale(1.1);
+    }
+    &:active  {
+        transform: scale(1.05);
+    }
+}
+
+#message {
+    interpolate-size: allow-keywords;
+    transition: opacity .5s;
+}
+
+#playAgain {
+    interpolate-size: allow-keywords;
+    transition: visibility .5s, opacity 0.5s;
+}
