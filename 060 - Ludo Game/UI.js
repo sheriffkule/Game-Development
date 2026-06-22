@@ -1,6 +1,6 @@
 import { COORDINATES_MAP, PLAYERS, STEP_LENGTH } from './constants.js';
 
-const diceButtonElement = document.querySelector('#dice-btn');
+const diceButtonElement = document.querySelector('.roll');
 const playerPiecesElements = {
   P1: document.querySelectorAll('[player-id="P1"].player-piece'),
   P2: document.querySelectorAll('[player-id="P2"].player-piece'),
@@ -68,12 +68,15 @@ export class UI {
   }
 
   static unhighlightPieces() {
-    document.querySelectorAll('.player.piece.highlight').forEach((ele) => {
+    document.querySelectorAll('.player-piece.highlight').forEach((ele) => {
       ele.classList.remove('highlight');
     });
   }
 
   static setDiceValue(value) {
-    document.querySelector('.dice-value').innerText = value;
+    const diceValueElement = document.querySelector('.dice-value');
+    if (diceValueElement) {
+      diceValueElement.innerText = value;
+    }
   }
 }

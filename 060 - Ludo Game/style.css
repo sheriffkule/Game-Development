@@ -151,12 +151,13 @@ h1 {
     border: none;
     cursor: pointer;
     font-size: 16px;
-    display: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
 
-    &:disabled {
-        opacity: 0.5;
-        display: none;
-    }
+.btn:disabled {
+    opacity: 0.5;
 }
 
 .btn-dice {
