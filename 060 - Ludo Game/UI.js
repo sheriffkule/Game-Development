@@ -1,4 +1,4 @@
-import { COORDINATES_MAP, PLAYERS, STEP_LENGTH } from 'constants.js';
+import { COORDINATES_MAP, PLAYERS, STEP_LENGTH } from './constants.js';
 
 const diceButtonElement = document.querySelector('#dice-btn');
 const playerPiecesElements = {
@@ -43,7 +43,7 @@ export class UI {
     const player = PLAYERS[index];
 
     // Display player ID
-    document.querySelector('.active-layer span').innerText = player;
+    document.querySelector('.active-player span').innerText = player;
     const activePlayerBase = document.querySelector('.player-base.highlight');
     if (activePlayerBase) {
       activePlayerBase.classList.remove('highlight');
@@ -73,7 +73,7 @@ export class UI {
     });
   }
 
-  static setDeviceValue(value) {
+  static setDiceValue(value) {
     document.querySelector('.dice-value').innerText = value;
   }
 }
