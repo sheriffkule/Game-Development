@@ -58,7 +58,7 @@ function startGame() {
   updateScore();
 
   startBtn.textContent = 'Playing...';
-  startBtn.disable = true;
+  startBtn.disabled = true;
 
   timeLeft = totalTime;
   startTimer();
@@ -71,7 +71,7 @@ function resetGame() {
   gameActive = false;
   clearInterval(timer);
   startBtn.textContent = 'Start Game';
-  startBtn.disable = false;
+  startBtn.disabled = false;
   feedbackElement.textContent = '';
   timerBar.style.width = '100%';
 }
@@ -95,3 +95,112 @@ function generateNewChallenge() {
   // Generate answer options
   generateColorOptions();
 }
+
+// Generate color options
+function generateColorOptions() {
+  colorOptionsContainer.innerHTML = '';
+
+  // Create options array with the correct color
+  let options = [currentCorrectColor];
+
+  // Fill the rest with random incorrect colors
+  const incorrectColors = colors.filter((c) => c !== currentCorrectColor);
+  const shuffledIncorrect = [...incorrectColors].sort(() => Math.random() - 0.5);
+
+  // Use 4 options for this version
+  for (let i = 1; i < 4; i++) {
+    options.push(shuffledIncorrect[i - 1]);
+  }
+
+  // Shuffle all options
+  options = options.sort(() => Math.random() - 0.5);
+
+  // Create the option elements
+  options.forEach((color) => {
+    const option = document.createElement('div');
+    option.className = 'color-option';
+    option.textContent = color;
+
+    // All options appear in black text (only their meaning matters)
+    option.style.color = '#000000';
+
+    option.addEventListener('click', () => handleColorClick(color));
+    colorOptionsContainer.appendChild(option);
+  });
+}
+
+// Handle color option click
+function handleColorClick(clickedColorName) {
+  if (!gameActive) return;
+
+  if (clickedColorName === currentCorrectColor) {
+    // Correct answer
+    score += 10 + streak * 2;
+    streak++;
+    updateScore();
+    showFeedback('Correct! +' + (10 + streak * 2), 'correct');
+
+    // Add time bonus for correct answers
+    timeLeft = Math.min(timeLeft + 500, totalTime);
+  } else {
+    // Wrong answer
+    streak = 0;
+    updateScore();
+    showFeedback('Wrong!', 'incorrect');
+
+    // Penalize for wrong answer
+    timeLeft = Math.min(timeLeft - 750, 0);
+  }
+
+  generateNewChallenge();
+
+  // Reset timer for new challenge
+  clearInterval(timer);
+  startTimer();
+}
+
+// Show feedback
+function showFeedback(message, type) {
+  feedbackElement.textContent = messasge;
+  feedbackElement.className = 'feedback ' + type;
+
+  setTimeout(() => {
+    feedbackElement.textContent = '';
+    feedbackElement.className = 'feedback';
+  }, 1000);
+}
+
+// Start timer
+function startTimer() {
+  timerBar.style.width = '100%';
+  timerBar.style.transition = 'none';
+  timerBar.offsetHeight;
+  timerBar.style.transition = `width ${timeLeft}ms linear`;
+  timerBar.style.width = '0%';
+
+  timer = setTimeout(() => {
+    endGame();
+  }, timeLeft);
+}
+
+// End the game
+function endGame() {
+  gameActive = false;
+  clearInterval(timer);
+  startBtn.textContent = 'Start Game';
+  startBtn.disabled = false;
+
+  showFeedback('Time Up!', 'incorrect');
+}
+
+// Load high scores
+function loadHighScores() {
+  const savedHighScore = localStorage.getItem('colorGameHighScore');
+  if (savedHighScore) {
+    highScore = parseInt(savedHighScore);
+    highScoreElement.textContent = highScore;
+  }
+}
+
+// Initialize the game
+init();
