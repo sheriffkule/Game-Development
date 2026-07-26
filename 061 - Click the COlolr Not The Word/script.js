@@ -17,7 +17,7 @@ let highScore = 0;
 let gameActive = false;
 let timer;
 let timeLeft = 0;
-let totalTime = 3000;
+let totalTime = 10000;
 let currentCorrectColor = '';
 
 // Color definitions width good contrast
@@ -73,13 +73,19 @@ function resetGame() {
   startBtn.textContent = 'Start Game';
   startBtn.disabled = false;
   feedbackElement.textContent = '';
+  score = 0;
+  streak = 0;
+  timeLeft = totalTime;
+  currentCorrectColor = '';
+  updateScore();
   timerBar.style.width = '100%';
+  colorOptionsContainer.innerHTML = '';
 }
 
 // Generate a new challenge
 function generateNewChallenge() {
   // Pick a random color name for the word text
-  const randomColorName = colors[Math.floor(Math.random() * colors.lenght)];
+  const randomColorName = colors[Math.floor(Math.random() * colors.length)];
 
   // Pick a different random color for the next color
   let availableColors = colors.filter((c) => c !== randomColorName);
@@ -102,6 +108,10 @@ function generateColorOptions() {
 
   // Create options array with the correct color
   let options = [currentCorrectColor];
+
+  if (!currentCorrectColor) {
+    return;
+  }
 
   // Fill the rest with random incorrect colors
   const incorrectColors = colors.filter((c) => c !== currentCorrectColor);
@@ -149,25 +159,37 @@ function handleColorClick(clickedColorName) {
     showFeedback('Wrong!', 'incorrect');
 
     // Penalize for wrong answer
-    timeLeft = Math.min(timeLeft - 750, 0);
+    timeLeft = Math.max(timeLeft - 750, 0);
   }
 
   generateNewChallenge();
 
   // Reset timer for new challenge
-  clearInterval(timer);
+  clearTimeout(timer);
   startTimer();
 }
 
 // Show feedback
 function showFeedback(message, type) {
-  feedbackElement.textContent = messasge;
+  feedbackElement.textContent = message;
   feedbackElement.className = 'feedback ' + type;
 
   setTimeout(() => {
     feedbackElement.textContent = '';
     feedbackElement.className = 'feedback';
   }, 1000);
+}
+
+// Update score display
+function updateScore() {
+  scoreElement.textContent = score;
+  streakElement.textContent = streak;
+
+  if (score > highScore) {
+    highScore = score;
+    highScoreElement.textContent = highScore
+    localStorage.setItem('colorGameHighScore', highScore)
+  }
 }
 
 // Start timer
@@ -186,7 +208,7 @@ function startTimer() {
 // End the game
 function endGame() {
   gameActive = false;
-  clearInterval(timer);
+  clearTimeout(timer);
   startBtn.textContent = 'Start Game';
   startBtn.disabled = false;
 
