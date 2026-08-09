@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#ffffff" />
+    <title>Sudoku Game</title>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <nav>
+      <div class="nav-container">
+        <a href="#" class="nav-logo">Sudoku Game</a>
+        <div class="dark-mode-toggle" id="dark-mode-toggle">
+          <i class="bx bxs-sun"></i>
+          <i class="bx bxs-moon"></i>
+        </div>
+      </div>
+    </nav>
+
+    <main class="main">
+      <div class="screen">
+        <div class="start-screen active" id="start-screen">
+          <input type="text" placeholder="Your name" max="11" class="input-name" id="input-name" />
+          <button class="btn" id="btn-level">Easy</button>
+          <button class="btn" id="btn-continue">Continue</button>
+          <button class="btn btn-blue" id="btn-play">New Game</button>
+        </div>
+
+        <div class="main-game" id="game-screen">
+          <div class="main-sudoku-grid">
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+            <div class="main-grid-cell"></div>
+          </div>
+
+          <div class="main-game-info">
+            <div class="main-game-info-box main-game-info-name">
+              <span id="player-name">Kule</span>
+            </div>
+            <div class="main-game-info-box main-game-info-level">
+              <span id="game-name">Easy</span>
+            </div>
+          </div>
+
+          <div class="main-game-info-box main-game-info-time">
+            <span id="game-time">10:20</span>
+            <button class="pause-btn" id="btn-pause" title="Pause"><i class="bx bx-pause"></i></button>
+          </div>
+
+          <div class="numbers">
+            <div class="number">1</div>
+            <div class="number">2</div>
+            <div class="number">3</div>
+            <div class="number">4</div>
+            <div class="number">5</div>
+            <div class="number">6</div>
+            <div class="number">7</div>
+            <div class="number">8</div>
+            <div class="number">9</div>
+            <button class="delete" id="btn-delete" title="Delete">X</button>
+          </div>
+        </div>
+
+        <div class="pause-screen" id="pause-screen">
+          <button class="btn btn-blue" id="btn-resume">Resume</button>
+          <button class="btn" id="btn-new-game">New Game</button>
+        </div>
+
+        <div class="result-screen" id="result-screen">
+          <div class="congrate">Competed</div>
+          <div class="info">Time</div>
+          <div id="result-time"></div>
+          <button class="btn" id="btn-new-game-2">New Game</button>
+        </div>
+      </div>
+    </main>
+
+    <script src="constant.js"></script>
+    <script src="sudoku.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
