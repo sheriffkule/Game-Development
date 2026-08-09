@@ -1,0 +1,137 @@
+document.querySelector('#dark-mode-toggle').addEventListener('click', () => {
+  document.body.classList.toggle('dark');
+  const isDarkMode = document.body.classList.contains('dark');
+  localStorage.setItem('darkMode', isDarkMode);
+  // Change mobile status bar color
+  document
+    .querySelector('meta[name="theme-color"]')
+    .setAttribute('content', isDarkMode ? '#1a1a2e' : '#f1f2fa');
+});
+
+// Initial values
+// Screen
+const start_screen = document.querySelector('#start-screen');
+const game_screen = document.querySelector('#game-screen');
+const pause_screen = document.querySelector('#pause-screen');
+const result_screen = document.querySelector('#result-screen');
+const cells = document.querySelectorAll('.main-grid-cell');
+const name_input = document.querySelector('#input-name');
+const number_inputs = document.querySelectorAll('#input-name');
+const player_name = document.querySelector('#player-name');
+const game_level = document.querySelector('#game-level');
+const game_time = document.querySelector('#game-time');
+const result_time = document.querySelector('#result-time');
+
+let level_index = 0;
+let level = CONSTANT.LEVEL(level_index);
+
+let timer = null;
+let pause = false;
+let seconds = 0;
+
+let su = undefined;
+let su_answer = undefined;
+
+let selected_cell = -1;
+
+const getGameInfo = () => JSON.parse(localStorage.getItem('game'));
+
+// Add space for each 9 cells
+const initGameGrid = () => {
+  let index = 0;
+
+  for (let i = 0; i < Math.pow(CONSTANT.GRID_SIZE, 2); i++) {
+    let row = Math.floor(i / CONSTANT.GRID_SIZE);
+    let col = i % CONSTANT.GRID_SIZE;
+    if (row === 2 || row === 5) cells[index].style.marginBottom = '10px';
+    if (col === 2 || col === 5) cells[index].style.marginRight = '10px';
+
+    index++;
+  }
+};
+
+const setPlayerName = (name) => localStorage.setItem('player_name', name);
+const getPlayerName = () => localStorage.getItem('player_name');
+
+const showTime = (seconds) => new Date(seconds * 1000).toISOString().substring(11, 8);
+
+const clearSudoku = () => {
+  for (let i = 0; i < Math.pow(CONSTANT.GRID_SIZE, 2); i++) {
+    cells[i].innerHTML = '';
+    cells[i].classList.remove('filled');
+    cells[i].classList.remove('selected');
+  }
+};
+
+const initSudoku = () => {
+  // Clear old sudoku
+  clearSudoku();
+  resetBg();
+  // generate sudoku puzzle here
+  su = sudokuGen(level);
+  su_answer = [...su.question];
+
+  seconds = 0;
+
+  saveGameInfo();
+
+  // Show sudoku to div
+  for (let i = 0; i < Math.pow(CONSTANT.GRID_SIZE, 2); i++) {
+    let row = Math.floor(i / CONSTANT.GRID_SIZE);
+    let col = i % CONSTANT.GRID_SIZE;
+
+    cells[i].setAttribute('data-value', su.question[row][col]);
+
+    if (su.question[row][col] !== 0) {
+      cells[i].classList.add('filled');
+      cells[i].innerHTML = su.question[row][col];
+    }
+  }
+};
+
+const loadSudoku = () => {
+  let game = getGameInfo();
+
+  game_level.innerHTML = CONSTANT.LEVEL_NAME[game.level];
+
+  su = game.su;
+
+  su_answer = su.answer;
+
+  seconds = game.seconds;
+  game_time.innerHTML = showTime(seconds);
+
+  level_index = game.level;
+
+  // Show sudoku to div
+  for (let i = 0; i < Math.pow(CONSTANT.GRID_SIZE, 2); i++) {
+    let row = Math.floor(i / CONSTANT.GRID_SIZE);
+    let col = i % CONSTANT.GRID_SIZE;
+
+    cells[i].setAttribute('data-value', su_answer[row][col]);
+    cells[i].innerHTML = su_answer[row][col] !== 0 ? su_answer[row][col] : '';
+    if (su.question[row][col] !== 0) {
+      cells[i].classList.add('filled');
+    }
+  }
+};
+
+const init = () => {
+  const darkMode = JSON.parse(localStorage.getItem('darkMode'));
+  document.body.classList.add(darkMode ? 'dark' : 'light');
+  document
+    .querySelector('meta[name="theme-color"]')
+    .setAttribute('content', darkMode ? '#1a1a2e' : '#f1f2fa');
+
+  const game = getGameInfo();
+
+  document.querySelector('#btn-continue').style.display = game ? 'grid' : 'none';
+
+  initGameGrid();
+  initCellsEvent();
+  initNumberInputEvent();
+
+  getPlayerName() ? (name_input.value = getPlayerName()) : name_input.focus();
+};
+
+init();

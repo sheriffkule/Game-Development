@@ -10,7 +10,7 @@
     --blue: #00aeef;
     --red: #e91e63;
     --black: #000;
-    --nav-size: 70px
+    --nav-size: 70px;
     --sudoku-cell-size: 50;
     --border-radius: 10px;
     --space-y: 20px;
@@ -140,5 +140,53 @@ nav {
 
     .start-screen > * + * {
         margin-top: 20px;
+    }
+}
+
+.input-name {
+    height: 80px;
+    width: 280px;
+    border: 1px solid var(--blue);
+    border-radius: var(--border-radius);
+    outline: 0;
+    background-color: var(--bg-main);
+    padding: 20px;
+    font-size: var(--font-size-lg);
+    text-align: center;
+}
+
+.btn {
+    height: 80px;
+    width: 280px;
+    background-color: var(--bg-main);
+    color: var(--color-text);
+    border-radius: var(--border-radius);
+    display: grid;
+    place-items: center;
+    transition: all 0.3s ease-in-out;
+    overflow: hidden;
+    font-size: var(--font-size-lg);
+    cursor: pointer;
+}
+
+.btn-blue {
+    background-color: var(--blue);
+    color: var(--white);
+}
+
+.input-err {
+    border-color: var(--red);
+    animation: bounce 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes bounce {
+    from, to {
+        transform: translateY(0);
+    }
+    25% {
+        transform: translateY(20px);
+    }
+    50% {
+        transform: translateY(-20px);
     }
 }
