@@ -23,7 +23,7 @@
 .dark {
     --bg-main: #2a2a38;
     --bg-body: #1a1a2e;
-    --color-text: #9a9a9a;
+    --color-text: #d4d4d4;
     --filled-color: #4f4f63;
     --filled-bg: #000;
 }
@@ -94,10 +94,12 @@ nav {
 
 .bxs-sun {
     display: none;
+    color: var(--color-text);
 }
 
 .bxs-moon {
     display: inline-block;
+    color: var(--color-text);
 }
 
 .dark .bxs-sun {
@@ -211,7 +213,7 @@ nav {
     grid-template-columns: repeat(9, 1fr);
 }
 
-.main-sudoku-cell {
+.main-grid-cell {
     height: var(--sudoku-cell-size);
     width: var(--sudoku-cell-size);
     border-radius: var(--border-radius);
@@ -224,7 +226,7 @@ nav {
 
     &.filled {
         background-color: var(--filled-bg);
-        color: var(--filled-color);
+        color: var(--color-text);
     }
     &.selected {
         background-color: var(--blue);
@@ -336,4 +338,77 @@ nav {
 .pause-screen > * + *,
 .result-screen > * + * {
     margin-top: 20px;
+}
+
+.result-screen.active div,
+.pause-screen.active .btn,
+.zoom-in {
+    animation: zoom-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.result-screen .congrate {
+    font-size: var(--font-size-xl);
+}
+
+.result-screen .info {
+    color: var(--color-text);
+    font-size: var(--font-size);
+}
+
+#result-time {
+    color: var(--blue);
+    font-size: var(--font-size-xl);
+}
+
+@keyframes zoom-in {
+    from {
+        transform: scale(3);
+    }
+    to {
+        transform: scale(1);
+    }
+}
+
+.cell-err {
+    animation: zoom-out-shake 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes zoom-out-shake {
+    from {
+        transform: scale(2);
+    }
+    25% {
+        transform: scale(2) rotate(30deg);
+    }
+    50% {
+        transform: scale(2) rotate(-30deg);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@media (width <= 800pc) {
+    :root {
+        --nav-size: 50px;
+        --sudoku-cell-size: 30px;
+        --border-radius: 5px;
+        --space-y: 10px;
+        --gap: 2px;
+        --font-size: 1rem;
+        --font-size-lg: 1.5rem;
+        --font-size-xl: 2rem;
+    }
+    .input-name, .btn {
+        height: 50px;
+    }
+    .main-grid-cell.hover {
+        border-width: 2px;
+    }
+    .screen {
+        min-width: unset;
+    }
+    .main {
+        min-height: 100dvh;
+    }
 }
