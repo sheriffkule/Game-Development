@@ -23,7 +23,7 @@ const game_time = document.querySelector('#game-time');
 const result_time = document.querySelector('#result-time');
 
 let level_index = 0;
-let level = CONSTANT.LEVEL(level_index);
+let level = CONSTANT.LEVEL[level_index];
 
 let timer = null;
 let pause = false;
@@ -236,6 +236,143 @@ const showResult = () => {
   result_screen.classList.add('active');
   result_time.innerHTML = showTime(seconds);
 };
+
+const initNumberInputEvent = () => {
+  number_inputs.forEach((e, index) => {
+    e.addEventListener('click', () => {
+      if (!cells[selected_cell].classList.contains('filled')) {
+        cells[selected_cell].innerHTML = index + 1;
+        cells[selected_cell].setAttribute('data-value', index + 1);
+        // Add to answer
+        let row = Math.floor(index / CONSTANT.GRID_SIZE);
+        let col = index % CONSTANT.GRID_SIZE;
+        su_answer[row][col] = index + 1;
+        // Save game
+        saveGameInfo();
+
+        removeErr();
+        checkErr(index + 1);
+        cells[selected_cell].classList.add('zoom-in');
+        setTimeout(() => {
+          cells[selected_cell].classList.remove('zoom-in');
+        }, 500);
+
+        // Check game win
+        if (isGameWin()) {
+          removeGameInfo();
+          showResult();
+        }
+      }
+    });
+  });
+};
+
+const initCellsEvent = () => {
+  cells.forEach((e, index) => {
+    e.addEventListener('click', () => {
+      if (!e.classList.contains('filled')) {
+        cells.forEach((e) => e.classList.remove('selected'));
+
+        selected_cell = index;
+        e.classList.remove('err');
+        e.classList.add('selected');
+        resetBg();
+        hoverBg();
+      }
+    });
+  });
+};
+
+const startGame = () => {
+  start_screen.classList.remove('active');
+  game_screen.classList.add('active');
+
+  player_name.innerHTML = name_input.value.trim();
+  setPlayerName(name_input.value.trim());
+
+  game_level.innerHTML = CONSTANT.LEVEL_NAME[level_index];
+
+  showTime(seconds);
+
+  timer = setInterval(() => {
+    if (!pause) {
+      seconds = seconds + 1;
+      game_time.innerHTML = showTime(seconds);
+    }
+  }, 1000);
+};
+
+const returnStartScreen = () => {
+  pause = false;
+  seconds = 0;
+  start_screen.classList.add('active');
+  game_screen.classList.remove('active');
+  pause_screen.classList.remove('active');
+  result_screen.classList.remove('active');
+};
+
+// add button event
+document.querySelector('#btn-level').addEventListener('click', (e) => {
+  level_index = level_index + 1 > CONSTANT.LEVEL.length - 1 ? 0 : level_index + 1;
+  level = CONSTANT.LEVEL[level_index];
+  e.target.innerHTML = CONSTANT.LEVEL_NAME[level_index];
+});
+
+document.querySelector('#btn-play').addEventListener('click', () => {
+  if (name_input.value.trim().length > 0) {
+    initSudoku();
+    startGame();
+  } else {
+    name_input.classList.add('input-err');
+    setTimeout(() => {
+      name_input.classList.remove('input-err');
+      name_input.focus();
+    }, 500);
+  }
+});
+
+document.querySelector('#btn-continue').addEventListener('click', () => {
+  if (name_input.value.trim().length > 0) {
+    loadSudoku();
+    startGame();
+  } else {
+    name_input.classList.add('input-err');
+    setTimeout(() => {
+      name_input.classList.remove('input-err');
+      name_input.focus();
+    }, 500);
+  }
+});
+
+document.querySelector('#btn-pause').addEventListener('click', () => {
+  pause_screen.classList.add('active');
+  pause = true;
+});
+
+document.querySelector('#btn-resume').addEventListener('click', () => {
+  pause_screen.classList.remove('active');
+  pause = false;
+});
+
+document.querySelector('#btn-new-game').addEventListener('click', () => {
+  returnStartScreen();
+});
+
+document.querySelector('#btn-new-game-2').addEventListener('click', () => {
+  console.log('object');
+  returnStartScreen();
+});
+
+document.querySelector('#btn-delete').addEventListener('click', () => {
+  cells[selected_cell].innerHTML = '';
+  cells[selected_cell].setAttribute('data-value', 0);
+
+  let row = Math.floor(selected_cell / CONSTANT.GRID_SIZE);
+  let col = selected_cell % CONSTANT.GRID_SIZE;
+
+  su_answer[row][col] = 0;
+  removeErr();
+});
 
 const init = () => {
   const darkMode = JSON.parse(localStorage.getItem('darkMode'));
