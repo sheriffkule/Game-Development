@@ -190,3 +190,85 @@ nav {
         transform: translateY(-20px);
     }
 }
+
+.main-game {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    justify-content: space-between;
+    padding-block: 30px;
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out;
+
+    &.active {
+        transform: translateX(0);
+    }
+}
+
+.main-sudoku-grid {
+    display: grid;
+    gap: var(--gap);
+    grid-template-columns: repeat(9, 1fr);
+}
+
+.main-sudoku-cell {
+    height: var(--sudoku-cell-size);
+    width: var(--sudoku-cell-size);
+    border-radius: var(--border-radius);
+    background-color: var(--bg-body);
+    color: var(--blue);
+    display: grid;
+    place-items: center;
+    font-size: var(--font-size);
+    cursor: pointer;
+
+    &.filled {
+        background-color: var(--filled-bg);
+        color: var(--filled-color);
+    }
+    &.selected {
+        background-color: var(--blue);
+        color: var(--white);
+    }
+    &:hover {
+        border: 2px solid var(--blue);
+    }
+    &.hover {
+        border: 3px solid var(--blue);
+    }
+    &.err {
+        background-color: var(--red);
+        color: var(--white);
+    }
+}
+
+.dark .main-sudoku-cell.hover {
+    border: 1px solid var(--blue);
+}
+
+.main-game-info {
+    margin-top: var(--space-y);
+    margin-bottom: 10px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.main-game-info-box {
+    height: 45px;
+    background-color: var(--bg-main);
+    color: var(--color-text);
+    border-radius: var(--border-radius);
+    display: grid;
+    place-items: center;
+    padding-inline: 20px;
+    font-size: var(--font-size);
+}
+
+.main-game-info-time {
+    position: relative;
+    align-items: center;
+    justify-content: center;
+    padding-left: 2rem;
+    margin-bottom: auto;
+}

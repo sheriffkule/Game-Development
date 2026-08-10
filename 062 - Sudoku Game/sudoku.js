@@ -116,6 +116,127 @@ const loadSudoku = () => {
   }
 };
 
+const hoverBg = (index) => {
+  let row = Math.floor(index / CONSTANT.GRID_SIZE);
+  let col = index % CONSTANT.GRID_SIZE;
+
+  let box_start_row = row - (row % 3);
+  let box_start_col = col - (col % 3);
+
+  for (let i = 0; i < CONSTANT.BOX_SIZE; i++) {
+    for (let j = 0; j < CONSTANT.BOX_SIZE; j++) {
+      let cell = cells[9 * (box_start_row + i) + (box_start_col + j)];
+      cell.classList.add('hover');
+    }
+  }
+
+  let step = 9;
+  while (index - step >= 0) {
+    cells[index - step].classList.add('hover');
+    step += 9;
+  }
+
+  step = 9;
+  while (index + step < 81) {
+    cells[index + step].classList.add('hover');
+    step += 9;
+  }
+
+  step = 1;
+  while (index - step >= 9 * row) {
+    cells[index - step].classList.add('hover');
+    step += 1;
+  }
+
+  step = 1;
+  while (index + step < 9 * row + 9) {
+    cells[index + step].classList.add('hover');
+    step += 1;
+  }
+};
+
+const resetBg = () => {
+  cells.forEach((e) => e.classList.remove('hover'));
+};
+
+const checkErr = (value) => {
+  const addErr = (cell) => {
+    if (parseInt(cell.getAttribute('data-value')) === value) {
+      cell.classList.add('err');
+      cell.classList.add('cell-err');
+      setTimeout(() => {
+        cell.classList.remove('cell-err');
+      }, 500);
+    }
+  };
+
+  let index = selected_cell;
+  let row = Math.floor(index / CONSTANT.GRID_SIZE);
+  let col = index % CONSTANT.GRID_SIZE;
+
+  let box_start_row = row - (row % 3);
+  let box_start_col = col - (col % 3);
+
+  for (let i = 0; i < CONSTANT.BOX_SIZE; i++) {
+    for (let j = 0; j < CONSTANT.BOX_SIZE; j++) {
+      let cell = cells[9 * (box_start_row + i) + (box_start_col + j)];
+      if (!cell.classList.contains('selected')) addErr(cell);
+    }
+  }
+
+  let step = 9;
+  while (index - step >= 0) {
+    addErr(cells[index - step]);
+    step += 9;
+  }
+
+  step = 9;
+  while (index + step < 81) {
+    addErr(cells[index + step]);
+    step += 9;
+  }
+
+  step = 1;
+  while (index - step >= 9 * row) {
+    addErr(cells[index - step]);
+    step += 1;
+  }
+
+  step = 1;
+  while (index + step < 9 * row + 9) {
+    addErr(cells[index + step]);
+    step += 1;
+  }
+};
+
+const removeErr = () => cells.forEach((e) => e.classList.remove('err'));
+
+const saveGameInfo = () => {
+  let game = {
+    level: level_index,
+    seconds: seconds,
+    su: {
+      original: su.original,
+      question: su.question,
+      answer: su_answer,
+    },
+  };
+  localStorage.setItem('game', JSON.stringify(game));
+};
+
+const removeGameInfo = () => {
+  localStorage.removeItem('game');
+  document.querySelector('#btn-continue').style.display = 'none';
+};
+
+const isGameWin = () => sudokuCheck(su_answer);
+
+const showResult = () => {
+  clearInterval(timer);
+  result_screen.classList.add('active');
+  result_time.innerHTML = showTime(seconds);
+};
+
 const init = () => {
   const darkMode = JSON.parse(localStorage.getItem('darkMode'));
   document.body.classList.add(darkMode ? 'dark' : 'light');
