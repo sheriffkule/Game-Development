@@ -10,6 +10,8 @@ const livesDisplay = document.getElementById('lives');
 const heartsDisplay = document.querySelector('.lives .heart');
 const gameOverModal = document.getElementById('gameOverModal');
 const welcomeModal = document.getElementById('welcomeModal');
+const gameOverCloseBtn = document.getElementById('gameOverCloseBtn');
+const welcomeCloseBtn = document.getElementById('welcomeCloseBtn');
 const finalScoreDisplay = document.getElementById('finalScore');
 const scoreList = document.getElementById('scoreList');
 const difficultyProgress = document.querySelector('.difficulty-progress');
@@ -249,3 +251,27 @@ function applyColorblindFilter(color) {
   const grayValue = 0.299 * r + 0.587 * g + 0.114 * b;
   return `rgb(${grayValue}, ${grayValue}, ${grayValue})`;
 }
+
+// Event listeners
+startBtn.addEventListener('click', startGame);
+restartBtn.addEventListener('click', restartGame);
+modalRestartBtn.addEventListener('click', restartGame);
+welcomeStartBtn.addEventListener('click', startGame);
+
+colorblindToggle.addEventListener('change', (e) => {
+  colorblindMode = e.target.checked;
+  if (startBtn.disabled) generateColors();
+});
+
+// Close modal buttons
+gameOverCloseBtn.addEventListener('click', () => {
+  gameOverModal.classList.remove('active');
+  startBtn.disabled = false;
+});
+
+welcomeCloseBtn.addEventListener('click', () => {
+  welcomeModal.classList.remove('active');
+});
+
+// Initialize the game
+init();
