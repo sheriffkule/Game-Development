@@ -92,12 +92,12 @@ function generateColors() {
     // Set dynamic size
     colorBox.style.minHeight = `${boxSize}px`;
 
-    colorBox.addEventListener(click, () => handleColorClick(i));
+    colorBox.addEventListener('click', () => handleColorClick(i));
     colorGrid.appendChild(colorBox);
   }
 
   // Update difficulty indicator
-  difficultyProgress.style.width = `${(difficulty / maxDifficulty) * 100}`;
+  difficultyProgress.style.width = `${(difficulty / maxDifficulty) * 100}%`;
 }
 
 // Handle color box click
@@ -202,4 +202,50 @@ function generateSimilarColor(baseColor, variation) {
   else newB = Math.max(0, Math.min(255, b + variation));
 
   return `rgb(${newR}, ${newG}, ${newB})`;
+}
+
+// Get color variation based on difficulty (smaller variation = harder)
+function getColorVariation() {
+  // Range from 50 (easy) to 10 (hard)
+  return Math.max(10, 50 - difficulty * 4);
+}
+
+// Add score to high score
+function addHighScore(newScore) {
+  highScores.push(newScore);
+  highScores.sort((a, b) => b - a);
+  highScores = highScores.slice(0, 5); // Keep top 5 scores
+  localStorage.setItem('colorSpotterHighScores', JSON.stringify(highScores));
+  updateHighScoresDisplay();
+}
+
+// Update high scores display
+function updateHighScoresDisplay() {
+  scoreList.innerHTML = '';
+
+  if (highScores.length === 0) {
+    scoreList.innerHTML = '<li class="score-item">No scores yet</li>';
+  }
+
+  highScores.forEach((score, index) => {
+    const scoreItem = document.createElement('li');
+    scoreItem.className = 'score-item';
+    scoreItem.innerHTML = `
+      <span>#${index + 1}</span>
+      <span class="score-value">${score}</span>
+    `;
+    scoreList.appendChild(scoreItem);
+  });
+}
+
+// Apply colorblind filter
+function applyColorblindFilter(color) {
+  const match = color.match(/\d+/g);
+  const r = parseInt(match[0]);
+  const g = parseInt(match[1]);
+  const b = parseInt(match[2]);
+
+  // Convert to grayscale for protanopia simulation
+  const grayValue = 0.299 * r + 0.587 * g + 0.114 * b;
+  return `rgb(${grayValue}, ${grayValue}, ${grayValue})`;
 }
