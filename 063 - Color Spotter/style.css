@@ -65,3 +65,26 @@ h1 {
     border-radius: var(--border-radius);
     font-weight: bold;
 }
+
+.timer, .score, .lives {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+:is(.timer, .score, .lives) span {
+    color: var(--primary);
+    font-size: 1.25rem;
+}
+
+.lives .heart {
+    color: var(--danger);
+}
+
+.color-grid {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 20px;
+    width: 100%;
+    grid-template-columns: repeat(2, 1fr);
+}
