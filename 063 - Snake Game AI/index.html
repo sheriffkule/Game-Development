@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Snake Game AI - Wall Passing</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Snake Game AI</h1>
+        <p class="subtitle">Watch the AI master the classic Snake game with wall passig.</p>
+      </header>
+
+      <main class="main-content">
+        <section class="game-container">
+          <canvas id="gameCanvas" width="600" height="600"></canvas>
+          <article class="controls">
+            <button id="startBtn">Start AI</button>
+            <button id="pauseBtn">Pause</button>
+            <button id="resetBtn">Reset</button>
+            <button id="manualBtn">Manual Mode</button>
+            <button id="wallPassBtn" class="toggle-on">Wall Passing: ON</button>
+          </article>
+          <dialog class="game-over" id="gameOver" style="display: block">
+            <h2>Game Over!</h2>
+            <p id="finalScore">Score: 0</p>
+            <button id="restartBtn">Play Again</button>
+          </dialog>
+        </section>
+
+        <aside class="sidebar">
+          <article class="card">
+            <h2>Game Statistics</h2>
+            <div class="stats-grid">
+              <div class="stat-item">
+                <div class="stat-value" id="score">0</div>
+                <div class="stat-label">Score</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value" id="highScore">0</div>
+                <div class="stat-label">High Score</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value" id="moves">0</div>
+                <div class="stat-label">Moves</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value" id="foodEaten">0</div>
+                <div class="stat-label">Food Eaten</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value" id="wallPasses">0</div>
+                <div class="stat-label">Wall Passes</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value" id="efficiency">0%</div>
+                <div class="stat-label">Efficiency</div>
+              </div>
+            </div>
+          </article>
+
+          <article class="card">
+            <h2>Game Settings</h2>
+            <div class="settings-grid">
+              <div class="setting-item">
+                <label for="aiAlgorithm">AI Algorithm:</label>
+                <select id="aiAlgorithm">
+                  <option value="hamiltonian">Hamiltonian Path</option>
+                  <option value="bfs">Breadth-First Search</option>
+                  <option value="aStar">A* Search</option>
+                </select>
+              </div>
+              <div class="setting-item">
+                <label for="gameSpeed">Game Speed:</label>
+                <input type="range" id="gameSpeed" class="speed-slider" min="1" max="10" value="5" />
+              </div>
+
+              <div class="setting-item">
+                <label for="gridSize">Grid Size:</label>
+                <select id="gridSize">
+                  <option value="15">15x15</option>
+                  <option value="20">20x20</option>
+                  <option value="25">25x25</option>
+                </select>
+              </div>
+            </div>
+          </article>
+
+          <article class="card">
+            <h2>AI Information</h2>
+            <div class="ai-info">
+              <p><strong>Current Algorithm:</strong> <span id="currentAlgorithm">Hamiltonian Path</span></p>
+              <p><strong>Status:</strong> <span id="aiStatus">Idle</span></p>
+              <p><strong>Wall Passing:</strong> <span id="wallPassStatus">Enabled</span></p>
+              <div class="algorithm-description" id="algorithmDescription">
+                The Hamiltonian Path algorithm ensures the snake visits every cell exactly once, guaranteeing
+                no collisions.
+              </div>
+            </div>
+          </article>
+
+          <article class="card">
+            <h2>Game Features <span class="feature-badge">NEW</span></h2>
+            <div class="ai-info">
+              <p>
+                <strong>Wall Passing:</strong> Snake can now pass through walls and appear on the opposite
+                side.
+              </p>
+              <p><strong>Enhanced AI:</strong> AI adapts to wall passing for more efficient gameplay.</p>
+              <p><strong>Statistics:</strong> Track wall passes and efficiency metrics.</p>
+            </div>
+          </article>
+        </aside>
+      </main>
+    </div>
+  </body>
+</html>
