@@ -15,7 +15,7 @@
 
       <main class="main-content">
         <section class="game-container">
-          <canvas id="gameCanvas" width="600" height="600"></canvas>
+          <canvas id="gameCanvas" width="600" height="600" class="game-board"></canvas>
           <article class="controls">
             <button id="startBtn">Start AI</button>
             <button id="pauseBtn">Pause</button>
@@ -23,7 +23,7 @@
             <button id="manualBtn">Manual Mode</button>
             <button id="wallPassBtn" class="toggle-on">Wall Passing: ON</button>
           </article>
-          <dialog class="game-over" id="gameOver" style="display: block">
+          <dialog class="game-over" id="gameOver">
             <h2>Game Over!</h2>
             <p id="finalScore">Score: 0</p>
             <button id="restartBtn">Play Again</button>
