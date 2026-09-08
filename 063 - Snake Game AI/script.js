@@ -1,7 +1,7 @@
 // Game variables
 /** @type {HTMLCanvasElement} */
 const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getElementById('2d');
+const ctx = canvas.getContext('2d');
 const startBtn = document.getElementById('startBtn');
 const pauseBtn = document.getElementById('pauseBtn');
 const resetBtn = document.getElementById('resetBtn');
@@ -42,7 +42,7 @@ let gameInterval;
 
 // Initialize game objects
 let snake = [];
-let foot = {};
+let food = {};
 let direction = 'right';
 let nextDirection = 'right';
 
@@ -81,6 +81,12 @@ function initGame() {
 
 // Generate food at random position
 function generateFood() {
+  const availableCells = gridSize * gridSize - snake.length;
+  if (availableCells <= 0) {
+    gameOver();
+    return;
+  }
+
   let newFood;
   let isOnSnake;
 
@@ -141,7 +147,7 @@ function draw() {
         );
         ctx.fillRect(
           segment.x * cellSize + cellSize - offset,
-          segment.y * cellSize * cellSize - offset - eyeSize,
+          segment.y * cellSize + cellSize - offset - eyeSize,
           eyeSize,
           eyeSize,
         );
@@ -235,14 +241,15 @@ function update() {
 
   // Handle wall passing
   if (wallPassingEnabled) {
+    const crossedWall = head.x < 0 || head.x >= gridSize || head.y < 0 || head.y >= gridSize;
+
     if (head.x < 0) head.x = gridSize - 1;
     else if (head.x >= gridSize) head.x = 0;
     if (head.y < 0) head.y = gridSize - 1;
     else if (head.y >= gridSize) head.y = 0;
 
     // Track wall passes
-    if (head.x !== snake[0].x && (head.x === 0 || head.x === gridSize - 1)) wallPasses++;
-    if (head.y !== snake[0].y && (head.y === 0 || head.y === gridSize - 1)) wallPasses++;
+    if (crossedWall) wallPasses++;
   } else {
     // Check for collisions with walls
     if (head.x < 0 || head.x >= gridSize || head.y < 0 || head.y >= gridSize) {
@@ -252,7 +259,8 @@ function update() {
   }
 
   // Check for collisions with self
-  if (snake.some((segment) => segment.x === head.x && segment.y === head.y)) {
+  const bodyToCheck = head.x === food.x && head.y === food.y ? snake : snake.slice(0, -1);
+  if (bodyToCheck.some((segment) => segment.x === head.x && segment.y === head.y)) {
     gameOver();
     return;
   }
@@ -290,6 +298,7 @@ function update() {
 function gameOver() {
   isRunning = false;
   clearInterval(gameInterval);
+  gameInterval = undefined;
 
   // Update high score
   if (score > highScore) {
@@ -310,8 +319,73 @@ function updateStats() {
   highScoreElement.textContent = highScore;
   movesElement.textContent = moves;
   foodEatenElement.textContent = foodEaten;
-  wallPassStatusElement.textContent = wallPasses;
-  efficiencyElement.textContent = `${efficiency}`;
+  wallPassesElement.textContent = wallPasses;
+  efficiencyElement.textContent = `${efficiency}%`;
+}
+
+function findPathDirection(algorithm) {
+  const start = snake[0];
+  const target = food;
+  const occupied = new Set(snake.slice(0, -1).map((segment) => `${segment.x},${segment.y}`));
+  const startKey = `${start.x},${start.y}`;
+  const targetKey = `${target.x},${target.y}`;
+  const directions = [
+    { name: 'up', x: 0, y: -1 },
+    { name: 'down', x: 0, y: 1 },
+    { name: 'left', x: -1, y: 0 },
+    { name: 'right', x: 1, y: 0 },
+  ];
+  const cameFrom = new Map([[startKey, null]]);
+  const distance = new Map([[startKey, 0]]);
+  const open = [{ x: start.x, y: start.y, priority: 0 }];
+
+  const heuristic = (x, y) => {
+    const dx = Math.abs(target.x - x);
+    const dy = Math.abs(target.y - y);
+    return wallPassingEnabled ? Math.min(dx, gridSize - dx) + Math.min(dy, gridSize - dy) : dx + dy;
+  };
+
+  while (open.length > 0) {
+    open.sort((first, second) => first.priority - second.priority);
+    const current = open.shift();
+    const currentKey = `${current.x},${current.y}`;
+
+    if (currentKey === targetKey) {
+      let stepKey = targetKey;
+      let step = cameFrom.get(stepKey);
+      while (step && step.previous !== startKey) {
+        stepKey = step.previous;
+        step = cameFrom.get(stepKey);
+      }
+      return step ? step.direction : null;
+    }
+
+    for (const directionOption of directions) {
+      let nextX = current.x + directionOption.x;
+      let nextY = current.y + directionOption.y;
+
+      if (wallPassingEnabled) {
+        nextX = (nextX + gridSize) % gridSize;
+        nextY = (nextY + gridSize) % gridSize;
+      } else if (nextX < 0 || nextX >= gridSize || nextY < 0 || nextY >= gridSize) {
+        continue;
+      }
+
+      const nextKey = `${nextX},${nextY}`;
+      if (occupied.has(nextKey) || distance.has(nextKey)) continue;
+
+      const nextDistance = distance.get(currentKey) + 1;
+      distance.set(nextKey, nextDistance);
+      cameFrom.set(nextKey, { previous: currentKey, direction: directionOption.name });
+      open.push({
+        x: nextX,
+        y: nextY,
+        priority: algorithm === 'aStar' ? nextDistance + heuristic(nextX, nextY) : nextDistance,
+      });
+    }
+  }
+
+  return null;
 }
 
 // AI movement logic (enhanced for wall passing)
@@ -320,6 +394,14 @@ function aiMove() {
 
   // Simple AI logic = move toward food with basic pathfinder
   const head = snake[0];
+
+  if (aiAlgorithmSelect.value !== 'hamiltonian') {
+    const pathDirection = findPathDirection(aiAlgorithmSelect.value);
+    if (pathDirection) {
+      nextDirection = pathDirection;
+      return;
+    }
+  }
 
   // Calculate direction to food with wall passing consideration
   let dx = food.x - head.x;
@@ -391,4 +473,187 @@ function aiMove() {
     if (nextHead.y < 0) nextHead.y = gridSize - 1;
     else if (nextHead.y >= gridSize) nextHead.y = 0;
   }
+
+  // Check if next move would cause collision
+  if (snake.slice(0, -1).some((segment) => segment.x === nextHead.x && segment.y === nextHead.y)) {
+    // Try to find a safe direction
+    const directions = ['up', 'down', 'left', 'right'];
+    const safeDirections = directions.filter((dir) => {
+      if (
+        (dir === 'up' && direction === 'down') ||
+        (dir === 'down' && direction === 'up') ||
+        (dir === 'left' && direction === 'right') ||
+        (dir === 'right' && direction === 'left')
+      ) {
+        return false; // Can't reverse direction
+      }
+
+      const testHead = { ...head };
+      switch (dir) {
+        case 'up':
+          testHead.y--;
+          break;
+        case 'down':
+          testHead.y++;
+          break;
+        case 'left':
+          testHead.x--;
+          break;
+        case 'right':
+          testHead.x++;
+          break;
+      }
+
+      // Handle wall passing in test
+      if (wallPassingEnabled) {
+        if (testHead.x < 0) testHead.x = gridSize - 1;
+        else if (testHead.x >= gridSize) testHead.x = 0;
+        if (testHead.y < 0) testHead.y = gridSize - 1;
+        else if (testHead.y >= gridSize) testHead.y = 0;
+      } else {
+        // Check for wall collision
+        if (testHead.x < 0 || testHead.x >= gridSize || testHead.y < 0 || testHead.y >= gridSize) {
+          return false;
+        }
+      }
+
+      // Check for self collision
+      return !snake.slice(0, -1).some((segment) => segment.x === testHead.x && segment.y === testHead.y);
+    });
+
+    // If there are safe directions, pick one randomly
+    if (safeDirections.length > 0) {
+      nextDirection = safeDirections[Math.floor(Math.random() * safeDirections.length)];
+    }
+    // Otherwise, continue in current direction (game over is imminent)
+  }
 }
+
+// Manual control for testing
+document.addEventListener('keydown', (e) => {
+  if (!isManualMode || !isRunning || isPaused) return;
+
+  switch (e.key) {
+    case 'ArrowUp':
+      if (direction !== 'down') nextDirection = 'up';
+      break;
+    case 'ArrowDown':
+      if (direction !== 'up') nextDirection = 'down';
+      break;
+    case 'ArrowLeft':
+      if (direction !== 'right') nextDirection = 'left';
+      break;
+    case 'ArrowRight':
+      if (direction !== 'left') nextDirection = 'right';
+      break;
+  }
+});
+
+// Event listeners for buttons
+startBtn.addEventListener('click', () => {
+  if (!isRunning) {
+    if (gameOverScreen.style.display === 'block') {
+      initGame();
+    }
+
+    isRunning = true;
+    isPaused = false;
+    aiStatusElement.textContent = 'Playing';
+
+    gameInterval = setInterval(() => {
+      aiMove();
+      update();
+    }, gameSpeed);
+  }
+});
+
+pauseBtn.addEventListener('click', () => {
+  if (isRunning) {
+    isPaused = !isPaused;
+    aiStatusElement.textContent = isPaused ? 'Paused' : 'Playing';
+    pauseBtn.textContent = isPaused ? 'Resume' : 'Pause';
+  }
+});
+
+resetBtn.addEventListener('click', () => {
+  clearInterval(gameInterval);
+  gameInterval = undefined;
+  initGame();
+  pauseBtn.textContent = 'Pause';
+});
+
+manualBtn.addEventListener('click', () => {
+  isManualMode = !isManualMode;
+  manualBtn.textContent = isManualMode ? 'AI Mode' : 'Manual Mode';
+  aiStatusElement.textContent = isManualMode ? 'Manual Control' : 'Idle';
+});
+
+wallPassBtn.addEventListener('click', () => {
+  wallPassingEnabled = !wallPassingEnabled;
+  wallPassBtn.textContent = `Wall Passing: ${wallPassingEnabled ? 'ON' : 'OFF'}`;
+  wallPassBtn.classList.toggle('toggle-on', wallPassingEnabled);
+  wallPassStatusElement.textContent = wallPassingEnabled ? 'Enabled' : 'Disabled';
+
+  // Redraw to update wall visualization
+  draw();
+});
+
+restartBtn.addEventListener('click', () => {
+  clearInterval(gameInterval);
+  gameInterval = undefined;
+  initGame();
+  pauseBtn.textContent = 'Pause';
+});
+
+// Update game speed when slider changes
+gameSpeedSlider.addEventListener('input', () => {
+  const speedValue = parseInt(gameSpeedSlider.value);
+  gameSpeed = 200 - speedValue * 15; // Convert to milliseconds (faster with higher value)
+
+  if (isRunning) {
+    clearInterval(gameInterval);
+    gameInterval = setInterval(() => {
+      aiMove();
+      update();
+    }, gameSpeed);
+  }
+});
+
+// Update grid size when selector changes
+gridSizeSelect.addEventListener('change', () => {
+  const wasRunning = isRunning;
+  clearInterval(gameInterval);
+  gameInterval = undefined;
+  gridSize = Number(gridSizeSelect.value);
+  cellSize = canvas.width / gridSize;
+  initGame();
+
+  if (wasRunning) {
+    startBtn.click();
+  }
+});
+
+aiAlgorithmSelect.addEventListener('change', () => {
+  const algorithm = aiAlgorithmSelect.value;
+  currentAlgorithmElement.textContent =
+    algorithm === 'hamiltonian'
+      ? 'Hamiltonian Path'
+      : algorithm === 'bfs'
+        ? 'Breadth-First Search'
+        : 'A* Search';
+
+  if (algorithm === 'hamiltonian') {
+    algorithmDescriptionElement.textContent =
+      'The Hamiltonian Path algorithm ensures the snake visits every cell exactly once, guaranteeing no collisions.';
+  } else if (algorithm === 'bfs') {
+    algorithmDescriptionElement.textContent =
+      'Breadth-First Search finds the shortest path to the food, but may not always be optimal for longer snakes.';
+  } else {
+    algorithmDescriptionElement.textContent =
+      'A* Search uses heuristics to find an optimal path to the food, balancing efficiency and performance.';
+  }
+});
+
+// Initialize the game
+initGame();
+highScoreElement.textContent = highScore;
