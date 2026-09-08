@@ -202,7 +202,7 @@ select, input {
     padding: 30px 50px;
     border-radius: 10px;
     text-align: center;
-    display: block;
+    display: none;
 
     h2 {
         color: #e94560;

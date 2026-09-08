@@ -208,3 +208,187 @@ function draw() {
   ctx.arc(centerX - radius / 3, centerY - radius / 3, radius / 3, 0, Math.PI * 2);
   ctx.fill();
 }
+
+// Update game stats
+function update() {
+  if (isPaused || !isRunning) return;
+
+  // Update direction
+  direction = nextDirection;
+
+  // Calculate new head position
+  const head = { ...snake[0] };
+  switch (direction) {
+    case 'up':
+      head.y--;
+      break;
+    case 'down':
+      head.y++;
+      break;
+    case 'left':
+      head.x--;
+      break;
+    case 'right':
+      head.x++;
+      break;
+  }
+
+  // Handle wall passing
+  if (wallPassingEnabled) {
+    if (head.x < 0) head.x = gridSize - 1;
+    else if (head.x >= gridSize) head.x = 0;
+    if (head.y < 0) head.y = gridSize - 1;
+    else if (head.y >= gridSize) head.y = 0;
+
+    // Track wall passes
+    if (head.x !== snake[0].x && (head.x === 0 || head.x === gridSize - 1)) wallPasses++;
+    if (head.y !== snake[0].y && (head.y === 0 || head.y === gridSize - 1)) wallPasses++;
+  } else {
+    // Check for collisions with walls
+    if (head.x < 0 || head.x >= gridSize || head.y < 0 || head.y >= gridSize) {
+      gameOver();
+      return;
+    }
+  }
+
+  // Check for collisions with self
+  if (snake.some((segment) => segment.x === head.x && segment.y === head.y)) {
+    gameOver();
+    return;
+  }
+
+  // Add new head
+  snake.unshift(head);
+
+  // Check for food collision
+  if (head.x === food.x && head.y === food.y) {
+    // Increase score
+    score += 10;
+    foodEaten++;
+
+    // Generate new food
+    generateFood();
+  } else {
+    // Remove tail if no food was eaten
+    snake.pop();
+  }
+
+  // Update moves counter
+  moves++;
+
+  // Calculate efficiency (food eaten per move)
+  efficiency = moves > 0 ? Math.round((foodEaten / moves) * 100) : 0;
+
+  // Update UI
+  updateStats();
+
+  // Redraw game
+  draw();
+}
+
+// Game over handler
+function gameOver() {
+  isRunning = false;
+  clearInterval(gameInterval);
+
+  // Update high score
+  if (score > highScore) {
+    highScore = score;
+    localStorage.setItem('snakeHighScore', highScore);
+    highScoreElement.textContent = highScore;
+  }
+
+  // Show game over screen
+  finalScoreElement.textContent = `Score: ${score}`;
+  gameOverScreen.style.display = 'block';
+  aiStatusElement.textContent = 'Game Over';
+}
+
+// Update statistics display
+function updateStats() {
+  scoreElement.textContent = score;
+  highScoreElement.textContent = highScore;
+  movesElement.textContent = moves;
+  foodEatenElement.textContent = foodEaten;
+  wallPassStatusElement.textContent = wallPasses;
+  efficiencyElement.textContent = `${efficiency}`;
+}
+
+// AI movement logic (enhanced for wall passing)
+function aiMove() {
+  if (!isRunning || isPaused || isManualMode) return;
+
+  // Simple AI logic = move toward food with basic pathfinder
+  const head = snake[0];
+
+  // Calculate direction to food with wall passing consideration
+  let dx = food.x - head.x;
+  let dy = food.y - head.y;
+
+  // If wall passing is enabled, consider the shortest path including through walls
+  if (wallPassingEnabled) {
+    // Check if going through a wall would be shorter
+    const altDx = dx > 0 ? dx - gridSize : dx + gridSize;
+    const altDy = dy > 0 ? dy - gridSize : dy + gridSize;
+
+    // Use the shortest path (through wall or normal
+    if (Math.abs(altDx) < Math.abs(dx)) dx = altDx;
+    if (Math.abs(altDy) < Math.abs(dy)) dy = altDy;
+  }
+
+  // Prefer horizontal or vertical movement based on distance
+  if (Math.abs(dx) > Math.abs(dy)) {
+    // Move horizontally
+    if (dx > 0 && direction !== 'left') {
+      nextDirection = 'right';
+    } else if (dx < 0 && direction !== 'right') {
+      nextDirection = 'left';
+    } else {
+      // If moving horizontally isn't possible, try vertical
+      if (dy > 0 && direction !== 'up') {
+        nextDirection = 'down';
+      } else if (dy < 0 && direction !== 'down') {
+        nextDirection = 'up';
+      }
+    }
+  } else {
+    // Move vertically
+    if (dy > 0 && direction !== 'up') {
+      nextDirection = 'down';
+    } else if (dy < 0 && direction !== 'down') {
+      nextDirection = 'up';
+    } else {
+      // If moving vertically isn't possible, try horizontal
+      if (dx > 0 && direction !== 'left') {
+        nextDirection = 'right';
+      } else if (dx < 0 && direction !== 'right') {
+        nextDirection = 'left';
+      }
+    }
+  }
+
+  // Avoid immediate self-collision
+  const nextHead = { ...head };
+  switch (nextDirection) {
+    case 'up':
+      nextHead.y--;
+      break;
+    case 'down':
+      nextHead.y++;
+      break;
+    case 'left':
+      nextHead.x--;
+      break;
+    case 'right':
+      nextHead.x++;
+      break;
+  }
+
+  // Handle wall passing in collision check
+  if (wallPassingEnabled) {
+    if (nextHead.x < 0) nextHead.x = gridSize - 1;
+    else if (nextHead.x >= gridSize) nextHead.x = 0;
+    if (nextHead.y < 0) nextHead.y = gridSize - 1;
+    else if (nextHead.y >= gridSize) nextHead.y = 0;
+  }
+}
