@@ -124,3 +124,20 @@ let winImageSize = { w: 228, h: 274 };
 let restartImageSize = { w: 180, h: 180 };
 restartImageSize.x = gameWidth / 2 - restartImageSize.w / 2;
 restartImageSize.y = gameHeight / 2 + restartImageSize.h / 3;
+
+const player1WinImage = new Image();
+player1WinImage.src = 'images/player1Win.png';
+
+const player2WinImage = new Image();
+player2WinImage.src = 'images/player2Win.png';
+
+const restartImage = new Image();
+restartImage.src = 'images/restart.png';
+
+const song = new Audio('sounds/endMusic.mp3');
+
+explosionUrl = 'sounds/explosion.mp3';
+
+plantUrl = 'sounds/plant.mp3';
+
+collectUrl = 'sounds/collect.mp3';
