@@ -98,7 +98,7 @@ bombArray = [];
 
 const explosionImage = new Image();
 explosionImage.src = 'images/explosion.png';
-let explosion = {
+let explosionObj = {
   image: explosionImage,
   x: 0,
   y: 0,

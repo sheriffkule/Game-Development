@@ -77,6 +77,171 @@ let bombExplode = function (bomb, player) {
   }
 };
 
+let explosion = function (
+  bomb,
+  player,
+  iteration = 0,
+  up = true,
+  down = true,
+  left = true,
+  right = true,
+  createdBombs = [],
+) {
+  try {
+    if (!gameOver) {
+      if (iteration == 0) {
+        let newExplosion = { image: explosionImage, x: bomb.x, y: bomb.y, w: blockSize, h: blockSize };
+        explosionArray.push(newExplosion);
+        createdBombs.push(newExplosion);
+        checkHitWithPlayer(newExplosion);
+      } else {
+        let newExplosion;
+        for (let i = 0; i < 4; i++) {
+          let addExplosion = false;
+          switch (i) {
+            case 0:
+              if (right) {
+                newExplosion = {
+                  image: explosionImage,
+                  x: bomb.x + blockSize * iteration,
+                  y: bomb.y,
+                  w: blockSize,
+                  h: blockSize,
+                };
+                if (checkHitWithStaticBlock(newExplosion)) {
+                  right = false;
+                } else {
+                  addExplosion = true;
+                  if (destroyBlocks(newExplosion)) {
+                    right = false;
+                  } else {
+                    checkHitWithPlayer(newExplosion);
+                  }
+                }
+              }
+              break;
+            case 1:
+              if (left) {
+                newExplosion = {
+                  image: explosionImage,
+                  x: bomb.x - blockSize * iteration,
+                  y: bomb.y,
+                  w: blockSize,
+                  h: blockSize,
+                };
+                if (checkHitWithStaticBlock(newExplosion)) {
+                  left = false;
+                } else {
+                  addExplosion = true;
+                  if (destroyBlocks(newExplosion)) {
+                    left = false;
+                  } else {
+                    checkHitWithPlayer(newExplosion);
+                  }
+                }
+              }
+              break;
+            case 2:
+              if (down) {
+                newExplosion = {
+                  image: explosionImage,
+                  x: bomb.x,
+                  y: bomb.y + blockSize * iteration,
+                  w: blockSize,
+                  h: blockSize,
+                };
+                if (checkHitWithStaticBlock(newExplosion)) {
+                  down = false;
+                } else {
+                  addExplosion = true;
+                  if (destroyBlocks(newExplosion)) {
+                    down = false;
+                  } else {
+                    checkHitWithPlayer(newExplosion);
+                  }
+                }
+              }
+              break;
+            case 3:
+              if (up) {
+                newExplosion = {
+                  image: explosionImage,
+                  x: bomb.x,
+                  y: bomb.y - blockSize * iteration,
+                  w: blockSize,
+                  h: blockSize,
+                };
+                if (checkHitWithStaticBlock(newExplosion)) {
+                  up = false;
+                } else {
+                  addExplosion = true;
+                  if (destroyBlocks(newExplosion)) {
+                    up = false;
+                  } else {
+                    checkHitWithPlayer(newExplosion);
+                  }
+                }
+              }
+              break;
+          }
+          if (addExplosion) {
+            if (!checkHitWithStaticBlock(newExplosion)) {
+              explosionArray.push(newExplosion);
+              createdBombs.push(newExplosion);
+              let explosionSound = new Audio(explosionUrl);
+              explosionSound.play();
+              explosionSound.volume = 0.4;
+            }
+          }
+        }
+      }
+      if (iteration < player.explosionSize) {
+        setTimeout(() => {
+          explosion(bomb, player, iteration++, up, down, left, right, createdBombs);
+        }, 50);
+      } else {
+        setTimeout(() => {
+          removeExplosion(createdBombs);
+        }, 500);
+      }
+    }
+  } catch (error) {
+    console.error('Error', error);
+  }
+};
+
+let removeExplosion = function (createdBombs) {
+  if (!gameOver) {
+    for (let i = 0; i < createdBombs.length; i++) {
+      explosionArray.splice(explosionArray.indexOf(createdBombs[i]), 1);
+    }
+  }
+};
+
+let destroyBlocks = function (explosion) {
+  let blockToDestroy = false;
+  if ((blockToDestroy = checkHitWithNonStBlock(explosion))) {
+    nonStBlockArray.splice(nonStBlockArray.indexOf(blockToDestroy), 1);
+  }
+  return blockToDestroy;
+};
+
+let checkHitWithPlayer = function (explosion) {
+  if (hitTest(player1, explosion)) {
+    win(player2);
+  } else if (hitTest(player2, explosion)) {
+    win(player1);
+  }
+};
+
+let win = function (player) {
+  song.play();
+  song.volume = 0.3;
+
+  gameOver = true;
+  winner = player;
+};
+
 let hitTest = function (a, b) {
   if (a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y) {
     return true;
@@ -90,6 +255,16 @@ let checkHitWithStaticBlock = function (a) {
   for (let i = 0; i < staticBlockArray.length; i++) {
     if (hitTest(staticBlockArray[i], a)) {
       return staticBlockArray[i];
+    }
+  }
+  return result;
+};
+
+let checkHitWithNonStBlock = function (a) {
+  let result = false;
+  for (let i = 0; i < nonStBlockArray.length; i++) {
+    if (hitTest(nonStBlockArray[i], a)) {
+      return nonStBlockArray[i];
     }
   }
   return result;
