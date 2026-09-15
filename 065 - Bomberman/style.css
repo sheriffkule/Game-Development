@@ -23,15 +23,17 @@ h1 {
     margin-block: 2rem;
 }
 
-.container {
-    /* width: 50%;
-    height: 50%; */
-}
-
 canvas {
     border: 2px solid darkcyan;
     display: block;
     width: auto;
     height: 90%;
+    margin-bottom: 2rem;
+}
+
+.instructions {
+    color: silver;
+    text-align: center;
+    line-height: 1.5;
     margin-bottom: 2rem;
 }

@@ -1,13 +1,16 @@
 let keysDown = {};
-addEventListener(
+window.addEventListener(
   'keydown',
   function (e) {
+    if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
+      e.preventDefault();
+    }
     keysDown[e.code] = true;
   },
-  false,
+  { passive: false },
 );
 
-addEventListener(
+window.addEventListener(
   'keyup',
   function (e) {
     delete keysDown[e.code];
@@ -24,7 +27,11 @@ addEventListener(
 );
 
 let keysUpdate = function () {
+  let blockHit;
   if (!gameOver) {
+    checkPowerUps(player1);
+    checkPowerUps(player2);
+
     if ('Space' in keysDown) plantBomb(player1);
     if ('Enter' in keysDown) plantBomb(player2);
 
@@ -38,8 +45,6 @@ let keysUpdate = function () {
     if ('KeyW' in keysDown) movePlayerUp(player1);
     if ('KeyS' in keysDown) movePlayerDown(player1);
   }
-
-  let blockHit;
 
   function movePlayerUp(player, offset = 0) {
     let playerTest = { x: player.x, y: player.y - player.speed, w: player.w, h: player.h };
@@ -86,7 +91,13 @@ let keysUpdate = function () {
   function plantBomb(player) {
     if (player.availableBombs > 0 && !checkHitWithBomb(player)) {
       --player.availableBombs;
-      newBomb = {
+
+      if (player.availableBombs === 0) {
+        const otherPlayer = player === player1 ? player2 : player1;
+        win(otherPlayer);
+      }
+
+      const newBomb = {
         image: bomb.image,
         x: Math.round(player.x / blockSize) * blockSize,
         y: Math.round(player.y / blockSize) * blockSize,

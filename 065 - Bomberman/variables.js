@@ -8,7 +8,7 @@ let gameOver = false;
 let winner;
 
 let playerStartSpeed = 5;
-let bombsOnStart = 1;
+let bombsOnStart = 12;
 let startExplosionSize = 1;
 
 /** @type {HTMLCanvasElement}  */
@@ -30,6 +30,7 @@ const initPlayer = function () {
   const player1ImageRight = new Image();
   player1ImageRight.src = 'images/player1Right.png';
   player1 = {
+    name: 'Player 1',
     image: player1ImageRight,
     imageLeft: player1ImageLeft,
     imageRight: player1ImageRight,
@@ -41,6 +42,7 @@ const initPlayer = function () {
     availableBombs: bombsOnStart,
     onBomb: null,
     explosionSize: startExplosionSize,
+    score: 0,
   };
 
   // Player2
@@ -49,6 +51,7 @@ const initPlayer = function () {
   const player2ImageRight = new Image();
   player2ImageRight.src = 'images/player2Right.png';
   player2 = {
+    name: 'Player 2',
     image: player2ImageLeft,
     imageLeft: player2ImageLeft,
     imageRight: player2ImageRight,
@@ -60,6 +63,7 @@ const initPlayer = function () {
     availableBombs: bombsOnStart,
     onBomb: null,
     explosionSize: startExplosionSize,
+    score: 0,
   };
 };
 
@@ -125,8 +129,6 @@ let powerUpArray = [];
 
 let winImageSize = { w: 228, h: 274 };
 let restartImageSize = { w: 180, h: 180 };
-restartImageSize.x = gameWidth / 2 - restartImageSize.w / 2;
-restartImageSize.y = gameHeight / 2 + restartImageSize.h / 3;
 
 const player1WinImage = new Image();
 player1WinImage.src = 'images/player1Win.png';
@@ -136,6 +138,13 @@ player2WinImage.src = 'images/player2Win.png';
 
 const restartImage = new Image();
 restartImage.src = 'images/restart.png';
+
+restartImageSize.x = gameWidth / 2 - restartImageSize.w / 2;
+restartImageSize.y = gameHeight / 2 + restartImageSize.h / 3;
+restartImage.x = restartImageSize.x;
+restartImage.y = restartImageSize.y;
+restartImage.w = restartImageSize.w;
+restartImage.h = restartImageSize.h;
 
 const song = new Audio('sounds/endMusic.mp3');
 

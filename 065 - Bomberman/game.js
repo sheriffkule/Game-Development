@@ -37,6 +37,7 @@ let checkPowerUps = function (player) {
 
     let collectSound = new Audio(collectUrl);
     collectSound.play();
+    collectSound.volume = 0.5;
 
     switch (result.type) {
       case 'bombAdd':
@@ -72,9 +73,17 @@ let playerOnBomb = function (player, playerTest) {
 let bombExplode = function (bomb, player) {
   if (!gameOver) {
     let currentBomb = bombArray.shift();
-    ++player.availableBombs;
+    if (!currentBomb) return;
     explosion(currentBomb, player);
   }
+};
+
+let drawHud = function () {
+  ctx.font = 'bold 32px sans-serif';
+  ctx.fillStyle = '#fff';
+  ctx.textBaseline = 'top';
+  ctx.fillText(`P1 Score: ${player1.score} | Bombs: ${player1.availableBombs}`, 20, 14);
+  ctx.fillText(`P2 Score: ${player2.score} | Bombs: ${player2.availableBombs}`, gameWidth - 400, 14);
 };
 
 let explosion = function (
@@ -88,9 +97,17 @@ let explosion = function (
   createdBombs = [],
 ) {
   try {
+    if (!bomb || !player) return;
     if (!gameOver) {
       if (iteration == 0) {
-        let newExplosion = { image: explosionImage, x: bomb.x, y: bomb.y, w: blockSize, h: blockSize };
+        let newExplosion = {
+          image: explosionImage,
+          x: bomb.x,
+          y: bomb.y,
+          w: blockSize,
+          h: blockSize,
+          owner: player,
+        };
         explosionArray.push(newExplosion);
         createdBombs.push(newExplosion);
         checkHitWithPlayer(newExplosion);
@@ -107,6 +124,7 @@ let explosion = function (
                   y: bomb.y,
                   w: blockSize,
                   h: blockSize,
+                  owner: player,
                 };
                 if (checkHitWithStaticBlock(newExplosion)) {
                   right = false;
@@ -128,6 +146,7 @@ let explosion = function (
                   y: bomb.y,
                   w: blockSize,
                   h: blockSize,
+                  owner: player,
                 };
                 if (checkHitWithStaticBlock(newExplosion)) {
                   left = false;
@@ -149,6 +168,7 @@ let explosion = function (
                   y: bomb.y + blockSize * iteration,
                   w: blockSize,
                   h: blockSize,
+                  owner: player,
                 };
                 if (checkHitWithStaticBlock(newExplosion)) {
                   down = false;
@@ -170,6 +190,7 @@ let explosion = function (
                   y: bomb.y - blockSize * iteration,
                   w: blockSize,
                   h: blockSize,
+                  owner: player,
                 };
                 if (checkHitWithStaticBlock(newExplosion)) {
                   up = false;
@@ -197,7 +218,7 @@ let explosion = function (
       }
       if (iteration < player.explosionSize) {
         setTimeout(() => {
-          explosion(bomb, player, iteration++, up, down, left, right, createdBombs);
+          explosion(bomb, player, iteration + 1, up, down, left, right, createdBombs);
         }, 50);
       } else {
         setTimeout(() => {
@@ -222,6 +243,9 @@ let destroyBlocks = function (explosion) {
   let blockToDestroy = false;
   if ((blockToDestroy = checkHitWithNonStBlock(explosion))) {
     nonStBlockArray.splice(nonStBlockArray.indexOf(blockToDestroy), 1);
+    if (explosion.owner) {
+      explosion.owner.score += 10;
+    }
   }
   return blockToDestroy;
 };
@@ -235,8 +259,16 @@ let checkHitWithPlayer = function (explosion) {
 };
 
 let win = function (player) {
+  if (gameOver) return;
+
   song.play();
   song.volume = 0.3;
+
+  if (player === player1) {
+    player1.score += 1;
+  } else if (player === player2) {
+    player2.score += 1;
+  }
 
   gameOver = true;
   winner = player;
@@ -270,6 +302,32 @@ let checkHitWithNonStBlock = function (a) {
   return result;
 };
 
+let checkHitWithBlock = function (a) {
+  let result = false;
+  result = checkHitWithStaticBlock(a);
+  if (!result) {
+    result = checkHitWithNonStBlock(a);
+  }
+  return result;
+};
+
+let checkBombMovement = function (a) {
+  let result = false;
+  result = checkHitWithBomb(a);
+
+  return result;
+};
+
+let checkHitWithBomb = function (a) {
+  let result = false;
+  for (let i = 0; i < bombArray.length; i++) {
+    if (hitTest(bombArray[i], a)) {
+      return bombArray[i];
+    }
+  }
+  return result;
+};
+
 let initEnvironment = function () {
   let k = 0;
   for (let j = 0; j < Math.floor(gameHeight / blockSize / 2); j++) {
@@ -290,7 +348,8 @@ let initBlocks = function () {
   for (let j = 0; j < gameHeight / blockSize; j++) {
     for (let i = 0; i < gameHeight / blockSize; i++) {
       if (
-        ((i * blockSize > blockSize || (j * blockSize && j * blockSize < gameHeight - blockSize * 2)) &&
+        ((i * blockSize > blockSize ||
+          (j * blockSize > blockSize && j * blockSize < gameHeight - blockSize * 2)) &&
           i * blockSize < gameHeight - blockSize * 2) ||
         (j * blockSize > blockSize && j * blockSize < gameHeight - blockSize * 2)
       ) {
@@ -420,6 +479,46 @@ let drawPlayers = function () {
   ctx.drawImage(player2.image, player2.x, player2.y, player2.w, player2.h);
 };
 
+let drawWinner = function () {
+  let winImage;
+  switch (winner) {
+    case player2:
+      winImage = player2WinImage;
+      break;
+    case player1:
+      winImage = player1WinImage;
+      break;
+  }
+
+  if (!winImage) return;
+
+  const panelX = gameWidth / 5;
+  const panelY = gameHeight / 5;
+  const panelW = (gameWidth / 5) * 3;
+  const panelH = (gameHeight /4) * 3;
+
+  const pulse = 1 + Math.sin(Date.now() / 140) * 0.1;
+
+  ctx.fillStyle = 'green';
+  ctx.fillRect(panelX, panelY, panelW, panelH);
+  ctx.drawImage(
+    winImage,
+    gameWidth / 2 - (winImageSize.w * pulse) / 2,
+    gameHeight / 2.8 - (winImageSize.h * pulse) / 2,
+    winImageSize.w * pulse,
+    winImageSize.h * pulse,
+  );
+
+  ctx.fillStyle = '#ffffff';
+  ctx.textAlign = 'center';
+  ctx.font = 'bold 46px sans-serif';
+  ctx.fillText(`${winner.name} Wins!`, gameWidth / 2, panelY + panelH - 100);
+  ctx.font = 'bold 32px sans-serif';
+  ctx.fillText(`Score: ${winner.score}`, gameWidth / 2, panelY + panelH - 48);
+
+  ctx.drawImage(restartImage, restartImageSize.x, restartImageSize.y, restartImageSize.w, restartImageSize.h);
+};
+
 let render = function () {
   ctx.drawImage(bgImage, 0, 0);
 
@@ -430,7 +529,11 @@ let render = function () {
   drawPlayers();
   drawExplosions();
 
-  if (gameOver) drawWinner();
+  if (gameOver) {
+    drawWinner();
+  }
+
+  drawHud();
 };
 
 function main() {
@@ -444,5 +547,5 @@ function startGame() {
   initEnvironment();
   initBlocks();
   initPowerUps();
-  main();
+  requestAnimationFrame(main);
 }
