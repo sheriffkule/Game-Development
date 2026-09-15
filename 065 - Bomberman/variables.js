@@ -45,10 +45,10 @@ const initPlayer = function () {
 
   // Player2
   const player2ImageLeft = new Image();
-  player1ImageLeft.src = 'images/player2Left.png';
+  player2ImageLeft.src = 'images/player2Left.png';
   const player2ImageRight = new Image();
-  player1ImageRight.src = 'images/player2Right.png';
-  player1 = {
+  player2ImageRight.src = 'images/player2Right.png';
+  player2 = {
     image: player2ImageLeft,
     imageLeft: player2ImageLeft,
     imageRight: player2ImageRight,
@@ -72,7 +72,7 @@ let staticBlock = {
   w: blockSize,
   h: blockSize,
 };
-let StaticBlockArray = [];
+let staticBlockArray = [];
 
 const nonStBlockImage = new Image();
 nonStBlockImage.src = 'images/nonStBlock.png';
@@ -83,6 +83,7 @@ let nonStBlock = {
   w: blockSize,
   h: blockSize,
 };
+let nonStBlockArray = [];
 
 const bombImage = new Image();
 bombImage.src = 'images/bomb.png';
@@ -93,6 +94,7 @@ let bomb = {
   w: blockSize,
   h: blockSize,
 };
+bombArray = [];
 
 const explosionImage = new Image();
 explosionImage.src = 'images/explosion.png';
@@ -103,6 +105,7 @@ let explosion = {
   w: blockSize,
   h: blockSize,
 };
+let explosionArray = [];
 
 const bombAddImage = new Image();
 bombAddImage.src = 'images/bombAdd.png';
