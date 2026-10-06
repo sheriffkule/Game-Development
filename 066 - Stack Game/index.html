@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stack Game</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="container">
+      <div id="game"></div>
+      <div id="score">0</div>
+      <div id="instructions">Click (or press the space bar) to place the block</div>
+      <div class="game-over">
+        <h2>Game Over</h2>
+        <p>You did great, you're the best.</p>
+        <p>Click or space bar to start again.</p>
+      </div>
+      <div class="game-ready">
+        <div id="start-button">Start</div>
+        <div></div>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.186.1/three.core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/all.min.js"></script>
+  </body>
+</html>
