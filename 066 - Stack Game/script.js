@@ -19,7 +19,7 @@ class Stage {
       alpha: false,
     });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.setClearColor('#f2eecb', 1);
+    this.renderer.setClearColor('#968d3f', 1);
     this.container.appendChild(this.renderer.domElement);
 
     // scene
@@ -32,7 +32,8 @@ class Stage {
     this.camera.position.x = 2;
     this.camera.position.y = 2;
     this.camera.position.z = 2;
-    this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+    this.cameraTarget = new THREE.Vector3(0, 0, 0);
+    this.camera.lookAt(this.cameraTarget);
 
     // light
     this.light = new THREE.DirectionalLight(0xffffff, 0.5);
@@ -46,7 +47,11 @@ class Stage {
 
   setCamera(y, speed = 0.3) {
     TweenLite.to(this.camera.position, speed, { y: y + 4, ease: Power1.easeInOut });
-    TweenLite.to(this.camera.lookAt, speed, { y: y, ease: Power1.easeInOut });
+    TweenLite.to(this.cameraTarget, speed, {
+      y: y,
+      ease: Power1.easeInOut,
+      onUpdate: () => this.camera.lookAt(this.cameraTarget),
+    });
   }
 
   onResize() {
@@ -126,6 +131,7 @@ class Block {
   }
 
   place() {
+    if (!this.targetBlock) return {};
     this.state = this.STATES.STOPPED;
     let overlap =
       this.targetBlock.dimension[this.workingDimension] -
@@ -150,7 +156,11 @@ class Block {
       choppedDimensions[this.workingDimension] -= overlap;
       this.dimension[this.workingDimension] = overlap;
 
-      let placedGeometry = new THREE.BoxGeometry(this.dimension.width, this.dimension.height, this.depth);
+      let placedGeometry = new THREE.BoxGeometry(
+        this.dimension.width,
+        this.dimension.height,
+        this.dimension.depth,
+      );
       placedGeometry.applyMatrix(
         new THREE.Matrix4().makeTranslation(
           this.dimension.width / 2,
@@ -177,7 +187,7 @@ class Block {
       let choppedPosition = { x: this.position.x, y: this.position.y, z: this.position.z };
 
       if (this.position[this.workingPlane] < this.targetBlock.position[this.workingPlane]) {
-        this.position[this.workingPlane] < this.targetBlock.position[this.workingPlane];
+        choppedPosition[this.workingPlane] = this.position[this.workingPlane];
       } else {
         choppedPosition[this.workingPlane] += overlap;
       }
@@ -227,6 +237,9 @@ class Game {
     this.stage.add(this.newBlocks);
     this.stage.add(this.placedBlocks);
     this.stage.add(this.choppedBlocks);
+    let foundation = new Block();
+    this.blocks.push(foundation);
+    this.placedBlocks.add(foundation.mesh);
     this.addBlock();
     this.tick();
     this.updateState(this.STATES.READY);
@@ -256,15 +269,20 @@ class Game {
       case this.STATES.PLAYING:
         this.placedBlock();
         break;
-      case this.STATES:
+      case this.STATES.ENDED:
         this.restartGame();
         break;
     }
   }
 
+  startGame() {
+    this.updateState(this.STATES.PLAYING);
+    this.scoreContainer.innerHTML = String(this.blocks.length - 2);
+  }
+
   restartGame() {
     this.updateState(this.STATES.RESETTING);
-    let oldBlocks = this.placedBlocks.children;
+    let oldBlocks = this.placedBlocks.children.slice(1);
     let removeSpeed = 0.2;
     let delayAmount = 0.02;
     for (let i = 0; i < oldBlocks.length; i++) {
@@ -295,6 +313,7 @@ class Game {
     });
     this.blocks = this.blocks.slice(0, 1);
     setTimeout(() => {
+      this.addBlock();
       this.startGame();
     }, cameraMoveSpeed * 1000);
   }
@@ -328,7 +347,36 @@ class Game {
       TweenLite.to(newBlocks.chopped.position, 1, positionParams);
       TweenLite.to(newBlocks.chopped.position, 1, rotationParams);
     }
-    this.addBlock()
+    this.addBlock();
+  }
+
+  addBlock() {
+    let lastBlock = this.blocks[this.blocks.length - 1];
+    if (lastBlock && lastBlock.state == lastBlock.STATES.MISSED) {
+      return this.endGame();
+    }
+
+    this.scoreContainer.innerHTML = String(this.blocks.length - 1);
+    let newKidOnTheBlock = new Block(lastBlock);
+    this.newBlocks.add(newKidOnTheBlock.mesh);
+    this.blocks.push(newKidOnTheBlock);
+    this.stage.setCamera(this.blocks.length * 2);
+
+    if (this.blocks.length >= 5) {
+      this.instructions.classList.add('hide');
+    }
+  }
+
+  endGame() {
+    this.updateState(this.STATES.ENDED);
+  }
+
+  tick() {
+    this.blocks[this.blocks.length - 1].tick();
+    this.stage.render();
+    requestAnimationFrame(() => {
+      this.tick();
+    });
   }
 }
 
