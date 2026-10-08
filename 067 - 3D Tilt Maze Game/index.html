@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D Tilt Maze Game</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="game-container">
+      <h1>3D Tilt Maze Game</h1>
+      <p>Drag the ** Red Handle** away from the center to tilt the maze.</p>
+
+      <div id="game-elements-wrapper">
+        <div id="perspective-wrapper">
+          <div id="maze">
+            <div id="ball"></div>
+            <div id="start">START</div>
+            <div id="end">END</div>
+          </div>
+        </div>
+
+        <div id="joystick-container">
+          <div id="joystick-handle"></div>
+        </div>
+      </div>
+
+      <div id="message"></div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
