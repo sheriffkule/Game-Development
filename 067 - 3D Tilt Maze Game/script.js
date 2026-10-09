@@ -143,7 +143,21 @@ const gameState = {
   currentWalls: [],
   currentHoles: [],
   containerCenter: { x: 0, y: 0 },
+  levelTransitionTimer: null,
+  animationFrameId: null,
 };
+
+function cancelLevelTransition() {
+  if (gameState.levelTransitionTimer !== null) {
+    clearTimeout(gameState.levelTransitionTimer);
+    gameState.levelTransitionTimer = null;
+  }
+}
+
+function scheduleAnimationFrame() {
+  if (gameState.animationFrameId !== null) return;
+  gameState.animationFrameId = requestAnimationFrame(gameLoop);
+}
 
 // Hole collision
 function checkHoleCollision(ballPos, hole) {
@@ -167,8 +181,8 @@ function resetJoystick() {
 
 function updateCenter() {
   const rect = joystickContainer.getBoundingClientRect();
-  gameState.containerCenter.x = rect.left + joystickRadius;
-  gameState.containerCenter.y = rect.top + joystickRadius;
+  gameState.containerCenter.x = rect.left + rect.width / 2;
+  gameState.containerCenter.y = rect.top + rect.height / 2;
 }
 
 function checkWallCollision(newPos, wall) {
@@ -196,7 +210,7 @@ function createRestartButton() {
     padding: 10px 20px; 
     font-size: 1.1em;
     margin-top: 20px;
-    cursor: pointer:
+    cursor: pointer;
     background-color: #2ecc71;
     color: white;
     border: none;
@@ -223,6 +237,8 @@ function removeRestartButton() {
 }
 
 function loadLevel(levelIndex) {
+  cancelLevelTransition();
+
   if (levelIndex >= levels.length) {
     messageDisplay.textContent = 'Congratulations! You have completed all levels!';
     gameState.gameRunning = false;
@@ -279,4 +295,184 @@ function loadLevel(levelIndex) {
     holeEl.style.top = `${holeData.y - holeData.r}px`;
     maze.appendChild(holeEl);
   });
+
+  scheduleAnimationFrame();
+
+  gameState.levelTransitionTimer = setTimeout(() => {
+    gameState.levelTransitionTimer = null;
+    gameState.gameRunning = true;
+    messageDisplay.textContent = `Level ${gameState.currentLevel + 1} of ${levels.length}. Go!`;
+  }, levelLoadDelay);
 }
+
+// Input handlers
+function moveJoystick(clientX, clientY) {
+  if (!gameState.isDragging) return;
+
+  let dx = clientX - gameState.containerCenter.x;
+  let dy = clientY - gameState.containerCenter.y;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  if (distance > joystickRadius) {
+    const scale = joystickRadius / distance;
+    dx *= scale;
+    dy *= scale;
+  }
+
+  // Update handle position
+  joystickHandle.style.left = `${50 + (dx / joystickRadius) * 50}%`;
+  joystickHandle.style.top = `${50 + (dy / joystickRadius) * 50}%`;
+
+  // Update acceleration
+  gameState.acceleration.x = (dx / joystickRadius) * joystickMaxAccel;
+  gameState.acceleration.y = (dy / joystickRadius) * joystickMaxAccel;
+
+  const rotationX = (-dy / joystickRadius) * maxTiltDeg;
+  const rotationY = (dx / joystickRadius) * maxTiltDeg;
+  const pushZ = (Math.min(distance, joystickRadius) / joystickRadius) * maxPushZ;
+
+  maze.style.transform = `translateZ(${pushZ}px) rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
+}
+
+function handleStart(e) {
+  if (!gameState.gameRunning) return;
+
+  gameState.isDragging = true;
+
+  gameState.acceleration.x = 0;
+  gameState.acceleration.y = 0;
+
+  updateCenter();
+  e.preventDefault();
+}
+
+function handleMove(e) {
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  moveJoystick(clientX, clientY);
+}
+
+function handleEnd() {
+  if (!gameState.gameRunning) return;
+
+  gameState.isDragging = false;
+  resetJoystick();
+}
+
+// Game loop (physics)
+function gameLoop(currentTime) {
+  gameState.animationFrameId = null;
+
+  if (!gameState.gameRunning) {
+    gameState.lastTime = currentTime;
+    scheduleAnimationFrame();
+    return;
+  }
+
+  const deltaTime = (currentTime - gameState.lastTime) / 1000;
+  gameState.lastTime = currentTime;
+
+  // 1. Update velocity and friction
+  gameState.velocity.x = (gameState.velocity.x + gameState.acceleration.x * deltaTime) * friction;
+  gameState.velocity.y = (gameState.velocity.y + gameState.acceleration.y * deltaTime) * friction;
+
+  gameState.velocity.x = Math.max(-maxSpeed, Math.min(maxSpeed, gameState.velocity.x));
+  gameState.velocity.y = Math.max(-maxSpeed, Math.min(maxSpeed, gameState.velocity.y));
+
+  if (Math.abs(gameState.velocity.x) < 0.1) gameState.velocity.x = 0;
+  if (Math.abs(gameState.velocity.y) < 0.1) gameState.velocity.y = 0;
+
+  // 2. Calculate potential new position
+  const previousX = gameState.position.x;
+  const previousY = gameState.position.y;
+  let newX = previousX + gameState.velocity.x * deltaTime;
+  let newY = previousY + gameState.velocity.y * deltaTime;
+
+  // 3. Wall collision detection
+  for (const wall of gameState.currentWalls) {
+    const testXPos = { x: newX, y: previousY };
+    if (checkWallCollision(testXPos, wall)) {
+      gameState.velocity.x *= -0.35;
+      newX = previousX;
+    }
+
+    const testYPos = { x: previousX, y: newY };
+    if (checkWallCollision(testYPos, wall)) {
+      gameState.velocity.y *= -0.35;
+      newY = previousY;
+    }
+  }
+
+  // Keep the ball within the maze's outer edges.
+  if (newX < ballRadius) {
+    newX = ballRadius;
+    if (gameState.velocity.x < 0) gameState.velocity.x *= -0.35;
+  } else if (newX > mazeSize - ballRadius) {
+    newX = mazeSize - ballRadius;
+    if (gameState.velocity.x > 0) gameState.velocity.x *= -0.35;
+  }
+
+  if (newY < ballRadius) {
+    newY = ballRadius;
+    if (gameState.velocity.y < 0) gameState.velocity.y *= -0.35;
+  } else if (newY > mazeSize - ballRadius) {
+    newY = mazeSize - ballRadius;
+    if (gameState.velocity.y > 0) gameState.velocity.y *= -0.35;
+  }
+
+  // 4. Update final position
+  gameState.position.x = newX;
+  gameState.position.y = newY;
+
+  // 5. Check hole collisions (game over collision)
+  for (const hole of gameState.currentHoles) {
+    if (checkHoleCollision(gameState.position, hole)) {
+      messageDisplay.textContent = `GAME OVER! You fell into a hole on Level ${gameState.currentLevel + 1}. Starting over...`;
+      gameState.gameRunning = false;
+
+      // Delay the reload to allow the user to see the game over screen
+      gameState.levelTransitionTimer = setTimeout(() => {
+        gameState.levelTransitionTimer = null;
+        loadLevel(gameState.currentLevel);
+      }, 2000);
+      return;
+    }
+  }
+
+  // 6. Check win condition (ball reached end))
+  if (gameState.position.x > endGoal.left + ballRadius && gameState.position.y > endGoal.top + ballRadius) {
+    messageDisplay.textContent = `Level ${gameState.currentLevel + 1} Completed! Loading next level...`;
+    gameState.gameRunning = false;
+    gameState.levelTransitionTimer = setTimeout(() => {
+      gameState.levelTransitionTimer = null;
+      loadLevel(gameState.currentLevel + 1);
+    }, 2000);
+    return;
+  }
+
+  // 7. Render ball position
+  renderBall();
+
+  scheduleAnimationFrame();
+}
+
+// Initialization and event binding
+function initializeGame() {
+  window.addEventListener('resize', updateCenter);
+  window.addEventListener('load', updateCenter);
+
+  joystickHandle.addEventListener('mousedown', handleStart);
+  document.addEventListener('mousemove', handleMove);
+  document.addEventListener('mouseup', handleEnd);
+
+  joystickHandle.addEventListener('touchstart', handleStart);
+  document.addEventListener('touchmove', handleMove);
+  document.addEventListener('touchend', handleEnd);
+
+  gameState.lastTime = performance.now();
+  loadLevel(0);
+  updateCenter();
+  scheduleAnimationFrame();
+}
+
+initializeGame();
