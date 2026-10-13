@@ -4,6 +4,10 @@ const greenBoard = document.getElementById('green-board');
 const redBoard = document.getElementById('red-board');
 const yellowBoard = document.getElementById('yellow-board');
 
+// DOM Elements
+const rollDiceButton = document.getElementById('rollDiceButton');
+const rollDice = document.getElementById('rollDice');
+
 // Initial variables
 let playerTurns = []; // This will hold the players team color
 let currentPlayerTurnIndex = 0;
@@ -12,6 +16,89 @@ let currentPlayerTurnStatus = true; // True means the user has not yet player an
 let teamHasBonus = false;
 
 let diceResult;
+let pathArray = [
+  'r1',
+  'r2',
+  'r3',
+  'r4',
+  'r5',
+  'r6',
+  'r7',
+  'r8',
+  'r9',
+  'r10',
+  'r11',
+  'r12',
+  'r13',
+  'g1',
+  'g2',
+  'g3',
+  'g4',
+  'g5',
+  'g6',
+  'g7',
+  'g8',
+  'g9',
+  'g10',
+  'g11',
+  'g12',
+  'g13',
+  'y1',
+  'y2',
+  'y3',
+  'y4',
+  'y5',
+  'y6',
+  'y7',
+  'y8',
+  'y9',
+  'y10',
+  'y11',
+  'y12',
+  'y13',
+  'b1',
+  'b2',
+  'b3',
+  'b4',
+  'b5',
+  'b6',
+  'b7',
+  'b8',
+  'b9',
+  'b10',
+  'b11',
+  'b12',
+  'b13',
+];
+
+let homePathEntries = {
+  blue: ['bh1', 'bh2', 'bh3', 'bh4', 'bh5', 'bh6', 'home'],
+  yellow: ['yh1', 'yh2', 'yh3', 'yh4', 'yh5', 'yh6', 'home'],
+  red: ['rh1', 'rh2', 'rh3', 'rh4', 'rh5', 'rh6', 'home'],
+  green: ['gh1', 'gh2', 'gh3', 'gh4', 'gh5', 'gh6', 'home'],
+};
+
+let safePaths = [
+  'r1',
+  'r9',
+  'b1',
+  'b9',
+  'y1',
+  'y9',
+  'g1',
+  'g9',
+  ...homePathEntries.blue,
+  ...homePathEntries.red,
+  ...homePathEntries.yellow,
+  ...homePathEntries.green,
+];
+
+let homePathArray = [
+  ...homePathEntries.blue,
+  ...homePathEntries.red,
+  ...homePathEntries.yellow,
+  ...homePathEntries.green,
+];
 
 // Setting player pieces class
 class PlayerPiece {
@@ -42,7 +129,8 @@ class PlayerPiece {
   sentToBoard() {}
 }
 
-let numPvp = parseInt(prompt('Enter the number of players.'));
+// let numPvp = parseInt(prompt('Enter the number of players.'));
+let numPvp = 4;
 
 let playerPieces = []; // This will hold all pieces from all teams
 let boardDetails = [
@@ -115,9 +203,72 @@ const nextTeamTurn = async () => {
   setPlayerTurn(currentPlayerTurnIndex);
   await delay(500);
   if (playerTurns[currentPlayerTurnIndex] !== 'blue') {
-    // RollDiceButtonForBot()
+    rollDiceButtonForBot();
   }
 };
 
-const rollDiceGif = new Image()
-rollDiceGif.src = `./assets/rollDice.gif`
+const turnForUser = async (e) => {
+  let isUserTurn = playerTurns[currentPlayerTurnIndex] === 'blue';
+  let currentTeamTurn = playerTurns[currentPlayerTurnIndex];
+
+  // Return user if user has used it's chance or the current turn is not for user
+  if (!isUserTurn || currentPlayerTurnStatus) return;
+
+  // If user has any unlocked pieces
+  let totalUnlockedPieces = playerPieces.filter(
+    (obj) => obj.team === currentTeamTurn && obj.status === 1,
+  ).length;
+
+  let piece = playerPieces.filter(
+    (obj) => obj.id === e.target.getAttribute('piece-id') && obj.team === currentTeamTurn,
+  );
+
+  let array = giveArrayForMovingPath(piece);
+};
+
+const rollDiceGif = new Image();
+rollDiceGif.src = `./assets/rollDice.gif`;
+
+rollDiceButton.addEventListener('click', async () => {
+  let currentTeamTurn = playerTurns[currentPlayerTurnIndex];
+
+  if (!currentPlayerTurnStatus) return; // Return if user has used chance
+
+  rollDiceButton.disabled = true;
+  rollDice.src = rollDiceGif.src;
+  diceResult = Math.floor(Math.random() * 6) + 1;
+  currentPlayerTurnStatus = false; // User used its chance
+  teamHasBonus = false;
+
+  setTimeout(async () => {
+    rollDice.src = `.assets/Dice-${diceResult}.png`;
+
+    await delay(700);
+    rollDiceButton.disabled = false;
+
+    let totalUnlockedPieces = playerPieces.filter((obj) => obj.team === currentTeamTurn && obj.status === 1);
+
+    if (totalUnlockedPieces.length === 0 && diceResult !== 6 && !teamHasBonus) {
+      await delay(500);
+      currentPlayerTurnStatus = true;
+      nextTeamTurn();
+    }
+  }, 600);
+});
+
+const rollDiceButtonForBot = () => {
+  if (!currentPlayerTurnStatus) return; // Return if user has used chance
+
+  rollDice.src = rollDiceGif.src;
+  diceResult = Math.floor(Math.random() * 6) + 1;
+  currentPlayerTurnStatus = false; // User used its chance
+  teamHasBonus = false;
+
+  setTimeout(async () => {
+    rollDice.src = `.assets/Dice-${diceResult}.png`;
+
+    await delay(700);
+    rollDiceButton.disabled = false;
+    // turnForBot();
+  }, 600);
+};
