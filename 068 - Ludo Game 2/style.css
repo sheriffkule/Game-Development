@@ -110,4 +110,142 @@ body {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
+    align-items: center;
+    justify-items: center;
+}
+
+.board div span {
+    width: 50%;
+    height: 50%;
+    border-radius: 50%;
+    position: relative;
+}
+
+#yellow-board div span {
+    background: var(--yellow);
+}
+
+#blue-board div span {
+    background: var(--blue);
+}
+
+#green-board div span {
+    background: var(--green);
+}
+
+#red-board div span {
+    background: var(--red);
+}
+
+.ludoBox {
+    border: 1px solid #11111142;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ludoBox .fa-location-pin {
+    position: absolute;
+    margin: 2px;
+    font-size: 2rem;
+    transform: translate(0, -40%);
+    -webkit-text-stroke: 2px rgb(255 255 255);
+    z-index: 100;
+    animation: animateMyI 0.08s linear;
+}
+
+.ludoBox .fa-star {
+    position: absolute;
+    color: #222;
+    opacity: 0.6s;
+}
+
+@keyframes animateMyI {
+    from {
+        transform: scale(1.1) translate(0, -40%);
+    }
+    to {
+        transform: scale(1) translate(0, -40%);
+    }
+}
+
+.ludoBox .fa-location-pin:nth-child(2) {
+    transform: translate(10px, -40%);
+}
+
+.ludoBox .fa-location-pin:nth-child(3) {
+    transform: translate(-10px, -40%);
+}
+
+.ludoBox .fa-location-pin:nth-child(4) {
+    transform: translate(0px, -40%) scale(0.8);
+}
+
+.redLudoBox {
+    background: var(--red);
+}
+
+.greenLudoBox {
+    background: var(--green);
+}
+
+.yellowLudoBox {
+    background: var(--yellow);
+}
+
+.blueLudoBox {
+    background: var(--blue);
+}
+
+.board .piece {
+    position: absolute;
+    -webkit-text-stroke: 2px rgb(255 255 255);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -90%);
+    font-size: 2.25rem;
+    z-index: 100;
+}
+
+.board.active {
+    animation: animateBoard 0.8s linear infinite;
+}
+
+@keyframes animateBoard {
+    from, to {
+        filter: brightness(1.4);
+    }
+    50% {
+       filter: brightness(1); 
+    }
+}
+
+.red-piece {
+    color: var(--red);
+}
+
+.yellow-piece {
+    color: var(--yellow);
+}
+
+.green-piece {
+    color: var(--green);
+}
+
+.blue-piece {
+    color: var(--blue);
+    z-index: 100;
+}
+
+.verticalPath {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+}
+
+.horizontalPath {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(3, 1fr);
 }
