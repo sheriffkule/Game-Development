@@ -1,0 +1,113 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+:root {
+    --red: #fa0000;
+    --green: #009a2a;
+    --yellow: #fee800;
+    --blue: #00acff;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: radial-gradient(circle at center, rgb(11 64 177 / 1) 0%, rgb(7 30 78 / 1) 100%);
+}
+
+.ludoContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 50px;
+    width: 100%;
+    height: 100dvh;
+}
+
+#ludoBoard {
+    max-width: 500px;
+    max-height: 500px;
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    display: grid;
+    grid-template-areas: 
+    'red-board red-board green-path green-board green-board'
+    'red-board red-board green-path green-board green-board'
+    'red-path red-path win-zone yellow-path yellow-path'
+    'blue-board blue-board blue-path yellow-board yellow-board'
+    'blue-board blue-board blue-path yellow-board yellow-board'
+    ;
+}
+
+#red-board {
+    grid-area: red-board;
+    background-color: var(--red);
+}
+
+#yellow-board {
+    grid-area: yellow-board;
+    background-color: var(--yellow);
+}
+
+#blue-board {
+    grid-area: blue-board;
+    background-color: var(--blue);
+}
+
+#green-board {
+    grid-area: green-board;
+    background-color: var(--green);
+}
+
+#green-path {
+    grid-area: green-path;
+    display: grid;
+}
+
+#blue-path {
+    grid-area: blue-path;
+}
+
+#yellow-path {
+    grid-area: yellow-path;
+}
+
+#red-path {
+    grid-area: red-path;
+}
+
+#win-zone {
+    grid-area: win-zone;
+}
+
+#verticalPath {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+}
+
+#horizontalPath {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+}
+
+.board {
+    padding: 12px;
+    background: #1212;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.board div {
+    width: 80%;
+    height: 80%;
+    background: white;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+}
