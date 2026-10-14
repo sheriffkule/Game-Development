@@ -130,11 +130,18 @@ class PlayerPiece {
     let filteredArray = array;
 
     moveElementSequentially(this.id, filteredArray);
-    this.score += filteredArray.lenght;
+    this.score += filteredArray.length;
   }
 
   // Function to return the piece to the locked position when killed
-  sentToBoard() {}
+  sentMeToBoard() {
+    this.score = 0;
+    this.position = this.initialPosition;
+    this.status = 0;
+    let element = document.querySelector(`[piece-id="${this.id}"]`);
+    let toAppendDiv = document.getElementById(this.initialPosition);
+    toAppendDiv.appendChild(element);
+  }
 }
 
 // let numPvp = parseInt(prompt('Enter the number of players.'));
@@ -160,8 +167,12 @@ for (let i = 0; i < numPvp; i++) {
     icon.classList.add('fa-solid', 'fa-location-pin', 'piece', `${boardColor}-piece`);
 
     icon.addEventListener('click', (e) => {
-      // turnForUser(e)
+      turnForUser(e);
     });
+
+    if (boardColor === 'blue') {
+      icon.setAttribute('myPieceNum', i + 1);
+    }
 
     let pieceID = `${boardColor}${i}`;
     let position = `${i}_${boardColor}`;
@@ -348,6 +359,37 @@ const turnForBot = async () => {
   }
 
   // Logic for kill detection
+  let opponentPieces = playerPieces.filter((obj) => obj.team !== currentTeamTurn && obj.status === 1);
+  let bonusReached = false;
+
+  for (let i = 0; i < totalUnlockedPieces.length; i++) {
+    if (bonusReached) break;
+
+    let array = giveArrayForMovingPath(totalUnlockedPieces[i]);
+    let cut = opponentPieces.find(
+      (obj) => obj.position === array[array.length - 1] && !safePaths.includes(obj.position),
+    );
+    let homeBonusReached = array[array.length - 1] === 'home'; // If the last path is home
+
+    if (cut) {
+      totalUnlockedPieces[i].movePiece(array);
+      await delay(array.length * 175);
+      cut.sentMeToBoard();
+      bonusReached = true;
+      rollMyDice(true);
+      return;
+    }
+
+    if (homeBonusReached) {
+      totalUnlockedPieces[i].movePiece(array);
+      await delay(array.length * 175);
+      bonusReached = true;
+      rollMyDice(true);
+    }
+  }
+
+  if (bonusReached) return;
+
   let lockedPieces = playerPieces.filter((obj) => obj.team === currentTeamTurn && obj.status === 0);
 
   const attemptMove = async (piece) => {
@@ -467,9 +509,42 @@ const turnForBot = async () => {
         opponentsBeforeFirstPiece < opponentsBeforeThirdPiece
       ) {
         if (!(await attemptMove(pieceSafe[0]))) return;
+      } else if (
+        opponentsBeforeSecondPiece < opponentsBeforeFirstPiece &&
+        opponentsBeforeSecondPiece < opponentsBeforeThirdPiece
+      ) {
+        if (!(await attemptMove(pieceSafe[1]))) return;
+      } else if (
+        opponentsBeforeThirdPiece < opponentsBeforeFirstPiece &&
+        opponentsBeforeThirdPiece < opponentsBeforeSecondPiece
+      ) {
+        if (!(await attemptMove(pieceSafe[2]))) return;
+      } else {
+        let piecesAtHomePath = pieceTeam.filter(
+          (obj) => obj.status === 1 && homePathArray.includes(obj.position),
+        );
+        let piecesNotAtHomePath = pieceTeam.filter(
+          (obj) => obj.status === 1 && !homePathArray.includes(obj.position),
+        );
+
+        piecesNotAtHomePath.sort((a, b) => a.score - b.score);
+
+        if (piecesNotAtHomePath.length > 0) {
+          if (!(await attemptMove(piecesNotAtHomePath[0]))) return;
+        } else {
+          for (let i = 0; i < piecesAtHomePath; i++) {
+            let movingPathArray = giveArrayForMovingPath(piecesAtHomePath[i]);
+            if (movingPathArray.length === diceResult) {
+              isMoving = true;
+              moveMyPiece(piecesAtHomePath[i]);
+              break;
+            }
+          }
+        }
       }
     }
   }
+  if (!isMoving) nextTeamTurn();
 };
 
 const turnForUser = async (e) => {
@@ -484,11 +559,23 @@ const turnForUser = async (e) => {
     (obj) => obj.team === currentTeamTurn && obj.status === 1,
   ).length;
 
-  let piece = playerPieces.filter(
+  let piece = playerPieces.find(
     (obj) => obj.id === e.target.getAttribute('piece-id') && obj.team === currentTeamTurn,
   );
-
+  let opponentPieces = playerPieces.filter((obj) => obj.team !== currentTeamTurn && obj.status === 1);
   let array = giveArrayForMovingPath(piece);
+
+  let cut = opponentPieces.find(
+    (obj) => obj.position === array[array.length - 1] && !safePaths.includes(obj.position),
+  );
+
+  if (cut) {
+    piece.movePiece(array);
+    await delay(array.length * 175);
+    cut.sentMeToBoard();
+    currentPlayerTurnStatus = true;
+    return;
+  }
 
   if (array.length < diceResult) return;
   if (diceResult === 6) {
@@ -552,3 +639,33 @@ const rollDiceButtonForBot = () => {
     turnForBot();
   }, 600);
 };
+
+document.addEventListener('keydown', (e) => {
+  let currentTeamTurn = playerTurns[currentPlayerTurnIndex];
+
+  if (currentTeamTurn !== 'blue') return;
+
+  if (e.key === '1') {
+    let piece = document.querySelector(`[myPieceNum="1"]`);
+    piece?.click();
+  }
+
+  if (e.key === '2') {
+    let piece = document.querySelector(`[myPieceNum="2"]`);
+    piece?.click();
+  }
+
+  if (e.key === '3') {
+    let piece = document.querySelector(`[myPieceNum="3"]`);
+    piece?.click();
+  }
+
+  if (e.key === '4') {
+    let piece = document.querySelector(`[myPieceNum="4"]`);
+    piece?.click();
+  }
+
+  if (e.code === 'Space') {
+    rollDiceButton.click();
+  }
+});
