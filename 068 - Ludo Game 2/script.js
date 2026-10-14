@@ -14,6 +14,7 @@ let currentPlayerTurnIndex = 0;
 let prevPlayerTurnIndex;
 let currentPlayerTurnStatus = true; // True means the user has not yet player and false means played
 let teamHasBonus = false;
+let gameOver = false;
 
 let diceResult;
 let pathArray = [
@@ -129,6 +130,23 @@ class PlayerPiece {
     // Function to move the piece
     let filteredArray = array;
 
+    if (array.includes(this.homePathEntry)) {
+      let indexOfPathEntry = array.findIndex((obj) => obj === this.homePathEntry);
+      let newSlicedArray = array.slice(0, indexOfPathEntry);
+
+      if (newSlicedArray.length < diceResult) {
+        let remainingLength = diceResult - newSlicedArray.length;
+        let secondPart = homePathEntries[this.team].slice(0, remainingLength);
+        newSlicedArray = newSlicedArray.concat(secondPart);
+      }
+
+      filteredArray = newSlicedArray;
+    }
+
+    if (filteredArray.includes('home')) {
+      teamHasBonus = true;
+    }
+
     moveElementSequentially(this.id, filteredArray);
     this.score += filteredArray.length;
   }
@@ -144,8 +162,8 @@ class PlayerPiece {
   }
 }
 
-// let numPvp = parseInt(prompt('Enter the number of players.'));
-let numPvp = 4;
+let numPvp = parseInt(prompt('Enter the number of players.'));
+// let numPvp = 4;
 
 let playerPieces = []; // This will hold all pieces from all teams
 let boardDetails = [
@@ -198,7 +216,7 @@ if (numPvp == 2) {
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const setPlayerTurn = (playerTurnIndex) => {
-  if (!playerTurnIndex) return;
+  if (playerTurnIndex === undefined || playerTurnIndex < 0) return;
 
   let currentTeamTurn = playerTurns[playerTurnIndex];
   // Filtering the board details array and finding the currentTeamTurn object
@@ -209,6 +227,8 @@ const setPlayerTurn = (playerTurnIndex) => {
 setPlayerTurn(0);
 
 const nextTeamTurn = async () => {
+  if (gameOver) return;
+
   prevPlayerTurnIndex = currentPlayerTurnIndex;
 
   if (currentPlayerTurnIndex === playerTurns.length - 1) {
@@ -221,6 +241,7 @@ const nextTeamTurn = async () => {
   setPlayerTurn(prevPlayerTurnIndex);
   setPlayerTurn(currentPlayerTurnIndex);
   await delay(500);
+  if (gameOver) return;
   if (playerTurns[currentPlayerTurnIndex] !== 'blue') {
     rollDiceButtonForBot();
   }
@@ -256,9 +277,9 @@ const giveArrayForMovingPath = (piece) => {
 
 const moveElementSequentially = (elementId, array) => {
   const elementToMove = document.querySelector(`[piece-id="${elementId}"]`);
-  let currentTeamTurn = playerTurns[currentPlayerTurnIndex];
   let piece = playerPieces.find((obj) => obj.id === elementId);
-  let toBreak = false;
+  if (!elementToMove || !piece) return;
+  let currentTeamTurn = piece.team;
 
   // Function to move the element to the next target
   function moveToNextTarget(index) {
@@ -270,7 +291,13 @@ const moveElementSequentially = (elementId, array) => {
       let indexOfPiece = playerPieces.findIndex((obj) => obj.id === piece.id);
       playerPieces.splice(indexOfPiece, 1);
       elementToMove.remove();
-      toBreak = true;
+      let totalPiecesOfThisTeam = playerPieces.filter((obj) => obj.team === currentTeamTurn);
+
+      if (totalPiecesOfThisTeam.length === 0) {
+        declareWinner(currentTeamTurn);
+        return;
+      }
+
       if (currentTeamTurn === 'blue') {
         currentPlayerTurnStatus = true;
       } else {
@@ -287,19 +314,21 @@ const moveElementSequentially = (elementId, array) => {
     setTimeout(() => {
       moveToNextTarget(index + 1);
     }, 170);
-
-    !toBreak && moveToNextTarget(0);
   }
+
+  moveToNextTarget(0);
 };
 
 const rollMyDice = async (hasBonus) => {
+  if (gameOver) return;
+
   currentPlayerTurnStatus = true;
   await delay(700);
+  if (gameOver) return;
   if (diceResult === 6 || hasBonus || teamHasBonus) {
     rollDiceButtonForBot();
   } else {
     nextTeamTurn();
-    if (playerTurns[currentPlayerTurnIndex] !== 'blue') rollDiceButtonForBot();
   }
 };
 
@@ -307,6 +336,9 @@ const moveMyPiece = async (piece) => {
   let array = giveArrayForMovingPath(piece);
 
   if (array.length < diceResult) {
+    await delay(500);
+    currentPlayerTurnStatus = true;
+    nextTeamTurn();
     return false;
   }
 
@@ -319,7 +351,7 @@ const moveMyPiece = async (piece) => {
 const giveEnemiesBehindMe = (piece) => {
   let currentTeamTurn = playerTurns[currentPlayerTurnIndex];
   let indexOfPath = pathArray.findIndex((elem) => elem === piece.position);
-  if (!indexOfPath) return 0;
+  if (indexOfPath < 0) return 0;
 
   let lastSixPath = [];
 
@@ -336,10 +368,12 @@ const giveEnemiesBehindMe = (piece) => {
 };
 
 const turnForBot = async () => {
+  if (gameOver) return;
+
   let currentTeamTurn = playerTurns[currentPlayerTurnIndex];
   let totalUnlockedPieces = playerPieces.filter(
     (obj) => obj.team === currentTeamTurn && obj.status === 1,
-  ).length;
+  );
   let totalPiecesOfThisTeam = playerPieces.filter((obj) => obj.team === currentTeamTurn).length;
   let isMoving = false;
 
@@ -366,6 +400,7 @@ const turnForBot = async () => {
     if (bonusReached) break;
 
     let array = giveArrayForMovingPath(totalUnlockedPieces[i]);
+    if (array.length < diceResult) continue;
     let cut = opponentPieces.find(
       (obj) => obj.position === array[array.length - 1] && !safePaths.includes(obj.position),
     );
@@ -393,7 +428,17 @@ const turnForBot = async () => {
   let lockedPieces = playerPieces.filter((obj) => obj.team === currentTeamTurn && obj.status === 0);
 
   const attemptMove = async (piece) => {
-    if (!(await moveMyPiece(piece))) return false;
+    const pieceToMove = [piece, ...totalUnlockedPieces].find(
+      (candidate) => candidate && giveArrayForMovingPath(candidate).length === diceResult,
+    );
+
+    if (!pieceToMove) {
+      currentPlayerTurnStatus = true;
+      nextTeamTurn();
+      return false;
+    }
+
+    if (!(await moveMyPiece(pieceToMove))) return false;
 
     isMoving = true;
     return true;
@@ -401,7 +446,7 @@ const turnForBot = async () => {
 
   // Condition when the bot has 1 unlocked piece
   if (totalUnlockedPieces.length === 1) {
-    if (totalUnlockedPieces.length <= 3 && diceResult === 6) {
+    if (diceResult === 6 && lockedPieces.length > 0) {
       lockedPieces[0].unlockPiece();
       rollMyDice();
       return;
@@ -412,9 +457,9 @@ const turnForBot = async () => {
 
   // Condition when the bot has 2  pieces unlocked
   if (totalUnlockedPieces.length === 2) {
-    if (totalUnlockedPieces.length <= 3 && diceResult === 6 && totalPiecesOfThisTeam >= 3) {
+    if (diceResult === 6 && lockedPieces.length > 0 && totalPiecesOfThisTeam >= 3) {
       lockedPieces[0].unlockPiece();
-      rollDice();
+      rollDiceButtonForBot();
       return;
     }
 
@@ -490,7 +535,8 @@ const turnForBot = async () => {
 
     if (
       pieceSafe.length === 3 &&
-      (pieceSafe[0].position === pieceSafe[1].position) === pieceSafe[2].position
+      pieceSafe[0].position === pieceSafe[1].position &&
+      pieceSafe[1].position === pieceSafe[2].position
     ) {
       if (!(await attemptMove(pieceSafe[0]))) return;
     }
@@ -532,11 +578,10 @@ const turnForBot = async () => {
         if (piecesNotAtHomePath.length > 0) {
           if (!(await attemptMove(piecesNotAtHomePath[0]))) return;
         } else {
-          for (let i = 0; i < piecesAtHomePath; i++) {
+          for (let i = 0; i < piecesAtHomePath.length; i++) {
             let movingPathArray = giveArrayForMovingPath(piecesAtHomePath[i]);
             if (movingPathArray.length === diceResult) {
-              isMoving = true;
-              moveMyPiece(piecesAtHomePath[i]);
+              if (!(await attemptMove(piecesAtHomePath[i]))) return;
               break;
             }
           }
@@ -544,10 +589,22 @@ const turnForBot = async () => {
       }
     }
   }
+
+  if (totalUnlockedPieces.length >= 4) {
+    const movablePiece = totalUnlockedPieces.find(
+      (piece) => giveArrayForMovingPath(piece).length === diceResult,
+    );
+    if (movablePiece) {
+      if (!(await attemptMove(movablePiece))) return;
+    }
+  }
+
   if (!isMoving) nextTeamTurn();
 };
 
 const turnForUser = async (e) => {
+  if (gameOver) return;
+
   let isUserTurn = playerTurns[currentPlayerTurnIndex] === 'blue';
   let currentTeamTurn = playerTurns[currentPlayerTurnIndex];
 
@@ -562,8 +619,12 @@ const turnForUser = async (e) => {
   let piece = playerPieces.find(
     (obj) => obj.id === e.target.getAttribute('piece-id') && obj.team === currentTeamTurn,
   );
+  if (!piece || (piece.status === 0 && diceResult !== 6)) return;
+
   let opponentPieces = playerPieces.filter((obj) => obj.team !== currentTeamTurn && obj.status === 1);
   let array = giveArrayForMovingPath(piece);
+
+  if (array.length < diceResult) return;
 
   let cut = opponentPieces.find(
     (obj) => obj.position === array[array.length - 1] && !safePaths.includes(obj.position),
@@ -577,18 +638,19 @@ const turnForUser = async (e) => {
     return;
   }
 
-  if (array.length < diceResult) return;
   if (diceResult === 6) {
-    currentPlayerTurnStatus = true;
     if (piece.status === 0) {
+      currentPlayerTurnStatus = true;
       piece.unlockPiece();
       return;
     }
     piece.movePiece(array);
-  } else {
-    if (piece.status === 0) return;
+    await delay(array.length * 175);
     currentPlayerTurnStatus = true;
+  } else {
     piece.movePiece(array);
+    await delay(array.length * 175);
+    currentPlayerTurnStatus = true;
     if (!teamHasBonus) nextTeamTurn();
   }
 };
@@ -599,7 +661,7 @@ rollDiceGif.src = `./assets/rollDice.gif`;
 rollDiceButton.addEventListener('click', async () => {
   let currentTeamTurn = playerTurns[currentPlayerTurnIndex];
 
-  if (!currentPlayerTurnStatus) return; // Return if user has used chance
+  if (gameOver || currentTeamTurn !== 'blue' || !currentPlayerTurnStatus) return;
 
   rollDiceButton.disabled = true;
   rollDice.src = rollDiceGif.src;
@@ -613,9 +675,17 @@ rollDiceButton.addEventListener('click', async () => {
     await delay(700);
     rollDiceButton.disabled = false;
 
-    let totalUnlockedPieces = playerPieces.filter((obj) => obj.team === currentTeamTurn && obj.status === 1);
+    let canMove = playerPieces.some(
+      (piece) =>
+        piece.team === currentTeamTurn &&
+        piece.status === 1 &&
+        giveArrayForMovingPath(piece).length === diceResult,
+    );
+    let canUnlock = diceResult === 6 && playerPieces.some(
+      (piece) => piece.team === currentTeamTurn && piece.status === 0,
+    );
 
-    if (totalUnlockedPieces.length === 0 && diceResult !== 6 && !teamHasBonus) {
+    if (!canMove && !canUnlock) {
       await delay(500);
       currentPlayerTurnStatus = true;
       nextTeamTurn();
@@ -624,7 +694,7 @@ rollDiceButton.addEventListener('click', async () => {
 });
 
 const rollDiceButtonForBot = () => {
-  if (!currentPlayerTurnStatus) return; // Return if user has used chance
+  if (gameOver || !currentPlayerTurnStatus) return;
 
   rollDice.src = rollDiceGif.src;
   diceResult = Math.floor(Math.random() * 6) + 1;
@@ -669,3 +739,64 @@ document.addEventListener('keydown', (e) => {
     rollDiceButton.click();
   }
 });
+
+const declareWinner = (team) => {
+  if (gameOver) return;
+  gameOver = true;
+  currentPlayerTurnStatus = false;
+  rollDiceButton.disabled = true;
+
+  let parentDiv = document.createElement('div');
+  let childDiv = document.createElement('div');
+  let h1 = document.createElement('h1');
+  let button = document.createElement('button');
+
+  parentDiv.setAttribute('id', 'declaredWinner');
+
+  h1.textContent = `${team} Won The Game!`;
+
+  button.textContent = 'Play Again';
+  button.addEventListener('click', () => {
+    location.reload();
+  });
+  childDiv.append(h1);
+  childDiv.append(button);
+  parentDiv.append(childDiv);
+  document.body.append(parentDiv);
+
+  fire(0.25, {
+    spread: 26,
+    startVelocity: 55,
+  });
+  fire(0.2, {
+    spread: 60,
+  });
+  fire(0.35, {
+    spread: 100,
+    decay: 0.91,
+    scalar: 0.8,
+  });
+  fire(0.1, {
+    spread: 120,
+    startVelocity: 25,
+    decay: 0.92,
+    scalar: 1.2,
+  });
+  fire(0.1, {
+    spread: 120,
+    startVelocity: 45,
+  });
+};
+
+let count = 200;
+let defaults = {
+  origin: { y: 0.7 },
+};
+
+function fire(particleRatio, opts) {
+  confetti({
+    ...defaults,
+    ...opts,
+    particleCount: Math.floor(count * particleRatio),
+  });
+}

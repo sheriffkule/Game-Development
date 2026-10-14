@@ -17,13 +17,30 @@ body {
     background: radial-gradient(circle at center, rgb(11 64 177 / 1) 0%, rgb(7 30 78 / 1) 100%);
 }
 
-.ludoContainer {
+.container {
+    min-height: 100dvh;
+    padding: 24px;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 50px;
-    width: 100%;
-    height: 100dvh;
+}
+
+.ludoContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 0 1 min(500px, calc(100vw - 220px), calc(100dvh - 48px));
+    width: min(500px, calc(100vw - 220px), calc(100dvh - 48px));
+    aspect-ratio: 1;
+}
+
+img {
+    display: block;
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    object-position: center;
 }
 
 #ludoBoard {
@@ -238,6 +255,24 @@ body {
     z-index: 100;
 }
 
+.blue-piece::after {
+    content: attr(myPieceNum);
+    font-weight: 600;
+    font-size: 12px;
+    color: white;
+    background: #00acff;
+    border-radius: 50%;
+    padding: 3px;
+    -webkit-text-stroke-width: 0px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, 2px);
+}
+
 .verticalPath {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -248,4 +283,88 @@ body {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     grid-template-rows: repeat(3, 1fr);
+}
+
+.rollingDice {
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 0 0 auto;
+}
+
+.rollingDice button {
+    margin-top: 10px;
+    border-radius: 4px;
+    outline: transparent;
+    background: white;
+    color: #111;
+    border: none;
+}
+
+#declaredWinner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(10px);
+    z-index: 999;
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+canvas {
+    z-index: 9999 !important;
+}
+
+#declaredWinner div {
+    width: 550px;
+    background: #1a1a1a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    border-radius: 6px;
+    padding: 20px 10px;
+}
+
+#declaredWinner div button,
+#rollDiceButton {
+    padding: 8px 16px;
+    font-family: inherit;
+    margin-block: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    background: #2b2b2b;
+    color: white;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 6px;
+    transition: 0.25s;
+
+    &:hover {
+        background-color: #3c3c3c;
+    }
+    &:active {
+        scale: 0.98;
+    }
+}
+
+@media (max-width: 700px) {
+    .container {
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .ludoContainer {
+        flex: 0 1 min(500px, calc(100vw - 48px));
+        width: min(500px, calc(100vw - 48px));
+    }
 }
