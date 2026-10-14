@@ -145,7 +145,7 @@ let boardDetails = [
   { boardColor: 'blue', board: blueBoard, homeEntry: 'y13', gameEntry: 'b1' },
   { boardColor: 'green', board: greenBoard, homeEntry: 'r13', gameEntry: 'g1' },
   { boardColor: 'red', board: redBoard, homeEntry: 'b13', gameEntry: 'r1' },
-  { boardColor: 'yellow', board: yellowBoard, homeEntry: 'g13', gameEntry: 'yb1' },
+  { boardColor: 'yellow', board: yellowBoard, homeEntry: 'g13', gameEntry: 'y1' },
 ];
 
 for (let i = 0; i < numPvp; i++) {
@@ -300,9 +300,28 @@ const moveMyPiece = async (piece) => {
   }
 
   piece.movePiece(array);
-  await delay(array.length * 175)
-  rollMyDice()
+  await delay(array.length * 175);
+  rollMyDice();
   return true; // Return true if move was performed
+};
+
+const giveEnemiesBehindMe = (piece) => {
+  let currentTeamTurn = playerTurns[currentPlayerTurnIndex];
+  let indexOfPath = pathArray.findIndex((elem) => elem === piece.position);
+  if (!indexOfPath) return 0;
+
+  let lastSixPath = [];
+
+  for (let i = 6; i > 0; i--) {
+    let index = (indexOfPath - i + pathArray.length) % pathArray.length;
+    lastSixPath.push(pathArray[index]);
+  }
+
+  let opponentsOnPath = playerPieces.filter(
+    (obj) => lastSixPath.includes(obj.position) && obj.team !== currentTeamTurn,
+  );
+
+  return opponentsOnPath.length;
 };
 
 const turnForBot = async () => {
@@ -319,13 +338,137 @@ const turnForBot = async () => {
   }
 
   currentPlayerTurnStatus = true;
-  let pieceTeam = playerPieces.filter(obj => obj.team === currentTeamTurn)
-  
+  let pieceTeam = playerPieces.filter((obj) => obj.team === currentTeamTurn);
+
   // Condition when the bot has 0 pieces unlocked
   if (totalUnlockedPieces.length === 0 && diceResult === 6) {
-    pieceTeam[0].unlockPiece()
-    rollMyDice()
+    pieceTeam[0].unlockPiece();
+    rollMyDice();
     return;
+  }
+
+  // Logic for kill detection
+  let lockedPieces = playerPieces.filter((obj) => obj.team === currentTeamTurn && obj.status === 0);
+
+  const attemptMove = async (piece) => {
+    if (!(await moveMyPiece(piece))) return false;
+
+    isMoving = true;
+    return true;
+  };
+
+  // Condition when the bot has 1 unlocked piece
+  if (totalUnlockedPieces.length === 1) {
+    if (totalUnlockedPieces.length <= 3 && diceResult === 6) {
+      lockedPieces[0].unlockPiece();
+      rollMyDice();
+      return;
+    }
+    let piece = totalUnlockedPieces.find((obj) => obj.status === 1);
+    if (!(await attemptMove(piece))) return;
+  }
+
+  // Condition when the bot has 2  pieces unlocked
+  if (totalUnlockedPieces.length === 2) {
+    if (totalUnlockedPieces.length <= 3 && diceResult === 6 && totalPiecesOfThisTeam >= 3) {
+      lockedPieces[0].unlockPiece();
+      rollDice();
+      return;
+    }
+
+    let pieceSafe = totalUnlockedPieces.filter((obj) => safePaths.includes(obj.position));
+    let pieceUnSafe = totalUnlockedPieces.filter((obj) => !safePaths.includes(obj.position));
+
+    if (pieceSafe.length === 0) {
+      let scoreOfFirstPiece = pieceUnSafe[0].score;
+      let scoreOffSecondPiece = pieceUnSafe[1].score;
+
+      if (scoreOffSecondPiece > scoreOfFirstPiece) {
+        if (!(await attemptMove(pieceUnSafe[1]))) return; // Move the element with higher score
+      } else {
+        if (!(await attemptMove(pieceUnSafe[0]))) return; // Move the element with higher score
+      }
+    }
+
+    if (pieceSafe.length === 1) {
+      if (!(await attemptMove(pieceSafe[0]))) return;
+    }
+
+    if (pieceSafe.length === 2 && pieceSafe[0].position === pieceSafe[1].position) {
+      if (!(await attemptMove(pieceSafe[0]))) return;
+    }
+
+    if (pieceSafe.length === 2) {
+      let scoreOfFirstPiece = pieceSafe[0].score;
+      let opponentsBeforeFirstPiece = giveEnemiesBehindMe(pieceSafe[0]);
+
+      let scoreOfSecondPiece = pieceSafe[1].score;
+      let opponentsBeforeSecondPiece = giveEnemiesBehindMe(pieceSafe[1]);
+
+      if (opponentsBeforeFirstPiece > opponentsBeforeSecondPiece) {
+        if (!(await attemptMove(pieceSafe[1]))) return;
+      } else if (opponentsBeforeSecondPiece > opponentsBeforeFirstPiece) {
+        if (!(await attemptMove(pieceSafe[0]))) return;
+      } else if (opponentsBeforeFirstPiece === opponentsBeforeSecondPiece) {
+        if (scoreOfSecondPiece > scoreOfFirstPiece) {
+          if (!(await attemptMove(pieceSafe[1]))) return;
+        } else {
+          if (!(await attemptMove(pieceSafe[0]))) return;
+        }
+      }
+    }
+  }
+
+  // Condition when the bot has 3 pieces unlocked
+  if (totalUnlockedPieces.length === 3) {
+    let pieceSafe = totalUnlockedPieces.filter((obj) => safePaths.includes(obj.position));
+    let pieceUnSafe = totalUnlockedPieces.filter((obj) => !safePaths.includes(obj.position));
+
+    if (pieceSafe.length === 0) {
+      let scoreOfFirstPiece = pieceUnSafe[0].score;
+      let scoreOffSecondPiece = pieceUnSafe[1].score;
+      let scoreOfThirdPiece = pieceUnSafe[2].score;
+
+      let greatestScore = Math.max(scoreOfFirstPiece, scoreOffSecondPiece, scoreOfThirdPiece);
+      let movingPiece = pieceUnSafe.find((obj) => obj.score === greatestScore);
+      if (!(await attemptMove(movingPiece))) return;
+    }
+
+    if (pieceSafe.length === 1) {
+      // 1 piece is safe and other 2 are unsafe
+      let scoreOfFirstPiece = pieceUnSafe[0].score;
+      let scoreOffSecondPiece = pieceUnSafe[1].score;
+
+      if (scoreOffSecondPiece > scoreOfFirstPiece) {
+        if (!(await attemptMove(pieceUnSafe[1]))) return; // Move the element with higher score
+      } else {
+        if (!(await attemptMove(pieceUnSafe[0]))) return; // Move the element with higher score
+      }
+    }
+
+    if (
+      pieceSafe.length === 3 &&
+      (pieceSafe[0].position === pieceSafe[1].position) === pieceSafe[2].position
+    ) {
+      if (!(await attemptMove(pieceSafe[0]))) return;
+    }
+
+    if (pieceSafe.length === 2) {
+      if (!(await attemptMove(pieceUnSafe[0]))) return;
+    }
+
+    if (pieceSafe.length === 3) {
+      let opponentsBeforeFirstPiece = giveEnemiesBehindMe(pieceSafe[0]);
+      let opponentsBeforeSecondPiece = giveEnemiesBehindMe(pieceSafe[1]);
+      let opponentsBeforeThirdPiece = giveEnemiesBehindMe(pieceSafe[2]);
+
+      if (
+        opponentsBeforeFirstPiece < opponentsBeforeSecondPiece &&
+        opponentsBeforeFirstPiece < opponentsBeforeThirdPiece
+      ) {
+        if (!(await attemptMove(pieceSafe[0]))) return;
+      }
+    }
   }
 };
 
@@ -378,7 +521,7 @@ rollDiceButton.addEventListener('click', async () => {
   teamHasBonus = false;
 
   setTimeout(async () => {
-    rollDice.src = `.assets/Dice-${diceResult}.png`;
+    rollDice.src = `./assets/Dice-${diceResult}.png`;
 
     await delay(700);
     rollDiceButton.disabled = false;
@@ -402,7 +545,7 @@ const rollDiceButtonForBot = () => {
   teamHasBonus = false;
 
   setTimeout(async () => {
-    rollDice.src = `.assets/Dice-${diceResult}.png`;
+    rollDice.src = `./assets/Dice-${diceResult}.png`;
 
     await delay(700);
     rollDiceButton.disabled = false;
